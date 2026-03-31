@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chop Pig Score Tracker (Web)</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #000000;
+      --card-bg: #f5f5f5;
+      --border: #cccccc;
+      --accent: #0077cc;
+      --table-border: #cccccc;
+    }
+    body.dark {
+      --bg: #121212;
+      --fg: #f5f5f5;
+      --card-bg: #1f1f1f;
+      --border: #444444;
+      --accent: #4ea3ff;
+      --table-border: #555555;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--fg);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    h1, h3 {
+      margin-top: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-top: 8px;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid var(--table-border);
+      padding: 4px 8px;
+      text-align: center;
+    }
+    th {
+      cursor: pointer;
+      background: rgba(0,0,0,0.05);
+    }
+
+    .rank1 { background: #FFD700; font-weight: bold; }
+    .rank2 { background: #C0C0C0; }
+    .rank3 { background: #CD7F32; }
+    .last { background: #FFCCCC; }
+    .unranked { background: #FFFFFF; }
+
+    body.dark .unranked {
+      background: #1f1f1f;
+    }
+
+    .btn {
+      padding: 2px 6px;
+      margin: 0 2px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--fg);
+    }
+    .btn:hover {
+      border-color: var(--accent);
+    }
+    .small { font-size: 11px; }
+
+    .row-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    select, input[type="text"], input[type="number"] {
+      padding: 2px 4px;
+      background: var(--bg);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.15s ease-out;
+      z-index: 999;
+    }
+    .modal-card {
+      background: var(--bg);
+      color: var(--fg);
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      max-height: 90%;
+      overflow: auto;
+      min-width: 340px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .icon-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="toggle-row">
+    <h1>Chop Pig Score Tracker (Web)</h1>
+    <div>
+      <label>
+        <input type="checkbox" id="darkModeToggle" />
+        Dark Mode
+      </label>
+    </div>
+  </div>
+
+  <!-- Add Player -->
+  <div class="card">
+    <label>New Player Name:
+      <input type="text" id="newPlayerName" />
+    </label>
+    <button class="btn" onclick="addPlayer()">Add Player</button>
+    <button class="btn" onclick="exportJSON()">Export JSON</button>
+    <button class="btn" onclick="importJSON()">Import JSON</button>
+    <input type="file" id="importFile" style="display:none" accept=".json" />
+  </div>
+
+  <!-- Round Input -->
+  <div class="card">
+    <h3>Current Round</h3>
+    <div id="roundRows"></div>
+    <button class="btn" onclick="addRoundScores()">Add Round Scores</button>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="card">
+    <h3>Leaderboard</h3>
+    <table id="leaderboard">
+      <thead>
+        <tr>
+          <th onclick="sortBy('rank')">Rank</th>
+          <th onclick="sortBy('name')">Player Name</th>
+          <th onclick="sortBy('score')">Total Score</th>
+          <th onclick="sortBy('games')">Games Played</th>
+          <th onclick="sortBy('winRate')">Win Rate (%)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Modal root -->
+  <div id="modalRoot"></div>
+
+  <script>
+    // ---------- DATA ----------
+    const baseScores = {
+      "1st": 4,
+      "2nd": 2,
+      "3rd": -2,
+      "4th": -4,
+      "Stinky 13": -5
+    };
+
+    const basePlacements = ["1st", "2nd", "3rd", "4th", "Stinky 13"];
+
+    const players = {}; // name -> { score, games, wins }
+    const playerList = [];
+
+    const rows = Array.from({ length: 4 }, () => ({
+      player: "",
+      placement: "",
+      stinky2: {
+        enabled: false,
+        red: 0,
+        black: 0,
+        pairs3: 0,
+        kind4: 0,
+        pairs4: 0
+      },
+      chop: {
+        enabled: false,
+        data: [] // [{ chopper, types: { "Black Pigs": n, ... } }]
+      },
+      score: 0
+    }));
+
+    let sortState = { column: "rank", desc: false };
+
+    // ---------- INIT ----------
+    function init() {
+      const container = document.getElementById("roundRows");
+      container.innerHTML = "";
+
+      rows.forEach((row, idx) => {
+        const div = document.createElement("div");
+        div.className = "row-container";
+
+        // Player select
+        const playerSel = document.createElement("select");
+        playerSel.dataset.idx = idx;
+        playerSel.onchange = onPlayerChange;
+        div.appendChild(playerSel);
+
+        // Placement select
+        const placeSel = document.createElement("select");
+        placeSel.dataset.idx = idx;
+        placeSel.onchange = onPlacementChange;
+        div.appendChild(placeSel);
+
+        // Score display
+        const scoreInput = document.createElement("input");
+        scoreInput.type = "text";
+        scoreInput.readOnly = true;
+        scoreInput.size = 4;
+        scoreInput.dataset.idx = idx;
+        scoreInput.className = "small";
+        div.appendChild(scoreInput);
+
+        // Stinky2 checkbox
+        const stinkyCb = document.createElement("input");
+        stinkyCb.type = "checkbox";
+        stinkyCb.dataset.idx = idx;
+        stinkyCb.onchange = onStinky2Toggle;
+        div.appendChild(stinkyCb);
+        const stinkyLabel = document.createElement("span");
+        stinkyLabel.innerHTML = `<span class="icon-label">🔥🐷 Stinky 2</span>`;
+        div.appendChild(stinkyLabel);
+
+        // Got Chopped checkbox + Edit button
+        const chopCb = document.createElement("input");
+        chopCb.type = "checkbox";
+        chopCb.dataset.idx = idx;
+        chopCb.onchange = onChopToggle;
+        div.appendChild(chopCb);
+        const chopLabel = document.createElement("span");
+        chopLabel.innerHTML = `<span class="icon-label">🐷 Got Chopped?</span>`;
+        div.appendChild(chopLabel);
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.className = "btn small";
+        editBtn.dataset.idx = idx;
+        editBtn.onclick = onEditChop;
+        div.appendChild(editBtn);
+
+        // Chopped by label
+        const choppedBySpan = document.createElement("span");
+        choppedBySpan.dataset.idx = idx;
+        choppedBySpan.style.minWidth = "120px";
+        choppedBySpan.style.textAlign = "center";
+        div.appendChild(choppedBySpan);
+
+        // Clear button
+        const clearBtn = document.createElement("button");
+        clearBtn.textContent = "Clear";
+        clearBtn.className = "btn small";
+        clearBtn.dataset.idx = idx;
+        clearBtn.onclick = onClearRow;
+        div.appendChild(clearBtn);
+
+        container.appendChild(div);
+      });
+
+      // Dark mode toggle
+      const darkToggle = document.getElementById("darkModeToggle");
+      darkToggle.onchange = () => {
+        if (darkToggle.checked) {
+          document.body.classList.add("dark");
+          localStorage.setItem("chopPig_darkMode", "1");
+        } else {
+          document.body.classList.remove("dark");
+          localStorage.setItem("chopPig_darkMode", "0");
+        }
+      };
+
+      loadFromLocalStorage();
+      refreshPlayerSelects();
+      refreshPlacementSelects();
+      refreshScores();
+      refreshLeaderboard();
+    }
+
+    // ---------- PLAYER MANAGEMENT ----------
+    function addPlayer() {
+      const input = document.getElementById("newPlayerName");
+      const name = input.value.trim();
+      if (!name) {
+        alert("Please enter a player name.");
+        return;
+      }
+      if (players[name]) {
+        alert("This player already exists.");
+        return;
+      }
+      players[name] = { score: 0, games: 0, wins: 0 };
+      playerList.push(name);
+      playerList.sort();
+      input.value = "";
+      refreshPlayerSelects();
+      refreshLeaderboard();
+      saveToLocalStorage();
+    }
+
+    function refreshPlayerSelects() {
+      const selected = rows.map(r => r.player);
+      const selects = document.querySelectorAll('#roundRows select:nth-child(1)');
+      selects.forEach((sel, idx) => {
+        const current = rows[idx].player;
+        sel.innerHTML = "<option value=''></option>";
+        playerList.forEach(name => {
+          if (!selected.includes(name) || name === current) {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel.appendChild(opt);
+          }
+        });
+        sel.value = current;
+      });
+    }
+
+    function onPlayerChange(e) {
+      const idx = Number(e.target.dataset.idx);
+      rows[idx].player = e.target.value;
+      refreshPlayerSelects();
+      refreshScores();
+      saveToLocalStorage();
+    }
+
+    // ---------- PLACEMENTS ----------
+    function refreshPlacementSelects() {
+      const selects = document.querySelectorAll('#roundRows select:nth-child(2)');
+      const placementsNow = rows.map(r => r.placement);
+      const stinkyCount = placementsNow.filter(p => p === "Stinky 13").length;
+
+      let allowedGlobal = [...basePlacements];
+      if (stinkyCount === 1) {
+        allowedGlobal = allowedGlobal.filter(p => p !== "4th");
+      } else if (stinkyCount === 2) {
+        allowedGlobal = allowedGlobal.filter(p => !["3rd", "4th"].includes(p));
+      } else if (stinkyCount >= 3) {
+        allowedGlobal = allowedGlobal.filter(p => !["2nd", "3rd", "4th"].includes(p));
+      }
+
+      selects.forEach((sel, idx) => {
+        const current = rows[idx].placement;
+        const placementsNow = rows.map(r => r.placement);
+        const usedByOthers = placementsNow
+          .map((p, j) => (j !== idx ? p : null))
+          .filter(p => ["1st", "2nd", "3rd", "4th"].includes(p));
+
+        sel.innerHTML = "<option value=''></option>";
+        allowedGlobal.forEach(p => {
+          if (p === "Stinky 13" || !usedByOthers.includes(p)) {
+            const opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = p;
+            sel.appendChild(opt);
+          }
+        });
+
+        if (current && !allowedGlobal.includes(current)) {
+          rows[idx].placement = "";
+        }
+        sel.value = rows[idx].placement;
+      });
+    }
+
+    function onPlacementChange(e) {
+      const idx = Number(e.target.dataset.idx);
+      rows[idx].placement = e.target.value;
+      refreshPlacementSelects();
+      refreshScores();
+      saveToLocalStorage();
+    }
+
+    // ---------- STINKY 2 ----------
+    function openStinky2Modal(idx) {
+      const root = document.getElementById("modalRoot");
+      const s = rows[idx].stinky2;
+
+      const modal = document.createElement("div");
+      modal.className = "modal-backdrop";
+
+      modal.innerHTML = `
+        <div class="modal-card">
+          <h3>Stinky 2 – Row ${idx + 1}</h3>
+          <div id="s2Rows"></div>
+          <div style="margin-top:10px;">
+            <button id="saveS2" class="btn">Save</button>
+            <button id="cancelS2" class="btn">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      root.appendChild(modal);
+
+      const fields = [
+        ["<span class='icon-label'>🔥🐷 Red Pigs</span>", "red", 3],
+        ["<span class='icon-label'>🐷 Black Pigs</span>", "black", 3],
+        ["<span class='icon-label'>🔥🐷 3 Consecutive Pairs</span>", "pairs3", 3],
+        ["<span class='icon-label'>🔥🔥🐷🐷 4 of a Kind</span>", "kind4", 3],
+        ["<span class='icon-label'>🔥🔥🐷🐷🐷 4 Consecutive Pairs</span>", "pairs4", 3]
+      ];
+
+      const container = modal.querySelector("#s2Rows");
+
+      fields.forEach(([label, key, max]) => {
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.justifyContent = "space-between";
+        row.style.marginBottom = "6px";
+
+        row.innerHTML = `
+          <span>${label}</span>
+          <input type="number" min="0" max="${max}" value="${s[key]}" id="s2_${key}" style="width:60px;">
+        `;
+        container.appendChild(row);
+      });
+
+      modal.querySelector("#cancelS2").onclick = () => modal.remove();
+
+      modal.querySelector("#saveS2").onclick = () => {
+        const red = Number(document.getElementById("s2_red").value);
+        const black = Number(document.getElementById("s2_black").value);
+        const total = red + black;
+
+        // Same combo rule as your Python (totals 1,2,3 allowed with specific combos)
+        const valid =
+          (total === 1) ||
+          (total === 2) ||
+          (total === 3);
+
+        if (!valid) {
+          alert("Invalid red/black combo.\nAllowed total red+black: 1, 2, or 3.");
+          return;
+        }
+
+        rows[idx].stinky2 = {
+          enabled: true,
+          red,
+          black,
+          pairs3: Number(document.getElementById("s2_pairs3").value),
+          kind4: Number(document.getElementById("s2_kind4").value),
+          pairs4: Number(document.getElementById("s2_pairs4").value)
+        };
+
+        modal.remove();
+        refreshScores();
+        saveToLocalStorage();
+      };
+    }
+
+    function onStinky2Toggle(e) {
+      const idx = Number(e.target.dataset.idx);
+      const checked = e.target.checked;
+
+      if (!checked) {
+        rows[idx].stinky2 = {
+          enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0
+        };
+        refreshScores();
+        saveToLocalStorage();
+        return;
+      }
+
+      if (!rows[idx].placement) {
+        alert("Select a placement before using Stinky 2.");
+        e.target.checked = false;
+        return;
+      }
+
+      openStinky2Modal(idx);
+    }
+
+    // ---------- CHOP ----------
+    function openChopModal(idx) {
+      const root = document.getElementById("modalRoot");
+      const existing = rows[idx].chop.data;
+
+      const modal = document.createElement("div");
+      modal.className = "modal-backdrop";
+
+      modal.innerHTML = `
+        <div class="modal-card" style="width:420px;">
+          <h3>Chop Pigs – Row ${idx + 1}</h3>
+          <div id="chopRows"></div>
+          <div style="margin-top:10px;">
+            <button id="addChopper" class="btn">Add Chopper</button>
+            <button id="saveChop" class="btn">Save</button>
+            <button id="cancelChop" class="btn">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      root.appendChild(modal);
+
+      const container = modal.querySelector("#chopRows");
+
+      const chopTypes = [
+        ["<span class='icon-label'>🐷 Black Pigs</span>", "Black Pigs", 2],
+        ["<span class='icon-label'>🔥🐷 Red Pigs</span>", "Red Pigs", 2],
+        ["<span class='icon-label'>🔥🐷 3 Consecutive Pairs</span>", "3 Consecutive Pairs", 3],
+        ["<span class='icon-label'>🔥🔥🐷🐷 4 of a Kind</span>", "4 of a Kind", 3],
+        ["<span class='icon-label'>🔥🔥🐷🐷🐷 4 Consecutive Pairs</span>", "4 Consecutive Pairs", 3]
+      ];
+
+      function addChopperRow(data = null) {
+        const block = document.createElement("div");
+        block.style.border = "1px solid var(--border)";
+        block.style.padding = "8px";
+        block.style.marginBottom = "10px";
+        block.style.borderRadius = "6px";
+
+        block.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Chopper</strong>
+            <button class="btn small removeChopper">Remove</button>
+          </div>
+
+          <select class="chopperName" style="width:100%; margin:6px 0;">
+            <option value=""></option>
+            ${playerList.map(p => `<option value="${p}">${p}</option>`).join("")}
+          </select>
+
+          <div class="chopTypeRows"></div>
+        `;
+
+        const typeContainer = block.querySelector(".chopTypeRows");
+
+        chopTypes.forEach(([labelHTML, key, max]) => {
+          const row = document.createElement("div");
+          row.style.display = "flex";
+          row.style.justifyContent = "space-between";
+          row.style.marginBottom = "4px";
+
+          const val = data ? (data.types[key] || 0) : 0;
+
+          row.innerHTML = `
+            <span>${labelHTML}</span>
+            <input type="number" min="0" max="${max}" value="${val}" data-type="${key}" style="width:60px;">
+          `;
+
+          typeContainer.appendChild(row);
+        });
+
+        if (data) {
+          block.querySelector(".chopperName").value = data.chopper;
+        }
+
+        block.querySelector(".removeChopper").onclick = () => block.remove();
+
+        container.appendChild(block);
+      }
+
+      existing.forEach(entry => addChopperRow(entry));
+      if (existing.length === 0) addChopperRow();
+
+      modal.querySelector("#addChopper").onclick = () => addChopperRow();
+      modal.querySelector("#cancelChop").onclick = () => modal.remove();
+
+      modal.querySelector("#saveChop").onclick = () => {
+        const blocks = container.querySelectorAll("> div");
+        const newList = [];
+        const victim = rows[idx].player;
+
+        for (const block of blocks) {
+          const name = block.querySelector(".chopperName").value;
+          if (!name) {
+            alert("Every chopper must have a name.");
+            return;
+          }
+          if (name === victim) {
+            alert("A player cannot chop themselves.");
+            return;
+          }
+          if (newList.some(e => e.chopper === name)) {
+            alert(`${name} is already listed as a chopper.`);
+            return;
+          }
+
+          const types = {};
+          const inputs = block.querySelectorAll("input[data-type]");
+          let hasValue = false;
+
+          inputs.forEach(input => {
+            const t = input.dataset.type;
+            const v = Number(input.value);
+            types[t] = v;
+            if (v > 0) hasValue = true;
+          });
+
+          if (!hasValue) {
+            alert("Each chopper must have at least one chop type.");
+            return;
+          }
+
+          newList.push({ chopper: name, types });
+        }
+
+        rows[idx].chop.enabled = newList.length > 0;
+        rows[idx].chop.data = newList;
+
+        modal.remove();
+        refreshScores();
+        saveToLocalStorage();
+      };
+    }
+
+    function onChopToggle(e) {
+      const idx = Number(e.target.dataset.idx);
+      const checked = e.target.checked;
+
+      if (!checked) {
+        rows[idx].chop.enabled = false;
+        rows[idx].chop.data = [];
+        refreshScores();
+        saveToLocalStorage();
+        return;
+      }
+
+      if (!rows[idx].player) {
+        alert("Select a player before using Chop Pigs.");
+        e.target.checked = false;
+        return;
+      }
+
+      openChopModal(idx);
+    }
+
+    function onEditChop(e) {
+      const idx = Number(e.target.dataset.idx);
+      if (!rows[idx].chop.enabled || rows[idx].chop.data.length === 0) {
+        alert("This player has no chop data to edit.");
+        return;
+      }
+      openChopModal(idx);
+    }
+
+    function onClearRow(e) {
+      const idx = Number(e.target.dataset.idx);
+      rows[idx].player = "";
+      rows[idx].placement = "";
+      rows[idx].stinky2 = { enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0 };
+      rows[idx].chop = { enabled: false, data: [] };
+      rows[idx].score = 0;
+
+      refreshPlayerSelects();
+      refreshPlacementSelects();
+      refreshScores();
+      saveToLocalStorage();
+    }
+
+    // ---------- SCORING ----------
+    function stinky2Total(s) {
+      return (
+        s.red * -2 +
+        s.black * -1 +
+        s.pairs3 * -2 +
+        s.kind4 * -4 +
+        s.pairs4 * -5
+      );
+    }
+
+    function chopPoints(type) {
+      if (type === "Black Pigs") return 1;
+      if (type === "Red Pigs") return 2;
+      if (type === "3 Consecutive Pairs") return 2;
+      if (type === "4 of a Kind") return 4;
+      if (type === "4 Consecutive Pairs") return 5;
+      return 0;
+    }
+
+    function refreshScores() {
+      const placementsNow = rows.map(r => r.placement);
+      const stinkyCount = placementsNow.filter(p => p === "Stinky 13").length;
+
+      const baseScoresRow = [0, 0, 0, 0];
+
+      rows.forEach((row, i) => {
+        const placement = row.placement;
+        let score = 0;
+        if (!placement) {
+          baseScoresRow[i] = 0;
+          return;
+        }
+        if (placement === "Stinky 13") {
+          score = -5;
+        } else if (placement === "1st") {
+          score = stinkyCount > 0 ? 5 * stinkyCount : 4;
+        } else if (placement === "2nd") {
+          score = (stinkyCount === 2) ? 0 : 2;
+        } else {
+          score = baseScores[placement];
+        }
+        baseScoresRow[i] = score;
+      });
+
+      const finalScores = [...baseScoresRow];
+
+      // Stinky2 transfers
+      rows.forEach((row, i) => {
+        if (!row.stinky2.enabled) return;
+        const total = stinky2Total(row.stinky2);
+        finalScores[i] += total;
+
+        const giverPlace = row.placement;
+        let receiverIdx = null;
+        if (giverPlace === "4th") {
+          receiverIdx = placementsNow.indexOf("3rd");
+        } else if (giverPlace === "Stinky 13") {
+          receiverIdx = placementsNow.indexOf("1st");
+        } else if (giverPlace === "3rd") {
+          receiverIdx = placementsNow.indexOf("2nd");
+        }
+        if (receiverIdx !== null && receiverIdx >= 0) {
+          finalScores[receiverIdx] -= total;
+        }
+      });
+
+      // Chop transfers
+      rows.forEach((row, i) => {
+        if (!row.player) return;
+        row.chop.data.forEach(entry => {
+          const chopperName = entry.chopper;
+          const chopperIdx = rows.findIndex(r => r.player === chopperName);
+          if (chopperIdx === -1) return;
+          let total = 0;
+          Object.entries(entry.types).forEach(([t, amt]) => {
+            if (amt > 0) total += chopPoints(t) * amt;
+          });
+          if (total > 0) {
+            finalScores[i] -= total;
+            finalScores[chopperIdx] += total;
+          }
+        });
+      });
+
+      // Update row scores + choppedBy labels
+      const scoreInputs = document.querySelectorAll('#roundRows input[type="text"]');
+      const choppedBySpans = document.querySelectorAll('#roundRows span[data-idx]');
+      rows.forEach((row, i) => {
+        row.score = finalScores[i];
+        const hasAny = row.player || row.placement || row.chop.data.length;
+        scoreInputs[i].value = hasAny ? finalScores[i] : "";
+        const choppedBy = row.chop.data.map(e => e.chopper);
+        choppedBySpans[i].textContent = choppedBy.join(", ");
+      });
+
+      refreshLeaderboard();
+    }
+
+    // ---------- ROUND COMMIT ----------
+    function addRoundScores() {
+      const selectedPlayers = [];
+      const scores = [];
+
+      for (let i = 0; i < 4; i++) {
+        const row = rows[i];
+        if (!row.player || !row.placement) {
+          alert("All 4 players and placements must be selected.");
+          return;
+        }
+        if (selectedPlayers.includes(row.player)) {
+          alert("Each player can only appear once per round.");
+          return;
+        }
+        selectedPlayers.push(row.player);
+        scores.push(row.score);
+      }
+
+      const maxScore = Math.max(...scores);
+      const winners = selectedPlayers.filter((p, i) => scores[i] === maxScore);
+
+      for (let i = 0; i < 4; i++) {
+        const name = selectedPlayers[i];
+        const s = scores[i];
+        players[name].score += s;
+        players[name].games += 1;
+        if (winners.includes(name)) {
+          players[name].wins += 1;
+        }
+      }
+
+      // Clear round
+      for (let i = 0; i < 4; i++) {
+        rows[i].player = "";
+        rows[i].placement = "";
+        rows[i].stinky2 = { enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0 };
+        rows[i].chop = { enabled: false, data: [] };
+        rows[i].score = 0;
+      }
+
+      refreshPlayerSelects();
+      refreshPlacementSelects();
+      refreshScores();
+      refreshLeaderboard();
+      saveToLocalStorage();
+    }
+
+    // ---------- LEADERBOARD ----------
+    function refreshLeaderboard() {
+      const tbody = document.querySelector("#leaderboard tbody");
+      tbody.innerHTML = "";
+
+      const stats = Object.entries(players).map(([name, s]) => {
+        const games = s.games;
+        const wins = s.wins;
+        const score = s.score;
+        const winRate = games > 0 ? (wins / games) * 100 : 0;
+        return { name, score, games, wins, winRate };
+      });
+
+      let ranked = stats.filter(s => s.games > 0);
+      let unranked = stats.filter(s => s.games === 0);
+
+      // Sort by score, then winRate, then name
+      ranked.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+        return a.name.localeCompare(b.name);
+      });
+
+      unranked.sort((a, b) => a.name.localeCompare(b.name));
+
+      const lastIdx = ranked.length ? ranked.length - 1 : null;
+
+      ranked.forEach((row, i) => {
+        const tr = document.createElement("tr");
+        let cls = "normal";
+        if (i === 0) cls = "rank1";
+        else if (i === 1) cls = "rank2";
+        else if (i === 2) cls = "rank3";
+        else if (i === lastIdx) cls = "last";
+        tr.className = cls;
+
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${row.name}</td>
+          <td>${row.score}</td>
+          <td>${row.games}</td>
+          <td>${row.winRate.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      unranked.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.className = "unranked";
+        tr.innerHTML = `
+          <td></td>
+          <td>${row.name}</td>
+          <td>${row.score}</td>
+          <td>${row.games}</td>
+          <td>${row.winRate.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function sortBy(column) {
+      // Table is already sorted by score/winRate/name.
+      // You can extend this to custom column sorting if you want.
+      alert("Leaderboard is already auto-sorted by score, win rate, and name.");
+    }
+
+    // ---------- LOCAL STORAGE ----------
+    function saveToLocalStorage() {
+      const data = {
+        players,
+        playerList,
+        rows,
+        darkMode: document.body.classList.contains("dark") ? 1 : 0
+      };
+      localStorage.setItem("chopPig_state", JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage() {
+      const raw = localStorage.getItem("chopPig_state");
+      if (!raw) {
+        // Dark mode preference
+        const dm = localStorage.getItem("chopPig_darkMode");
+        if (dm === "1") {
+          document.body.classList.add("dark");
+          document.getElementById("darkModeToggle").checked = true;
+        }
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        // players
+        Object.keys(data.players || {}).forEach(name => {
+          players[name] = data.players[name];
+        });
+        (data.playerList || []).forEach(name => {
+          if (!playerList.includes(name)) playerList.push(name);
+        });
+        playerList.sort();
+
+        // rows
+        if (Array.isArray(data.rows)) {
+          data.rows.forEach((r, i) => {
+            if (rows[i]) {
+              rows[i].player = r.player || "";
+              rows[i].placement = r.placement || "";
+              rows[i].stinky2 = r.stinky2 || { enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0 };
+              rows[i].chop = r.chop || { enabled: false, data: [] };
+              rows[i].score = r.score || 0;
+            }
+          });
+        }
+
+        // dark mode
+        if (data.darkMode === 1) {
+          document.body.classList.add("dark");
+          document.getElementById("darkModeToggle").checked = true;
+        }
+
+      } catch (e) {
+        console.error("Failed to load from localStorage", e);
+      }
+    }
+
+    // ---------- JSON IMPORT/EXPORT ----------
+    function exportJSON() {
+      const data = {
+        players,
+        playerList
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "chop_pig_players.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJSON() {
+      const fileInput = document.getElementById("importFile");
+      fileInput.value = "";
+      fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (!data.players || !data.playerList) {
+              alert("Invalid JSON format.");
+              return;
+            }
+            // Clear current
+            for (const k in players) delete players[k];
+            playerList.length = 0;
+
+            Object.keys(data.players).forEach(name => {
+              players[name] = data.players[name];
+            });
+            data.playerList.forEach(name => playerList.push(name));
+            playerList.sort();
+
+            // Clear round rows
+            for (let i = 0; i < 4; i++) {
+              rows[i].player = "";
+              rows[i].placement = "";
+              rows[i].stinky2 = { enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0 };
+              rows[i].chop = { enabled: false, data: [] };
+              rows[i].score = 0;
+            }
+
+            refreshPlayerSelects();
+            refreshPlacementSelects();
+            refreshScores();
+            refreshLeaderboard();
+            saveToLocalStorage();
+            alert("Player data imported successfully.");
+          } catch (err) {
+            alert("Failed to parse JSON file.");
+          }
+        };
+        reader.readAsText(file);
+      };
+      fileInput.click();
+    }
+
+    // ---------- BOOT ----------
+    init();
+  </script>
+</body>
+</html>
