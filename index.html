@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chop Pig Score Tracker (Mobile Native Style)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --fg: #111111;
+      --card-bg: #ffffff;
+      --border: #dddddd;
+      --accent: #ff6b6b;
+      --accent-soft: #ffe3e3;
+      --accent-dark: #c0392b;
+      --shadow: 0 2px 6px rgba(0,0,0,0.12);
+      --rank1: #ffeaa7;
+      --rank2: #dfe6e9;
+      --rank3: #fab1a0;
+      --last: #ff7675;
+    }
+    body.dark {
+      --bg: #121212;
+      --fg: #f5f5f5;
+      --card-bg: #1f1f1f;
+      --border: #333333;
+      --accent: #ff7675;
+      --accent-soft: #3b1f1f;
+      --accent-dark: #ff4b4b;
+      --shadow: 0 2px 8px rgba(0,0,0,0.6);
+      --rank1: #7f6b00;
+      --rank2: #636e72;
+      --rank3: #6c4a3f;
+      --last: #b33939;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      padding: 12px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .app-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .field-label {
+      font-size: 13px;
+      margin-bottom: 4px;
+      opacity: 0.8;
+    }
+
+    .field-group {
+      margin-bottom: 10px;
+    }
+
+    select, input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 15px;
+      outline: none;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      background: var(--card-bg);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent-dark);
+    }
+
+    .btn-danger {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+
+    .btn-inline-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-inline-row .btn {
+      margin-top: 0;
+    }
+
+    .score-display {
+      font-size: 16px;
+      font-weight: 600;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .icon-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pill-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .pill-toggle input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+
+    .pill-toggle.active {
+      background: var(--accent-soft);
+      border-color: var(--accent-dark);
+    }
+
+    .player-card {
+      margin-bottom: 10px;
+    }
+
+    .player-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .chopped-by {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    /* Modal bottom sheet */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 999;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card-bg);
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+      padding: 12px 14px 16px;
+      border-top: 1px solid var(--border);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--border);
+      margin: 0 auto 8px;
+    }
+
+    .modal-footer {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-footer .btn {
+      margin-top: 0;
+    }
+
+    .s2-row, .chop-type-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .s2-row input, .chop-type-row input {
+      width: 70px;
+      text-align: center;
+    }
+
+    .chopper-block {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px;
+      margin-bottom: 10px;
+      background: var(--bg);
+    }
+
+    .chopper-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .lb-item {
+      border-radius: 12px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 14px;
+    }
+
+    .lb-rank1 { background: var(--rank1); }
+    .lb-rank2 { background: var(--rank2); }
+    .lb-rank3 { background: var(--rank3); }
+    .lb-last { background: var(--last); color: #fff; }
+
+    .lb-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .lb-name {
+      font-weight: 600;
+    }
+
+    .lb-rank-badge {
+      font-size: 13px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.1);
+    }
+
+    .lb-meta {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .lb-unranked {
+      opacity: 0.7;
+    }
+
+    .small-text {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .file-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .file-buttons .btn {
+      margin-top: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @media (min-width: 700px) {
+      body {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <div class="app-title">Chop Pig Score Tracker</div>
+    <div class="toggle-row">
+      <label class="small-text">
+        <input type="checkbox" id="darkModeToggle" />
+        Dark
+      </label>
+    </div>
+  </div>
+
+  <!-- Add Player / Data -->
+  <div class="card">
+    <div class="card-title">Players & Data</div>
+    <div class="field-group">
+      <div class="field-label">New Player Name</div>
+      <input type="text" id="newPlayerName" placeholder="Enter player name" />
+    </div>
+    <button class="btn btn-primary" onclick="addPlayer()">Add Player</button>
+
+    <div class="file-buttons">
+      <button class="btn" onclick="exportJSON()">Export JSON</button>
+      <button class="btn" onclick="importJSON()">Import JSON</button>
+      <input type="file" id="importFile" style="display:none" accept=".json" />
+    </div>
+  </div>
+
+  <!-- Current Round -->
+  <div class="card">
+    <div class="card-title">Current Round</div>
+    <div id="roundRows"></div>
+    <button class="btn btn-primary" onclick="addRoundScores()">Commit Round</button>
+    <div class="small-text" style="margin-top:4px;">
+      All 4 players and placements must be set before committing a round.
+    </div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="card">
+    <div class="card-title">Leaderboard</div>
+    <div id="leaderboardList" class="leaderboard-list"></div>
+    <div class="small-text" style="margin-top:4px;">
+      Ranked by total score, then win rate, then name.
+    </div>
+  </div>
+
+  <!-- Modal root -->
+  <div id="modalRoot"></div>
+
+  <script>
+    // ---------- DATA ----------
+    const baseScores = {
+      "1st": 4,
+      "2nd": 2,
+      "3rd": -2,
+      "4th": -4,
+      "Stinky 13": -5
+    };
+
+    const basePlacements = ["1st", "2nd", "3rd", "4th", "Stinky 13"];
+
+    const players = {}; // name -> { score, games, wins }
+    const playerList = [];
+
+    const rows = Array.from({ length: 4 }, () => ({
+      player: "",
+      placement: "",
+      stinky2: {
+        enabled: false,
+        red: 0,
+        black: 0,
+        pairs3: 0,
+        kind4: 0,
+        pairs4: 0
+      },
+      chop: {
+        enabled: false,
+        data: [] // [{ chopper, types: { "Black Pigs": n, ... } }]
+      },
+      score: 0
+    }));
+
+    // ---------- INIT ----------
+    function init() {
+      const container = document.getElementById("roundRows");
+      container.innerHTML = "";
+
+      rows.forEach((row, idx) => {
+        const card = document.createElement("div");
+        card.className = "player-card";
+
+        const inner = document.createElement("div");
+        inner.className = "card";
+
+        // Header
+        const header = document.createElement("div");
+        header.className = "player-card-header";
+        header.innerHTML = `
+          <span>Seat ${idx + 1}</span>
+          <span class="small-text" id="seatPlayerLabel_${idx}"></span>
+        `;
+        inner.appendChild(header);
+
+        // Player select
+        const playerGroup = document.createElement("div");
+        playerGroup.className = "field-group";
+        playerGroup.innerHTML = `
+          <div class="field-label">Player</div>
+        `;
+        const playerSel = document.createElement("select");
+        playerSel.dataset.idx = idx;
+        playerSel.onchange = onPlayerChange;
+        playerGroup.appendChild(playerSel);
+        inner.appendChild(playerGroup);
+
+        // Placement select
+        const placeGroup = document.createElement("div");
+        placeGroup.className = "field-group";
+        placeGroup.innerHTML = `
+          <div class="field-label">Placement</div>
+        `;
+        const placeSel = document.createElement("select");
+        placeSel.dataset.idx = idx;
+        placeSel.onchange = onPlacementChange;
+        placeGroup.appendChild(placeSel);
+        inner.appendChild(placeGroup);
+
+        // Score display
+        const scoreGroup = document.createElement("div");
+        scoreGroup.className = "field-group";
+        scoreGroup.innerHTML = `<div class="field-label">Score This Round</div>`;
+        const scoreDiv = document.createElement("div");
+        scoreDiv.className = "score-display";
+        scoreDiv.id = `scoreDisplay_${idx}`;
+        scoreDiv.textContent = "—";
+        scoreGroup.appendChild(scoreDiv);
+        inner.appendChild(scoreGroup);
+
+        // Toggles
+        const toggleRow = document.createElement("div");
+        toggleRow.className = "btn-inline-row";
+
+        const stinkyLabel = document.createElement("label");
+        stinkyLabel.className = "pill-toggle";
+        stinkyLabel.innerHTML = `
+          <input type="checkbox" data-idx="${idx}" />
+          <span class="icon-label">🔥🐷 Stinky 2</span>
+        `;
+        stinkyLabel.querySelector("input").onchange = onStinky2Toggle;
+        toggleRow.appendChild(stinkyLabel);
+
+        const chopLabel = document.createElement("label");
+        chopLabel.className = "pill-toggle";
+        chopLabel.innerHTML = `
+          <input type="checkbox" data-idx="${idx}" />
+          <span class="icon-label">🐷 Chopped</span>
+        `;
+        chopLabel.querySelector("input").onchange = onChopToggle;
+        toggleRow.appendChild(chopLabel);
+
+        inner.appendChild(toggleRow);
+
+        // Buttons
+        const btnRow = document.createElement("div");
+        btnRow.className = "btn-inline-row";
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn";
+        editBtn.textContent = "Edit Chop";
+        editBtn.dataset.idx = idx;
+        editBtn.onclick = onEditChop;
+        btnRow.appendChild(editBtn);
+
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "btn btn-danger";
+        clearBtn.textContent = "Clear Row";
+        clearBtn.dataset.idx = idx;
+        clearBtn.onclick = onClearRow;
+        btnRow.appendChild(clearBtn);
+
+        inner.appendChild(btnRow);
+
+        // Chopped by label
+        const choppedBy = document.createElement("div");
+        choppedBy.className = "chopped-by";
+        choppedBy.id = `choppedBy_${idx}`;
+        choppedBy.textContent = "";
+        inner.appendChild(choppedBy);
+
+        card.appendChild(inner);
+        container.appendChild(card);
+      });
+
+      // Dark mode toggle
+      const darkToggle = document.getElementById("darkModeToggle");
+      darkToggle.onchange = () => {
+        if (darkToggle.checked) {
+          document.body.classList.add("dark");
+          localStorage.setItem("chopPig_darkMode", "1");
+        } else {
+          document.body.classList.remove("dark");
+          localStorage.setItem("chopPig_darkMode", "0");
+        }
+      };
+
+      loadFromLocalStorage();
+      refreshPlayerSelects();
+      refreshPlacementSelects();
+      refreshScores();
+      refreshLeaderboard();
+      refreshSeatLabels();
+    }
+
+    // ---------- PLAYER MANAGEMENT ----------
+    function addPlayer() {
+      const input = document.getElementById("newPlayerName");
+      const name = input.value.trim();
+      if (!name) {
+        alert("Please enter a player name.");
+        return;
+      }
+      if (players[name]) {
+        alert("This player already exists.");
+        return;
+      }
+      players[name] = { score: 0, games: 0, wins: 0 };
+      playerList.push(name);
+      playerList.sort();
+      input.value = "";
+      refreshPlayerSelects();
+      refreshLeaderboard();
+      saveToLocalStorage();
+    }
+
+    function refreshPlayerSelects() {
+      const selected = rows.map(r => r.player);
+      const selects = document.querySelectorAll('#roundRows select[data-idx]');
+      selects.forEach((sel, idx) => {
+        const current = rows[idx].player;
+        sel.innerHTML = "<option value=''></option>";
+        playerList.forEach(name => {
+          if (!selected.includes(name) || name === current) {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel.appendChild(opt);
+          }
+        });
+        sel.value = current;
+      });
+      refreshSeatLabels();
+    }
+
+    function refreshSeatLabels() {
+      rows.forEach((row, idx) => {
+        const label = document.getElementById(`seatPlayerLabel_${idx}`);
+        label.textContent = row.player ? row.player : "Empty";
+      });
+    }
+
+    function onPlayerChange(e) {
+      const idx = Number(e.target.dataset.idx);
+      rows[idx].player = e.target.value;
+      refreshPlayerSelects();
+      refreshScores();
+      saveToLocalStorage();
+    }
+
+    // ---------- PLACEMENTS ----------
+    function refreshPlacementSelects() {
+      const selects = document.querySelectorAll('#roundRows select[data-idx]');
+      const placementsNow = rows.map(r => r.placement);
+      const stinkyCount = placementsNow.filter(p => p === "Stinky 13").length;
+
+      let allowedGlobal = [...basePlacements];
+      if (stinkyCount === 1) {
+        allowedGlobal = allowedGlobal.filter(p => p !== "4th");
+      } else if (stinkyCount === 2) {
+        allowedGlobal = allowedGlobal.filter(p => !["3rd", "4th"].includes(p));
+      } else if (stinkyCount >= 3) {
+        allowedGlobal = allowedGlobal.filter(p => !["2nd", "3rd", "4th"].includes(p));
+      }
+
+      // second select in each card is placement
+      const placementSelects = [];
+      const roundRows = document.getElementById("roundRows").querySelectorAll(".player-card");
+      roundRows.forEach(card => {
+        const selectsInCard = card.querySelectorAll("select[data-idx]");
+        if (selectsInCard.length === 2) {
+          placementSelects.push(selectsInCard[1]);
+        }
+      });
+
+      placementSelects.forEach((sel, idx) => {
+        const current = rows[idx].placement;
+        const placementsNow = rows.map(r => r.placement);
+        const usedByOthers = placementsNow
+          .map((p, j) => (j !== idx ? p : null))
+          .filter(p => ["1st", "2nd", "3rd", "4th"].includes(p));
+
+        sel.innerHTML = "<option value=''></option>";
+        allowedGlobal.forEach(p => {
+          if (p === "Stinky 13" || !usedByOthers.includes(p)) {
+            const opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = p;
+            sel.appendChild(opt);
+          }
+        });
+
+        if (current && !allowedGlobal.includes(current)) {
+          rows[idx].placement = "";
+        }
+        sel.value = rows[idx].placement;
+      });
+    }
+
+    function onPlacementChange(e) {
+      const idx = Number(e.target.dataset.idx);
+      rows[idx].placement = e.target.value;
+      refreshPlacementSelects();
+      refreshScores();
+      saveToLocalStorage();
+    }
+
+    // ---------- STINKY 2 ----------
+    function openStinky2Modal(idx) {
+      const root = document.getElementById("modalRoot");
+      const s = rows[idx].stinky2;
+
+      const backdrop = document.createElement("div");
+      backdrop.className = "modal-backdrop";
+
+      backdrop.innerHTML = `
+        <div class="modal-sheet">
+          <div class="modal-header">
+            <div class="modal-handle"></div>
+            <div class="modal-title">Stinky 2 – Seat ${idx + 1}</div>
+          </div>
+          <div id="s2Rows"></div>
+          <div class="modal-footer">
+            <button id="saveS2" class="btn btn-primary">Save</button>
+            <button id="cancelS2" class="btn">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      root.appendChild(backdrop);
+
+      const fields = [
+        ["<span class='icon-label'>🔥🐷 Red Pigs</span>", "red", 3],
+        ["<span class='icon-label'>🐷 Black Pigs</span>", "black", 3],
+        ["<span class='icon-label'>🔥🐷 3 Consecutive Pairs</span>", "pairs3", 3],
+        ["<span class='icon-label'>🔥🔥🐷🐷 4 of a Kind</span>", "kind4", 3],
+        ["<span class='icon-label'>🔥🔥🐷🐷🐷 4 Consecutive Pairs</span>", "pairs4", 3]
+      ];
+
+      const container = backdrop.querySelector("#s2Rows");
+
+      fields.forEach(([label, key, max]) => {
+        const row = document.createElement("div");
+        row.className = "s2-row";
+        row.innerHTML = `
+          <span>${label}</span>
+          <input type="number" min="0" max="${max}" value="${s[key]}" id="s2_${key}">
+        `;
+        container.appendChild(row);
+      });
+
+      backdrop.querySelector("#cancelS2").onclick = () => backdrop.remove();
+
+      backdrop.querySelector("#saveS2").onclick = () => {
+        const red = Number(document.getElementById("s2_red").value);
+        const black = Number(document.getElementById("s2_black").value);
+        const total = red + black;
+
+        const valid = (total === 1) || (total === 2) || (total === 3);
+        if (!valid) {
+          alert("Invalid red/black combo.\nAllowed total red+black: 1, 2, or 3.");
+          return;
+        }
+
+        rows[idx].stinky2 = {
+          enabled: true,
+          red,
+          black,
+          pairs3: Number(document.getElementById("s2_pairs3").value),
+          kind4: Number(document.getElementById("s2_kind4").value),
+          pairs4: Number(document.getElementById("s2_pairs4").value)
+        };
+
+        backdrop.remove();
+        refreshScores();
+        saveToLocalStorage();
+      };
+    }
+
+    function onStinky2Toggle(e) {
+      const idx = Number(e.target.dataset.idx);
+      const checked = e.target.checked;
+      const pill = e.target.closest(".pill-toggle");
+
+      if (!checked) {
+        rows[idx].stinky2 = {
+          enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0
+        };
+        pill.classList.remove("active");
+        refreshScores();
+        saveToLocalStorage();
+        return;
+      }
+
+      if (!rows[idx].placement) {
+        alert("Select a placement before using Stinky 2.");
+        e.target.checked = false;
+        return;
+      }
+
+      pill.classList.add("active");
+      openStinky2Modal(idx);
+    }
+
+    // ---------- CHOP ----------
+    function openChopModal(idx) {
+      const root = document.getElementById("modalRoot");
+      const existing = rows[idx].chop.data;
+
+      const backdrop = document.createElement("div");
+      backdrop.className = "modal-backdrop";
+
+      backdrop.innerHTML = `
+        <div class="modal-sheet">
+          <div class="modal-header">
+            <div class="modal-handle"></div>
+            <div class="modal-title">Chop Pigs – Seat ${idx + 1}</div>
+          </div>
+          <div id="chopRows"></div>
+          <div class="modal-footer">
+            <button id="addChopper" class="btn">Add Chopper</button>
+            <button id="saveChop" class="btn btn-primary">Save</button>
+            <button id="cancelChop" class="btn">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      root.appendChild(backdrop);
+
+      const container = backdrop.querySelector("#chopRows");
+
+      const chopTypes = [
+        ["<span class='icon-label'>🐷 Black Pigs</span>", "Black Pigs", 2],
+        ["<span class='icon-label'>🔥🐷 Red Pigs</span>", "Red Pigs", 2],
+        ["<span class='icon-label'>🔥🐷 3 Consecutive Pairs</span>", "3 Consecutive Pairs", 3],
+        ["<span class='icon-label'>🔥🔥🐷🐷 4 of a Kind</span>", "4 of a Kind", 3],
+        ["<span class='icon-label'>🔥🔥🐷🐷🐷 4 Consecutive Pairs</span>", "4 Consecutive Pairs", 3]
+      ];
+
+      function addChopperRow(data = null) {
+        const block = document.createElement("div");
+        block.className = "chopper-block";
+
+        block.innerHTML = `
+          <div class="chopper-header">
+            <span>Chopper</span>
+            <button class="btn btn-danger" style="width:auto; padding:4px 10px; font-size:12px;">Remove</button>
+          </div>
+          <div class="field-group">
+            <select class="chopperName">
+              <option value=""></option>
+              ${playerList.map(p => `<option value="${p}">${p}</option>`).join("")}
+            </select>
+          </div>
+          <div class="chopTypeRows"></div>
+        `;
+
+        const typeContainer = block.querySelector(".chopTypeRows");
+
+        chopTypes.forEach(([labelHTML, key, max]) => {
+          const row = document.createElement("div");
+          row.className = "chop-type-row";
+          const val = data ? (data.types[key] || 0) : 0;
+          row.innerHTML = `
+            <span>${labelHTML}</span>
+            <input type="number" min="0" max="${max}" value="${val}" data-type="${key}">
+          `;
+          typeContainer.appendChild(row);
+        });
+
+        if (data) {
+          block.querySelector(".chopperName").value = data.chopper;
+        }
+
+        block.querySelector("button").onclick = () => block.remove();
+
+        container.appendChild(block);
+      }
+
+      existing.forEach(entry => addChopperRow(entry));
+      if (existing.length === 0) addChopperRow();
+
+      backdrop.querySelector("#addChopper").onclick = () => addChopperRow();
+      backdrop.querySelector("#cancelChop").onclick = () => backdrop.remove();
+
+      backdrop.querySelector("#saveChop").onclick = () => {
+        const blocks = container.querySelectorAll(".chopper-block");
+        const newList = [];
+        const victim = rows[idx].player;
+
+        for (const block of blocks) {
+          const name = block.querySelector(".chopperName").value;
+          if (!name) {
+            alert("Every chopper must have a name.");
+            return;
+          }
+          if (name === victim) {
+            alert("A player cannot chop themselves.");
+            return;
+          }
+          if (newList.some(e => e.chopper === name)) {
+            alert(`${name} is already listed as a chopper.`);
+            return;
+          }
+
+          const types = {};
+          const inputs = block.querySelectorAll("input[data-type]");
+          let hasValue = false;
+
+          inputs.forEach(input => {
+            const t = input.dataset.type;
+            const v = Number(input.value);
+            types[t] = v;
+            if (v > 0) hasValue = true;
+          });
+
+          if (!hasValue) {
+            alert("Each chopper must have at least one chop type.");
+            return;
+          }
+
+          newList.push({ chopper: name, types });
+        }
+
+        rows[idx].chop.enabled = newList.length > 0;
+        rows[idx].chop.data = newList;
+
+        backdrop.remove();
+        refreshScores();
+        saveToLocalStorage();
+      };
+    }
+
+    function onChopToggle(e) {
+      const idx = Number(e.target.dataset.idx);
+      const checked = e.target.checked;
+      const pill = e.target.closest(".pill-toggle");
+
+      if (!checked) {
+        rows[idx].chop.enabled = false;
+        rows[idx].chop.data = [];
+        pill.classList.remove("active");
+        refreshScores();
+        saveToLocalStorage();
+        return;
+      }
+
+      if (!rows[idx].player) {
+        alert("Select a player before using Chop Pigs.");
+        e.target.checked = false;
+        return;
+      }
+
+      pill.classList.add("active");
+      openChopModal(idx);
+    }
+
+    function onEditChop(e) {
+      const idx = Number(e.target.dataset.idx);
+      if (!rows[idx].chop.enabled || rows[idx].chop.data.length === 0) {
+        alert("This player has no chop data to edit.");
+        return;
+      }
+      openChopModal(idx);
+    }
+
+    function onClearRow(e) {
+      const idx = Number(e.target.dataset.idx);
+      rows[idx].player = "";
+      rows[idx].placement = "";
+      rows[idx].stinky2 = { enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0 };
+      rows[idx].chop = { enabled: false, data: [] };
+      rows[idx].score = 0;
+
+      // reset toggles
+      const card = document.querySelectorAll(".player-card")[idx];
+      const toggles = card.querySelectorAll(".pill-toggle input[type='checkbox']");
+      toggles.forEach(t => {
+        t.checked = false;
+        t.closest(".pill-toggle").classList.remove("active");
+      });
+
+      document.getElementById(`scoreDisplay_${idx}`).textContent = "—";
+      document.getElementById(`choppedBy_${idx}`).textContent = "";
+      refreshPlayerSelects();
+      refreshPlacementSelects();
+      refreshScores();
+      saveToLocalStorage();
+    }
+
+    // ---------- SCORING ----------
+    function stinky2Total(s) {
+      return (
+        s.red * -2 +
+        s.black * -1 +
+        s.pairs3 * -2 +
+        s.kind4 * -4 +
+        s.pairs4 * -5
+      );
+    }
+
+    function chopPoints(type) {
+      if (type === "Black Pigs") return 1;
+      if (type === "Red Pigs") return 2;
+      if (type === "3 Consecutive Pairs") return 2;
+      if (type === "4 of a Kind") return 4;
+      if (type === "4 Consecutive Pairs") return 5;
+      return 0;
+    }
+
+    function refreshScores() {
+      const placementsNow = rows.map(r => r.placement);
+      const stinkyCount = placementsNow.filter(p => p === "Stinky 13").length;
+
+      const baseScoresRow = [0, 0, 0, 0];
+
+      rows.forEach((row, i) => {
+        const placement = row.placement;
+        let score = 0;
+        if (!placement) {
+          baseScoresRow[i] = 0;
+          return;
+        }
+        if (placement === "Stinky 13") {
+          score = -5;
+        } else if (placement === "1st") {
+          score = stinkyCount > 0 ? 5 * stinkyCount : 4;
+        } else if (placement === "2nd") {
+          score = (stinkyCount === 2) ? 0 : 2;
+        } else {
+          score = baseScores[placement];
+        }
+        baseScoresRow[i] = score;
+      });
+
+      const finalScores = [...baseScoresRow];
+
+      // Stinky2 transfers
+      rows.forEach((row, i) => {
+        if (!row.stinky2.enabled) return;
+        const total = stinky2Total(row.stinky2);
+        finalScores[i] += total;
+
+        const giverPlace = row.placement;
+        let receiverIdx = null;
+        if (giverPlace === "4th") {
+          receiverIdx = placementsNow.indexOf("3rd");
+        } else if (giverPlace === "Stinky 13") {
+          receiverIdx = placementsNow.indexOf("1st");
+        } else if (giverPlace === "3rd") {
+          receiverIdx = placementsNow.indexOf("2nd");
+        }
+        if (receiverIdx !== null && receiverIdx >= 0) {
+          finalScores[receiverIdx] -= total;
+        }
+      });
+
+      // Chop transfers
+      rows.forEach((row, i) => {
+        if (!row.player) return;
+        row.chop.data.forEach(entry => {
+          const chopperName = entry.chopper;
+          const chopperIdx = rows.findIndex(r => r.player === chopperName);
+          if (chopperIdx === -1) return;
+          let total = 0;
+          Object.entries(entry.types).forEach(([t, amt]) => {
+            if (amt > 0) total += chopPoints(t) * amt;
+          });
+          if (total > 0) {
+            finalScores[i] -= total;
+            finalScores[chopperIdx] += total;
+          }
+        });
+      });
+
+      rows.forEach((row, i) => {
+        row.score = finalScores[i];
+        const scoreDiv = document.getElementById(`scoreDisplay_${i}`);
+        const hasAny = row.player || row.placement || row.chop.data.length;
+        scoreDiv.textContent = hasAny ? finalScores[i] : "—";
+        const choppedBy = row.chop.data.map(e => e.chopper);
+        const choppedLabel = document.getElementById(`choppedBy_${i}`);
+        choppedLabel.textContent = choppedBy.length ? `Chopped by: ${choppedBy.join(", ")}` : "";
+      });
+
+      refreshLeaderboard();
+    }
+
+    // ---------- ROUND COMMIT ----------
+    function addRoundScores() {
+      const selectedPlayers = [];
+      const scores = [];
+
+      for (let i = 0; i < 4; i++) {
+        const row = rows[i];
+        if (!row.player || !row.placement) {
+          alert("All 4 players and placements must be selected.");
+          return;
+        }
+        if (selectedPlayers.includes(row.player)) {
+          alert("Each player can only appear once per round.");
+          return;
+        }
+        selectedPlayers.push(row.player);
+        scores.push(row.score);
+      }
+
+      const maxScore = Math.max(...scores);
+      const winners = selectedPlayers.filter((p, i) => scores[i] === maxScore);
+
+      for (let i = 0; i < 4; i++) {
+        const name = selectedPlayers[i];
+        const s = scores[i];
+        players[name].score += s;
+        players[name].games += 1;
+        if (winners.includes(name)) {
+          players[name].wins += 1;
+        }
+      }
+
+      // Clear round
+      for (let i = 0; i < 4; i++) {
+        rows[i].player = "";
+        rows[i].placement = "";
+        rows[i].stinky2 = { enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0 };
+        rows[i].chop = { enabled: false, data: [] };
+        rows[i].score = 0;
+      }
+
+      // reset UI
+      const cards = document.querySelectorAll(".player-card");
+      cards.forEach((card, idx) => {
+        const selects = card.querySelectorAll("select[data-idx]");
+        selects.forEach(sel => sel.value = "");
+        const toggles = card.querySelectorAll(".pill-toggle input[type='checkbox']");
+        toggles.forEach(t => {
+          t.checked = false;
+          t.closest(".pill-toggle").classList.remove("active");
+        });
+        document.getElementById(`scoreDisplay_${idx}`).textContent = "—";
+        document.getElementById(`choppedBy_${idx}`).textContent = "";
+      });
+
+      refreshPlayerSelects();
+      refreshPlacementSelects();
+      refreshScores();
+      refreshLeaderboard();
+      saveToLocalStorage();
+    }
+
+    // ---------- LEADERBOARD ----------
+    function refreshLeaderboard() {
+      const list = document.getElementById("leaderboardList");
+      list.innerHTML = "";
+
+      const stats = Object.entries(players).map(([name, s]) => {
+        const games = s.games;
+        const wins = s.wins;
+        const score = s.score;
+        const winRate = games > 0 ? (wins / games) * 100 : 0;
+        return { name, score, games, wins, winRate };
+      });
+
+      let ranked = stats.filter(s => s.games > 0);
+      let unranked = stats.filter(s => s.games === 0);
+
+      ranked.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+        return a.name.localeCompare(b.name);
+      });
+
+      unranked.sort((a, b) => a.name.localeCompare(b.name));
+
+      const lastIdx = ranked.length ? ranked.length - 1 : null;
+
+      ranked.forEach((row, i) => {
+        const item = document.createElement("div");
+        item.className = "lb-item";
+
+        if (i === 0) item.classList.add("lb-rank1");
+        else if (i === 1) item.classList.add("lb-rank2");
+        else if (i === 2) item.classList.add("lb-rank3");
+        else if (i === lastIdx) item.classList.add("lb-last");
+
+        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`;
+
+        item.innerHTML = `
+          <div class="lb-header-row">
+            <span class="lb-name">${medal} ${row.name}</span>
+            <span class="lb-rank-badge">${row.score} pts</span>
+          </div>
+          <div class="lb-meta">
+            Games: ${row.games} &nbsp;•&nbsp; Wins: ${row.wins} &nbsp;•&nbsp; Win Rate: ${row.winRate.toFixed(1)}%
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      unranked.forEach(row => {
+        const item = document.createElement("div");
+        item.className = "lb-item lb-unranked";
+        item.innerHTML = `
+          <div class="lb-header-row">
+            <span class="lb-name">${row.name}</span>
+            <span class="lb-rank-badge">Unranked</span>
+          </div>
+          <div class="lb-meta">
+            Score: ${row.score} &nbsp;•&nbsp; Games: ${row.games}
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    // ---------- LOCAL STORAGE ----------
+    function saveToLocalStorage() {
+      const data = {
+        players,
+        playerList,
+        rows,
+        darkMode: document.body.classList.contains("dark") ? 1 : 0
+      };
+      localStorage.setItem("chopPig_state_native", JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage() {
+      const raw = localStorage.getItem("chopPig_state_native");
+      if (!raw) {
+        const dm = localStorage.getItem("chopPig_darkMode");
+        if (dm === "1") {
+          document.body.classList.add("dark");
+          document.getElementById("darkModeToggle").checked = true;
+        }
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        Object.keys(data.players || {}).forEach(name => {
+          players[name] = data.players[name];
+        });
+        (data.playerList || []).forEach(name => {
+          if (!playerList.includes(name)) playerList.push(name);
+        });
+        playerList.sort();
+
+        if (Array.isArray(data.rows)) {
+          data.rows.forEach((r, i) => {
+            if (rows[i]) {
+              rows[i].player = r.player || "";
+              rows[i].placement = r.placement || "";
+              rows[i].stinky2 = r.stinky2 || { enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0 };
+              rows[i].chop = r.chop || { enabled: false, data: [] };
+              rows[i].score = r.score || 0;
+            }
+          });
+        }
+
+        if (data.darkMode === 1) {
+          document.body.classList.add("dark");
+          document.getElementById("darkModeToggle").checked = true;
+        }
+      } catch (e) {
+        console.error("Failed to load from localStorage", e);
+      }
+    }
+
+    // ---------- JSON IMPORT/EXPORT ----------
+    function exportJSON() {
+      const data = {
+        players,
+        playerList
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "chop_pig_players.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJSON() {
+      const fileInput = document.getElementById("importFile");
+      fileInput.value = "";
+      fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (!data.players || !data.playerList) {
+              alert("Invalid JSON format.");
+              return;
+            }
+            for (const k in players) delete players[k];
+            playerList.length = 0;
+
+            Object.keys(data.players).forEach(name => {
+              players[name] = data.players[name];
+            });
+            data.playerList.forEach(name => playerList.push(name));
+            playerList.sort();
+
+            for (let i = 0; i < 4; i++) {
+              rows[i].player = "";
+              rows[i].placement = "";
+              rows[i].stinky2 = { enabled: false, red: 0, black: 0, pairs3: 0, kind4: 0, pairs4: 0 };
+              rows[i].chop = { enabled: false, data: [] };
+              rows[i].score = 0;
+            }
+
+            refreshPlayerSelects();
+            refreshPlacementSelects();
+            refreshScores();
+            refreshLeaderboard();
+            saveToLocalStorage();
+            alert("Player data imported successfully.");
+          } catch (err) {
+            alert("Failed to parse JSON file.");
+          }
+        };
+        reader.readAsText(file);
+      };
+      fileInput.click();
+    }
+
+    // ---------- BOOT ----------
+    init();
+  </script>
+</body>
+</html>
