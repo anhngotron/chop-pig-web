@@ -1,0 +1,165 @@
+/* ---------------------------------------------
+   APP.CSS — Layout + Components
+   Style: S1 (Soft Rounded / iOS-like)
+----------------------------------------------*/
+
+/* ---------------------------------------------
+   HEADER
+----------------------------------------------*/
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-card);
+    border-bottom-left-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+    margin-bottom: 18px;
+}
+
+.app-header h1 {
+    font-size: 1.8rem;
+}
+
+/* ---------------------------------------------
+   CONTROLS SECTION
+----------------------------------------------*/
+.controls-section {
+    padding: 0 20px 20px;
+}
+
+.controls-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+/* ---------------------------------------------
+   PLAYER LIST
+----------------------------------------------*/
+.player-list {
+    padding: 0 20px;
+}
+
+.player-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.player-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.player-score {
+    font-size: 1.1rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* ---------------------------------------------
+   ROUND SECTION
+----------------------------------------------*/
+.round-section {
+    padding: 20px;
+}
+
+.round-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.round-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+}
+
+.round-card h4 {
+    margin-bottom: 10px;
+}
+
+/* ---------------------------------------------
+   LEADERBOARD
+----------------------------------------------*/
+.leaderboard-section {
+    padding: 20px;
+}
+
+.leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.leaderboard-item {
+    background: var(--card-bg);
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.leaderboard-rank {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* ---------------------------------------------
+   MODALS (Bottom Sheet Style)
+----------------------------------------------*/
+.modal {
+    border-radius: var(--radius);
+    padding: 20px;
+}
+
+#addPlayerModal,
+#importModal {
+    max-width: 420px;
+}
+
+/* ---------------------------------------------
+   DARK MODE TOGGLE
+----------------------------------------------*/
+#darkModeToggle {
+    font-size: 1.5rem;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+#darkModeToggle:hover {
+    background: var(--secondary);
+}
+
+/* ---------------------------------------------
+   ANIMATIONS
+----------------------------------------------*/
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.player-card,
+.round-card,
+.leaderboard-item {
+    animation: fadeInUp 0.25s ease;
+}
