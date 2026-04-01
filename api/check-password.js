@@ -9,7 +9,14 @@ export default function handler(req, res) {
     return res.status(400).json({ ok: false, error: "Missing password" });
   }
 
-  if (password === process.env.ADMIN_PASSWORD) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    console.error("ADMIN_PASSWORD is not set in environment variables.");
+    return res.status(500).json({ ok: false, error: "Server misconfigured" });
+  }
+
+  if (password === adminPassword) {
     return res.status(200).json({ ok: true });
   }
 
