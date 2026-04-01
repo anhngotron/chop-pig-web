@@ -1,0 +1,36 @@
+{
+  "players": {
+    "a": {
+      "score": 0,
+      "games": 0,
+      "wins": 0
+    },
+    "b": {
+      "score": 0,
+      "games": 0,
+      "wins": 0
+    },
+    "g": {
+      "score": 0,
+      "games": 0,
+      "wins": 0
+    },
+    "p": {
+      "score": 0,
+      "games": 0,
+      "wins": 0
+    },
+    "r": {
+      "score": 0,
+      "games": 0,
+      "wins": 0
+    }
+  },
+  "playerList": [
+    "a",
+    "b",
+    "g",
+    "p",
+    "r"
+  ]
+}
