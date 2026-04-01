@@ -1,13 +1,13 @@
 {
   "players": {
     "James": {
-      "score": 32,
-      "games": 22,
+      "score": 34,
+      "games": 23,
       "wins": 7
     },
     "Andy": {
       "score": 50,
-      "games": 20,
+      "games": 21,
       "wins": 11
     },
     "Ana": {
@@ -16,8 +16,8 @@
       "wins": 4
     },
     "David": {
-      "score": -6,
-      "games": 7,
+      "score": -8,
+      "games": 8,
       "wins": 1
     },
     "Lawrence": {
@@ -37,8 +37,8 @@
     },
     "Kevin": {
       "score": -27,
-      "games": 27,
-      "wins": 7
+      "games": 28,
+      "wins": 8
     },
     "Jeanette": {
       "score": -11,
