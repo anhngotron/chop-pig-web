@@ -1180,8 +1180,8 @@
     refreshTable();
     saveState();
   }
-   /* ---------------------------------------------------------
-     LEADERBOARD (TABLE VIEW WITH ICONS)
+    /* ---------------------------------------------------------
+     LEADERBOARD (TABLE VIEW WITH ICONS + WIN RATE)
   --------------------------------------------------------- */
   function refreshTable() {
     const container = document.getElementById("leaderboardContainer");
@@ -1191,7 +1191,8 @@
       name,
       score: data.score,
       games: data.games,
-      wins: data.wins
+      wins: data.wins,
+      winRate: data.games > 0 ? ((data.wins / data.games) * 100).toFixed(1) : "0.0"
     }));
 
     arr.sort((a, b) => b.score - a.score);
@@ -1216,6 +1217,7 @@
         <th style="padding:10px; text-align:left;">Score</th>
         <th style="padding:10px; text-align:left;">Games</th>
         <th style="padding:10px; text-align:left;">Wins</th>
+        <th style="padding:10px; text-align:left;">Win Rate %</th>
       </tr>
     `;
     table.appendChild(thead);
@@ -1245,6 +1247,7 @@
         <td style="padding:10px;">${p.score}</td>
         <td style="padding:10px;">${p.games}</td>
         <td style="padding:10px;">${p.wins}</td>
+        <td style="padding:10px;">${p.winRate}%</td>
       `;
 
       tbody.appendChild(tr);
