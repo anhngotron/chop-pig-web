@@ -1,0 +1,72 @@
+{
+  "players": {
+    "James": {
+      "score": 25,
+      "games": 21,
+      "wins": 6
+    },
+    "Andy": {
+      "score": 46,
+      "games": 19,
+      "wins": 10
+    },
+    "Ana": {
+      "score": -10,
+      "games": 21,
+      "wins": 4
+    },
+    "David": {
+      "score": -8,
+      "games": 6,
+      "wins": 1
+    },
+    "Lawrence": {
+      "score": -8,
+      "games": 11,
+      "wins": 1
+    },
+    "William ": {
+      "score": -4,
+      "games": 17,
+      "wins": 5
+    },
+    "Robert": {
+      "score": -6,
+      "games": 8,
+      "wins": 1
+    },
+    "Kevin": {
+      "score": -23,
+      "games": 25,
+      "wins": 7
+    },
+    "Jeanette": {
+      "score": -11,
+      "games": 5,
+      "wins": 0
+    },
+    "Majid": {
+      "score": 4,
+      "games": 5,
+      "wins": 1
+    },
+    "Ian": {
+      "score": -5,
+      "games": 2,
+      "wins": 0
+    }
+  },
+  "playerList": [
+    "Ana",
+    "Andy",
+    "David",
+    "Ian",
+    "James",
+    "Jeanette",
+    "Kevin",
+    "Lawrence",
+    "Majid",
+    "Robert",
+    "William "
+  ]
+}
