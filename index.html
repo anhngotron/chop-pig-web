@@ -1180,8 +1180,8 @@
     refreshTable();
     saveState();
   }
-    /* ---------------------------------------------------------
-     LEADERBOARD
+   /* ---------------------------------------------------------
+     LEADERBOARD (TABLE VIEW WITH ICONS)
   --------------------------------------------------------- */
   function refreshTable() {
     const container = document.getElementById("leaderboardContainer");
@@ -1196,37 +1196,64 @@
 
     arr.sort((a, b) => b.score - a.score);
 
+    // Create table
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.style.background = "white";
+    table.style.borderRadius = "12px";
+    table.style.overflow = "hidden";
+    table.style.margin = "16px auto";
+    table.style.maxWidth = "700px";
+    table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
+
+    // Header
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+      <tr style="background:#f2f2f7;">
+        <th style="padding:10px; text-align:left;">Rank</th>
+        <th style="padding:10px; text-align:left;">Player</th>
+        <th style="padding:10px; text-align:left;">Score</th>
+        <th style="padding:10px; text-align:left;">Games</th>
+        <th style="padding:10px; text-align:left;">Wins</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    // Body
+    const tbody = document.createElement("tbody");
+
     arr.forEach((p, idx) => {
-      const card = document.createElement("div");
-      card.className = "leaderboard-card";
+      const tr = document.createElement("tr");
 
-      if (idx === 0) card.classList.add("rank1");
-      else if (idx === 1) card.classList.add("rank2");
-      else if (idx === 2) card.classList.add("rank3");
-      else if (idx === arr.length - 1) card.classList.add("last");
+      // Rank icon
+      let icon = "";
+      if (idx === 0) icon = "🥇";
+      else if (idx === 1) icon = "🥈";
+      else if (idx === 2) icon = "🥉";
+      else if (idx === arr.length - 1) icon = "💀";
 
-      const title = document.createElement("h3");
-      title.textContent = `${idx + 1}. ${p.name}`;
-      card.appendChild(title);
+      // Rank coloring
+      if (idx === 0) tr.style.background = "#fff7d1";     // gold
+      else if (idx === 1) tr.style.background = "#f2f2f7"; // silver
+      else if (idx === 2) tr.style.background = "#f8e7d1"; // bronze
+      else if (idx === arr.length - 1) tr.style.background = "#ffe5e5"; // last
 
-      const s1 = document.createElement("div");
-      s1.className = "stat";
-      s1.textContent = `Score: ${p.score}`;
-      card.appendChild(s1);
+      tr.innerHTML = `
+        <td style="padding:10px; font-size:18px;">${icon} ${idx + 1}</td>
+        <td style="padding:10px;">${p.name}</td>
+        <td style="padding:10px;">${p.score}</td>
+        <td style="padding:10px;">${p.games}</td>
+        <td style="padding:10px;">${p.wins}</td>
+      `;
 
-      const s2 = document.createElement("div");
-      s2.className = "stat";
-      s2.textContent = `Games: ${p.games}`;
-      card.appendChild(s2);
-
-      const s3 = document.createElement("div");
-      s3.className = "stat";
-      s3.textContent = `Wins: ${p.wins}`;
-      card.appendChild(s3);
-
-      container.appendChild(card);
+      tbody.appendChild(tr);
     });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
   }
+
 
   /* ---------------------------------------------------------
      EXPORT TO EXCEL
