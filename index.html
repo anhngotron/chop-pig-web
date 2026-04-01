@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Chop Pig Score Tracker (Web)</title>
+  <title>Chop Pig Score Tracker (Cloud Sync)</title>
 
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
@@ -38,12 +38,11 @@
     #syncStatus { font-size: 12px; color: #555; }
   </style>
 
-  <!-- SheetJS for Excel import/export -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
-  <h1>Chop Pig Score Tracker</h1>
+  <h1>Chop Pig Score Tracker (Cloud Sync)</h1>
 
   <!-- Add Player -->
   <div class="section add-player-section">
@@ -108,7 +107,33 @@
 
   <script>
 /* ---------------------------------------------------------
-   AUTOSAVE (localStorage + GitHub)
+   CLOUD LOAD FROM GITHUB (public repo)
+--------------------------------------------------------- */
+async function loadStateFromGitHub() {
+  try {
+    const owner = "anhngotron";
+    const repo = "chop-pig-web";
+    const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json`;
+
+    const resp = await fetch(url, { cache: "no-store" });
+
+    if (!resp.ok) {
+      console.warn("No GitHub state found yet.");
+      return;
+    }
+
+    const data = await resp.json();
+    players = data.players || {};
+    playerList = data.playerList || [];
+
+    console.log("Loaded state from GitHub:", data);
+  } catch (err) {
+    console.error("Failed to load from GitHub:", err);
+  }
+}
+
+/* ---------------------------------------------------------
+   AUTOSAVE TO GITHUB ONLY
 --------------------------------------------------------- */
 function setSyncStatus(text, color = "#555") {
   const el = document.getElementById("syncStatus");
@@ -119,15 +144,8 @@ function setSyncStatus(text, color = "#555") {
 }
 
 function saveState() {
-  const data = {
-    players,
-    playerList
-  };
+  const data = { players, playerList };
 
-  // Local JSON autosave
-  localStorage.setItem("chopPigState", JSON.stringify(data));
-
-  // Remote GitHub autosave via Vercel backend
   setSyncStatus("Syncing…", "#888");
 
   fetch("/api/save-state", {
@@ -140,45 +158,13 @@ function saveState() {
     setSyncStatus("Saved ✓", "green");
   })
   .catch(err => {
-    console.warn("Remote GitHub autosave failed:", err);
+    console.warn("GitHub autosave failed:", err);
     setSyncStatus("Sync failed ⚠", "red");
   });
 }
 
 function manualSync() {
-  const data = {
-    players,
-    playerList
-  };
-
-  setSyncStatus("Syncing…", "#888");
-
-  fetch("/api/save-state", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  })
-  .then(res => {
-    if (!res.ok) throw new Error("GitHub sync failed");
-    setSyncStatus("Saved ✓", "green");
-  })
-  .catch(err => {
-    console.warn("Manual GitHub sync failed:", err);
-    setSyncStatus("Sync failed ⚠", "red");
-  });
-}
-
-function loadState() {
-  const raw = localStorage.getItem("chopPigState");
-  if (!raw) return;
-
-  try {
-    const data = JSON.parse(raw);
-    players = data.players || {};
-    playerList = data.playerList || [];
-  } catch (e) {
-    console.error("Failed to load saved state:", e);
-  }
+  saveState();
 }
 
 /* ---------------------------------------------------------
@@ -325,7 +311,6 @@ function addPlayer() {
 function onPlayerSelected(idx) {
   updatePlayerDropdowns();
   autoFillAllScores();
-  saveState();
 }
 
 function updatePlayerDropdowns() {
@@ -361,7 +346,6 @@ function findPlayerRow(name) {
 function onPlacementChanged() {
   updatePlacementOptions();
   autoFillAllScores();
-  saveState();
 }
 
 function updatePlacementOptions() {
@@ -450,7 +434,6 @@ function clearRow(idx) {
   updatePlayerDropdowns();
   updatePlacementOptions();
   autoFillAllScores();
-  saveState();
 }
 
 /* ---------------------------------------------------------
@@ -497,7 +480,6 @@ function handleStinky2Checkbox(idx) {
     Stinky2_kind4[idx] = 0;
     Stinky2_pairs4[idx] = 0;
     autoFillAllScores();
-    saveState();
     return;
   }
   openStinky2Popup(idx);
@@ -606,7 +588,6 @@ function openStinky2Popup(idx) {
     Stinky2_pairs4[idx] = pp4;
 
     autoFillAllScores();
-    saveState();
     closeModal();
   };
   modal.appendChild(btnSave);
@@ -631,7 +612,6 @@ function handleChopCheckbox(idx) {
   if (!chk.checked) {
     chopData[idx] = [];
     autoFillAllScores();
-    saveState();
     return;
   }
   const player = rowState[idx].playerSelect.value;
@@ -807,7 +787,6 @@ function openChopPopup(idx) {
 
     chopData[idx] = newList;
     autoFillAllScores();
-    saveState();
     closeModal();
   };
   modal.appendChild(btnSave);
@@ -961,7 +940,6 @@ function addRoundScores() {
     scores.push(scoreVal);
   }
 
-  // WINNER = placement "1st"
   const winners = selectedPlayers.filter(
     (p, i) => placements[i] === "1st"
   );
@@ -983,7 +961,7 @@ function addRoundScores() {
 }
 
 /* ---------------------------------------------------------
-   LEADERBOARD (with crown 👑)
+   LEADERBOARD
 --------------------------------------------------------- */
 function refreshTable() {
   const tbody = document.getElementById("leaderboardBody");
@@ -1172,13 +1150,15 @@ document.getElementById("modalBackdrop").addEventListener("click", e => {
 });
 
 /* ---------------------------------------------------------
-   STARTUP
+   STARTUP (CLOUD LOAD + INIT)
 --------------------------------------------------------- */
-loadState();
-init();
-refreshTable();
-updatePlayerDropdowns();
-setSyncStatus(""); // start neutral
+(async () => {
+  await loadStateFromGitHub();
+  init();
+  refreshTable();
+  updatePlayerDropdowns();
+  setSyncStatus("");
+})();
   </script>
 </body>
 </html>
