@@ -3,15 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "echo 'No build step required'",
+    "start": "echo 'No start script required'"
   },
   "dependencies": {
     "@octokit/rest": "^20.0.0",
-    "xlsx": "^0.18.5",
-    "next": "14.1.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "xlsx": "^0.18.5"
   }
 }
