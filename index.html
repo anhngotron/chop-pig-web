@@ -7,6 +7,17 @@
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     h1 { text-align: center; }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .top-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
     .section { margin-bottom: 20px; }
     .row-table { border-collapse: collapse; width: 100%; max-width: 900px; margin: 0 auto; }
     .row-table th, .row-table td { border: 1px solid #ccc; padding: 4px 6px; text-align: center; }
@@ -22,37 +33,55 @@
     .unranked { background: #FFFFFF; }
     .normal { background: #FFFFFF; }
     .btn { padding: 4px 10px; cursor: pointer; }
-    .btn-small { padding: 2px 6px; font-size: 12px; }
+    .btn-small { padding: 2px 6px; font-size: 12px; cursor: pointer; }
     .input-small { width: 80px; }
+    .add-player-section { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
+    .add-player-section input { padding: 4px; }
+    #syncStatus { font-size: 12px; color: #555; }
+    #modeBanner { font-size: 12px; color: #a00; text-align: center; margin-bottom: 8px; }
+    .chopped-by { font-size: 12px; }
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
     .modal { background: #fff; padding: 15px; max-width: 520px; max-height: 80vh; overflow-y: auto; border-radius: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.4); }
     .modal h2 { margin-top: 0; }
     .label-row { display: flex; align-items: center; margin-bottom: 4px; }
     .label-row span.label { width: 220px; text-align: left; }
     .spin { width: 40px; }
-    .chopped-by { font-size: 12px; }
     .tooltip { position: relative; cursor: help; }
-    .tooltip:hover::after { content: attr(data-tip); position: absolute; left: 0; top: 100%; white-space: pre-line; background: #ffffe0; border: 1px solid #ccc; padding: 4px 6px; font-size: 11px; z-index: 2000; }
-    .add-player-section { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
-    .add-player-section input { padding: 4px; }
-    #syncStatus { font-size: 12px; color: #555; }
+    .tooltip:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 0;
+      top: 100%;
+      white-space: pre-line;
+      background: #ffffe0;
+      border: 1px solid #ccc;
+      padding: 4px 6px;
+      font-size: 11px;
+      z-index: 2000;
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
-  <h1>Chop Pig Score Tracker (Cloud Sync)</h1>
+  <div class="top-bar">
+    <h1>Chop Pig Score Tracker (Cloud Sync)</h1>
+    <div class="top-right">
+      <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
+      <button class="btn" onclick="refreshFromCloud()">Refresh</button>
+    </div>
+  </div>
 
-  <!-- Add Player -->
+  <div id="modeBanner"></div>
+
   <div class="section add-player-section">
     <label>New Player Name:
       <input type="text" id="newPlayerName" />
     </label>
-    <button class="btn" onclick="addPlayer()">Add Player</button>
+    <button class="btn" id="addPlayerBtn" onclick="addPlayer()">Add Player</button>
   </div>
 
-  <!-- Round Input -->
   <div class="section">
     <table class="row-table">
       <thead>
@@ -70,26 +99,24 @@
     </table>
 
     <div style="text-align:center; margin-top:10px;">
-      <button class="btn" onclick="addRoundScores()">Add Round Scores</button>
+      <button class="btn" id="addRoundBtn" onclick="addRoundScores()">Add Round Scores</button>
     </div>
   </div>
 
-  <!-- Button Bar -->
   <div class="section controls">
-    <button class="btn" onclick="exportToExcel()">Export to Excel</button>
+    <button class="btn" id="exportBtn" onclick="exportToExcel()">Export to Excel</button>
     <input type="file" id="importFile" accept=".xlsx" style="display:none" onchange="importFromExcel(event)" />
-    <button class="btn" onclick="document.getElementById('importFile').click()">Import from Excel</button>
+    <button class="btn" id="importBtn" onclick="document.getElementById('importFile').click()">Import from Excel</button>
     <button class="btn" onclick="openReadme()">Read Me</button>
-    <button class="btn" onclick="manualSync()">Sync Now</button>
+    <button class="btn" id="syncNowBtn" onclick="manualSync()">Sync Now</button>
     <span id="syncStatus"></span>
   </div>
 
-  <!-- Leaderboard -->
   <div class="section leaderboard">
     <table>
       <thead>
         <tr>
-          <th>Rank</th>
+          <th>Rank</</th>
           <th>Player Name</th>
           <th>Total Score</th>
           <th>Games Played</th>
@@ -100,14 +127,90 @@
     </table>
   </div>
 
-  <!-- Modals -->
   <div id="modalBackdrop" class="modal-backdrop">
     <div class="modal" id="modalContent"></div>
   </div>
 
   <script>
 /* ---------------------------------------------------------
-   CLOUD LOAD FROM GITHUB (public repo)
+   AUTH / MODE
+--------------------------------------------------------- */
+let canSave = false;
+let appPassword = "";
+let players = {};
+let playerList = [];
+
+function updateModeBanner() {
+  const banner = document.getElementById("modeBanner");
+  const loginBtn = document.getElementById("loginBtn");
+  const disabled = !canSave;
+
+  document.getElementById("addPlayerBtn").disabled = disabled;
+  document.getElementById("addRoundBtn").disabled = disabled;
+  document.getElementById("exportBtn").disabled = disabled;
+  document.getElementById("importBtn").disabled = disabled;
+  document.getElementById("syncNowBtn").disabled = disabled;
+
+  for (const r of rowState) {
+    r.playerSelect.disabled = disabled;
+    r.placeSelect.disabled = disabled;
+    r.stinky2Checkbox.disabled = disabled;
+    r.chopCheckbox.disabled = disabled;
+  }
+
+  if (canSave) {
+    banner.textContent = "";
+    loginBtn.textContent = "Logout";
+  } else {
+    banner.textContent = "🔒 View-only mode — login to make changes";
+    loginBtn.textContent = "Login";
+  }
+}
+
+async function handleLoginClick() {
+  if (canSave) {
+    canSave = false;
+    appPassword = "";
+    setSyncStatus("Logged out — view-only mode", "gray");
+    updateModeBanner();
+    return;
+  }
+
+  const pwd = prompt("Enter password to enable saving:");
+  if (!pwd) {
+    setSyncStatus("View-only mode", "gray");
+    return;
+  }
+
+  try {
+    const resp = await fetch("/api/check-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pwd })
+    });
+
+    if (!resp.ok) {
+      alert("Incorrect password. View-only mode enabled.");
+      setSyncStatus("View-only mode", "gray");
+      canSave = false;
+      appPassword = "";
+      updateModeBanner();
+      return;
+    }
+
+    canSave = true;
+    appPassword = pwd;
+    setSyncStatus("Logged in — saving enabled", "green");
+    updateModeBanner();
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Error checking password. Staying in view-only mode.");
+    setSyncStatus("View-only mode", "gray");
+  }
+}
+
+/* ---------------------------------------------------------
+   CLOUD LOAD FROM GITHUB
 --------------------------------------------------------- */
 async function loadStateFromGitHub() {
   try {
@@ -125,6 +228,7 @@ async function loadStateFromGitHub() {
     const data = await resp.json();
     players = data.players || {};
     playerList = data.playerList || [];
+    playerList.sort();
 
     console.log("Loaded state from GitHub:", data);
   } catch (err) {
@@ -132,25 +236,40 @@ async function loadStateFromGitHub() {
   }
 }
 
+async function refreshFromCloud() {
+  setSyncStatus("Refreshing…", "#888");
+  await loadStateFromGitHub();
+  updatePlayerDropdowns();
+  refreshTable();
+  setSyncStatus("Refreshed ✓", "green");
+}
+
 /* ---------------------------------------------------------
-   AUTOSAVE TO GITHUB ONLY
+   AUTOSAVE TO GITHUB
 --------------------------------------------------------- */
 function setSyncStatus(text, color = "#555") {
   const el = document.getElementById("syncStatus");
-  if (el) {
-    el.textContent = text;
-    el.style.color = color;
-  }
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = color;
 }
 
 function saveState() {
+  if (!canSave) {
+    setSyncStatus("View-only mode — not synced", "gray");
+    return;
+  }
+
   const data = { players, playerList };
 
   setSyncStatus("Syncing…", "#888");
 
   fetch("/api/save-state", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-App-Password": appPassword
+    },
     body: JSON.stringify(data)
   })
   .then(res => {
@@ -168,7 +287,7 @@ function manualSync() {
 }
 
 /* ---------------------------------------------------------
-   STATE
+   STATE / CONSTANTS
 --------------------------------------------------------- */
 const baseScores = {
   "1st": 4,
@@ -191,9 +310,6 @@ let chopData = [[], [], [], []];
 const rowCount = 4;
 const rowState = [];
 
-let players = {};
-let playerList = [];
-
 /* ---------------------------------------------------------
    INIT
 --------------------------------------------------------- */
@@ -203,7 +319,6 @@ function init() {
   for (let i = 0; i < rowCount; i++) {
     const tr = document.createElement("tr");
 
-    // Player
     const tdPlayer = document.createElement("td");
     const selPlayer = document.createElement("select");
     selPlayer.innerHTML = `<option value="">--</option>`;
@@ -211,7 +326,6 @@ function init() {
     tdPlayer.appendChild(selPlayer);
     tr.appendChild(tdPlayer);
 
-    // Placement
     const tdPlace = document.createElement("td");
     const selPlace = document.createElement("select");
     selPlace.innerHTML =
@@ -221,7 +335,6 @@ function init() {
     tdPlace.appendChild(selPlace);
     tr.appendChild(tdPlace);
 
-    // Score
     const tdScore = document.createElement("td");
     const inpScore = document.createElement("input");
     inpScore.type = "text";
@@ -230,7 +343,6 @@ function init() {
     tdScore.appendChild(inpScore);
     tr.appendChild(tdScore);
 
-    // Stinky 2
     const tdStinky = document.createElement("td");
     const chkStinky = document.createElement("input");
     chkStinky.type = "checkbox";
@@ -238,7 +350,6 @@ function init() {
     tdStinky.appendChild(chkStinky);
     tr.appendChild(tdStinky);
 
-    // Chop
     const tdChop = document.createElement("td");
     const chkChop = document.createElement("input");
     chkChop.type = "checkbox";
@@ -253,14 +364,12 @@ function init() {
     tdChop.appendChild(btnEdit);
     tr.appendChild(tdChop);
 
-    // Chopped By
     const tdChoppedBy = document.createElement("td");
     const spanChoppedBy = document.createElement("span");
     spanChoppedBy.className = "chopped-by";
     tdChoppedBy.appendChild(spanChoppedBy);
     tr.appendChild(tdChoppedBy);
 
-    // Clear
     const tdClear = document.createElement("td");
     const btnClear = document.createElement("button");
     btnClear.textContent = "Clear";
@@ -283,6 +392,7 @@ function init() {
 
   updatePlayerDropdowns();
   refreshTable();
+  updateModeBanner();
 }
 
 /* ---------------------------------------------------------
@@ -410,9 +520,6 @@ function updatePlacementOptions() {
   }
 }
 
-/* ---------------------------------------------------------
-   CLEAR ROW
---------------------------------------------------------- */
 function clearRow(idx) {
   const r = rowState[idx];
   r.playerSelect.value = "";
@@ -437,7 +544,7 @@ function clearRow(idx) {
 }
 
 /* ---------------------------------------------------------
-   STINKY 2 HELPERS
+   STINKY 2
 --------------------------------------------------------- */
 function isStinky2AllowedForRow(idx) {
   const placementsNow = rowState.map(r => r.placeSelect.value);
@@ -485,9 +592,6 @@ function handleStinky2Checkbox(idx) {
   openStinky2Popup(idx);
 }
 
-/* ---------------------------------------------------------
-   STINKY 2 POPUP
---------------------------------------------------------- */
 function openStinky2Popup(idx) {
   if (!isStinky2AllowedForRow(idx)) {
     alert(
@@ -728,7 +832,6 @@ function openChopPopup(idx) {
     });
   }
 
-  // Load existing chop data
   for (const entry of chopData[idx]) {
     addChopperRow(entry);
   }
@@ -830,7 +933,6 @@ function autoFillAllScores() {
 
   const finalScores = baseScoresRow.slice();
 
-  // Stinky 2 transfers
   for (let i = 0; i < rowCount; i++) {
     if (!stinky2Enabled[i]) continue;
 
@@ -858,7 +960,6 @@ function autoFillAllScores() {
       finalScores[receiverIdx] -= total;
   }
 
-  // Chop Pigs transfers
   for (let i = 0; i < rowCount; i++) {
     const victimName = rowState[i].playerSelect.value;
     if (!victimName) continue;
@@ -880,7 +981,6 @@ function autoFillAllScores() {
     }
   }
 
-  // Update UI
   for (let i = 0; i < rowCount; i++) {
     const r = rowState[i];
     const player = r.playerSelect.value;
@@ -957,7 +1057,12 @@ function addRoundScores() {
   for (let i = 0; i < rowCount; i++) clearRow(i);
 
   refreshTable();
-  saveState();
+
+  if (canSave) {
+    saveState();
+  } else {
+    setSyncStatus("View-only mode — not synced", "gray");
+  }
 }
 
 /* ---------------------------------------------------------
@@ -1150,14 +1255,14 @@ document.getElementById("modalBackdrop").addEventListener("click", e => {
 });
 
 /* ---------------------------------------------------------
-   STARTUP (CLOUD LOAD + INIT)
+   STARTUP
 --------------------------------------------------------- */
 (async () => {
   await loadStateFromGitHub();
   init();
   refreshTable();
   updatePlayerDropdowns();
-  setSyncStatus("");
+  setSyncStatus("View-only mode", "gray");
 })();
   </script>
 </body>
