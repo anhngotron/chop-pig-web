@@ -11,7 +11,7 @@
     .row-table { border-collapse: collapse; width: 100%; max-width: 900px; margin: 0 auto; }
     .row-table th, .row-table td { border: 1px solid #ccc; padding: 4px 6px; text-align: center; }
     .row-table th { background: #f0f0f0; }
-    .controls { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
+    .controls { display: flex; justify-content: center; gap: 10px; margin: 15px 0; align-items: center; flex-wrap: wrap; }
     .leaderboard { margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
     .leaderboard table { width: 100%; border-collapse: collapse; }
     .leaderboard th, .leaderboard td { border: 1px solid #ccc; padding: 4px 6px; text-align: center; }
@@ -35,6 +35,7 @@
     .tooltip:hover::after { content: attr(data-tip); position: absolute; left: 0; top: 100%; white-space: pre-line; background: #ffffe0; border: 1px solid #ccc; padding: 4px 6px; font-size: 11px; z-index: 2000; }
     .add-player-section { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
     .add-player-section input { padding: 4px; }
+    #syncStatus { font-size: 12px; color: #555; }
   </style>
 
   <!-- SheetJS for Excel import/export -->
@@ -80,6 +81,8 @@
     <input type="file" id="importFile" accept=".xlsx" style="display:none" onchange="importFromExcel(event)" />
     <button class="btn" onclick="document.getElementById('importFile').click()">Import from Excel</button>
     <button class="btn" onclick="openReadme()">Read Me</button>
+    <button class="btn" onclick="manualSync()">Sync Now</button>
+    <span id="syncStatus"></span>
   </div>
 
   <!-- Leaderboard -->
@@ -104,27 +107,64 @@
   </div>
 
   <script>
-    /* ---------------------------------------------------------
-   AUTOSAVE (localStorage)
+/* ---------------------------------------------------------
+   AUTOSAVE (localStorage + GitHub)
 --------------------------------------------------------- */
+function setSyncStatus(text, color = "#555") {
+  const el = document.getElementById("syncStatus");
+  if (el) {
+    el.textContent = text;
+    el.style.color = color;
+  }
+}
+
 function saveState() {
   const data = {
     players,
     playerList
   };
 
-  // Local autosave
+  // Local JSON autosave
   localStorage.setItem("chopPigState", JSON.stringify(data));
 
-  // Remote GitHub autosave via Vercel
+  // Remote GitHub autosave via Vercel backend
+  setSyncStatus("Syncing…", "#888");
+
   fetch("/api/save-state", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
-  }).catch(err => {
-    console.warn("Remote save failed (GitHub)", err);
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("GitHub sync failed");
+    setSyncStatus("Saved ✓", "green");
+  })
+  .catch(err => {
+    console.warn("Remote GitHub autosave failed:", err);
+    setSyncStatus("Sync failed ⚠", "red");
+  });
+}
+
+function manualSync() {
+  const data = {
+    players,
+    playerList
+  };
+
+  setSyncStatus("Syncing…", "#888");
+
+  fetch("/api/save-state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("GitHub sync failed");
+    setSyncStatus("Saved ✓", "green");
+  })
+  .catch(err => {
+    console.warn("Manual GitHub sync failed:", err);
+    setSyncStatus("Sync failed ⚠", "red");
   });
 }
 
@@ -164,6 +204,9 @@ let chopData = [[], [], [], []];
 
 const rowCount = 4;
 const rowState = [];
+
+let players = {};
+let playerList = [];
 
 /* ---------------------------------------------------------
    INIT
@@ -409,6 +452,57 @@ function clearRow(idx) {
   autoFillAllScores();
   saveState();
 }
+
+/* ---------------------------------------------------------
+   STINKY 2 HELPERS
+--------------------------------------------------------- */
+function isStinky2AllowedForRow(idx) {
+  const placementsNow = rowState.map(r => r.placeSelect.value);
+  const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
+  const place = placementsNow[idx];
+
+  if (!place) return false;
+
+  if (place === "4th" && stinky13Count === 0) return true;
+  if (place === "Stinky 13") return true;
+  if (place === "3rd" && stinky13Count === 1) return true;
+
+  return false;
+}
+
+function validStinky2Combo(red, black) {
+  const combos = [
+    [1, 0],
+    [0, 1],
+    [1, 1],
+    [2, 0],
+    [0, 2],
+    [2, 1],
+    [1, 2]
+  ];
+  return combos.some(([r, b]) => r === red && b === black);
+}
+
+function stinky2Total(red, black, p3, k4, p4) {
+  return -2 * red - 1 * black - 2 * p3 - 4 * k4 - 5 * p4;
+}
+
+function handleStinky2Checkbox(idx) {
+  const chk = rowState[idx].stinky2Checkbox;
+  if (!chk.checked) {
+    stinky2Enabled[idx] = false;
+    Stinky2_red[idx] = 0;
+    Stinky2_black[idx] = 0;
+    Stinky2_pairs3[idx] = 0;
+    Stinky2_kind4[idx] = 0;
+    Stinky2_pairs4[idx] = 0;
+    autoFillAllScores();
+    saveState();
+    return;
+  }
+  openStinky2Popup(idx);
+}
+
 /* ---------------------------------------------------------
    STINKY 2 POPUP
 --------------------------------------------------------- */
@@ -521,7 +615,7 @@ function openStinky2Popup(idx) {
 }
 
 /* ---------------------------------------------------------
-   CHOP PIGS POPUP
+   CHOP PIGS
 --------------------------------------------------------- */
 function chopPoints(type) {
   if (type === "Black Pigs") return 1;
@@ -724,6 +818,13 @@ function openChopPopup(idx) {
 /* ---------------------------------------------------------
    SCORING ENGINE
 --------------------------------------------------------- */
+function findPlayerByPlace(placements, place) {
+  for (let i = 0; i < placements.length; i++) {
+    if (placements[i] === place) return i;
+  }
+  return null;
+}
+
 function autoFillAllScores() {
   const placementsNow = rowState.map(r => r.placeSelect.value);
   const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
@@ -930,7 +1031,7 @@ function refreshTable() {
   }
 
   for (const d of unranked) {
-      const tr = document.createElement("tr");
+    const tr = document.createElement("tr");
     tr.className = "unranked";
     tr.innerHTML = `
       <td></td>
@@ -1073,10 +1174,11 @@ document.getElementById("modalBackdrop").addEventListener("click", e => {
 /* ---------------------------------------------------------
    STARTUP
 --------------------------------------------------------- */
-loadState();   // Load autosaved data
-init();        // Build UI
+loadState();
+init();
 refreshTable();
 updatePlayerDropdowns();
+setSyncStatus(""); // start neutral
   </script>
 </body>
 </html>
