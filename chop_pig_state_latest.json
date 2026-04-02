@@ -59,6 +59,11 @@
       "score": 0,
       "games": 0,
       "wins": 0
+    },
+    "Ted": {
+      "score": 0,
+      "games": 0,
+      "wins": 0
     }
   },
   "playerList": [
@@ -72,6 +77,7 @@
     "Lawrence",
     "Majid",
     "Robert",
+    "Ted",
     "Tes",
     "William "
   ]
