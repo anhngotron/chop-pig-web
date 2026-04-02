@@ -1,8 +1,8 @@
 {
   "players": {
     "James": {
-      "score": 31,
-      "games": 29,
+      "score": 33,
+      "games": 30,
       "wins": 10
     },
     "Andy": {
@@ -26,9 +26,9 @@
       "wins": 1
     },
     "William ": {
-      "score": -11,
-      "games": 26,
-      "wins": 7
+      "score": -5,
+      "games": 27,
+      "wins": 8
     },
     "Robert": {
       "score": -4,
@@ -46,8 +46,8 @@
       "wins": 0
     },
     "Majid": {
-      "score": 1,
-      "games": 11,
+      "score": -1,
+      "games": 12,
       "wins": 1
     },
     "Ian": {
@@ -56,8 +56,8 @@
       "wins": 2
     },
     "Tes": {
-      "score": 1,
-      "games": 2,
+      "score": -5,
+      "games": 3,
       "wins": 1
     },
     "Ted": {
