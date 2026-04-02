@@ -1,18 +1,18 @@
 {
   "players": {
     "James": {
-      "score": 33,
-      "games": 30,
+      "score": 37,
+      "games": 31,
       "wins": 10
     },
     "Andy": {
-      "score": 49,
-      "games": 26,
-      "wins": 12
+      "score": 53,
+      "games": 27,
+      "wins": 13
     },
     "Ana": {
-      "score": -15,
-      "games": 30,
+      "score": -21,
+      "games": 31,
       "wins": 5
     },
     "David": {
@@ -51,8 +51,8 @@
       "wins": 1
     },
     "Ian": {
-      "score": 4,
-      "games": 9,
+      "score": 2,
+      "games": 10,
       "wins": 3
     },
     "Tes": {
