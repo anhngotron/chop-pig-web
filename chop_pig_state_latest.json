@@ -6,13 +6,13 @@
       "wins": 10
     },
     "Andy": {
-      "score": 51,
-      "games": 27,
+      "score": 49,
+      "games": 26,
       "wins": 12
     },
     "Ana": {
-      "score": -13,
-      "games": 31,
+      "score": -15,
+      "games": 30,
       "wins": 5
     },
     "David": {
@@ -46,9 +46,9 @@
       "wins": 0
     },
     "Majid": {
-      "score": 3,
-      "games": 13,
-      "wins": 2
+      "score": -1,
+      "games": 12,
+      "wins": 1
     },
     "Ian": {
       "score": 4,
@@ -56,8 +56,8 @@
       "wins": 3
     },
     "Tes": {
-      "score": -13,
-      "games": 4,
+      "score": -5,
+      "games": 3,
       "wins": 1
     },
     "Ted": {
