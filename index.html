@@ -223,7 +223,7 @@
   /* ---------------------------------------------------------
      AUTH / MODE
   --------------------------------------------------------- */
-  let canSave = false;
+  let canSave = false; 
   let appPassword = "";
   let players = {};
   let playerList = [];
@@ -926,16 +926,42 @@
         lbl.textContent = `${iconMap[label]}  ${label}`;
         frame.appendChild(lbl);
 
+        // minus button
+        const minus = document.createElement("button");
+        minus.textContent = "-";
+        minus.className = "btn-small";
+        frame.appendChild(minus);
+
+        // read-only number display
         const spin = document.createElement("input");
         spin.type = "number";
+        spin.className = "spin";
         spin.min = 0;
         spin.max = maxVal;
-        spin.className = "spin";
         spin.value = existing ? existing.types[label] || 0 : 0;
+        spin.readOnly = true;
         frame.appendChild(spin);
+
+        // plus button
+        const plus = document.createElement("button");
+        plus.textContent = "+";
+        plus.className = "btn-small";
+        frame.appendChild(plus);
+
+        // button logic
+        minus.onclick = () => {
+        const v = Math.max(0, parseInt(spin.value) - 1);
+        spin.value = v;
+        };
+
+        plus.onclick = () => {
+        const v = Math.min(maxVal, parseInt(spin.value) + 1);
+        spin.value = v;
+        };
 
         typeVars[label] = spin;
         block.appendChild(frame);
+
       }
 
       container.appendChild(block);
