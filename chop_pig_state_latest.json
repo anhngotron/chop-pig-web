@@ -1,19 +1,19 @@
 {
   "players": {
     "James": {
-      "score": 31,
-      "games": 29,
-      "wins": 10
+      "score": 34,
+      "games": 27,
+      "wins": 9
     },
     "Andy": {
-      "score": 50,
-      "games": 25,
+      "score": 48,
+      "games": 24,
       "wins": 12
     },
     "Ana": {
-      "score": -10,
-      "games": 29,
-      "wins": 5
+      "score": -12,
+      "games": 27,
+      "wins": 4
     },
     "David": {
       "score": -8,
@@ -26,13 +26,13 @@
       "wins": 1
     },
     "William ": {
-      "score": -11,
-      "games": 26,
+      "score": -8,
+      "games": 25,
       "wins": 7
     },
     "Robert": {
-      "score": -4,
-      "games": 11,
+      "score": -2,
+      "games": 9,
       "wins": 2
     },
     "Kevin": {
@@ -46,18 +46,18 @@
       "wins": 0
     },
     "Majid": {
-      "score": 1,
-      "games": 11,
+      "score": -2,
+      "games": 9,
       "wins": 1
     },
     "Ian": {
-      "score": 0,
-      "games": 8,
-      "wins": 2
+      "score": -4,
+      "games": 7,
+      "wins": 1
     },
     "Tes": {
-      "score": 1,
-      "games": 2,
+      "score": 4,
+      "games": 1,
       "wins": 1
     },
     "Ted": {
