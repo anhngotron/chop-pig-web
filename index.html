@@ -658,7 +658,7 @@
     updatePlacementOptions();
     autoFillAllScores();
   }
-    /* ---------------------------------------------------------
+  /* ---------------------------------------------------------
      STINKY 2
   --------------------------------------------------------- */
   function isStinky2AllowedForRow(idx) {
@@ -813,203 +813,199 @@
 
     openModal();
   }
-    /* ---------------------------------------------------------
+  /* ---------------------------------------------------------
      CHOP PIGS
   --------------------------------------------------------- */
-  function chopPoints(type) {
-    if (type === "Black Pigs") return 1;
-    if (type === "Red Pigs") return 2;
-    if (type === "3 Consecutive Pairs") return 2;
-    if (type === "4 of a Kind") return 4;
-    if (type === "4 Consecutive Pairs") return 5;
-    return 0;
-  }
-
-  function handleChopCheckbox(idx) {
-    const chk = rowState[idx].chopCheckbox;
-    if (!chk.checked) {
-      chopData[idx] = [];
-      autoFillAllScores();
-      return;
-    }
-    const player = rowState[idx].playerSelect.value;
-    if (!player) {
-      alert("Select a player before using Chop Pigs.");
-      chk.checked = false;
-      return;
-    }
-    openChopPopup(idx);
-  }
-
-  function editChop(idx) {
-    if (!rowState[idx].chopCheckbox.checked) {
-      alert("This player has no chop data to edit.");
-      return;
-    }
-    openChopPopup(idx);
-  }
-
   function openChopPopup(idx) {
-    const modal = document.getElementById("modalContent");
-    modal.innerHTML = `<h2>Chop Pigs for Player Row ${idx + 1}</h2>`;
+  const modal = document.getElementById("modalContent");
+  modal.innerHTML = `<h2>Chop Pigs for Player Row ${idx + 1}</h2>`;
 
-    const container = document.createElement("div");
-    modal.appendChild(container);
+  const container = document.createElement("div");
+  modal.appendChild(container);
 
-    const types = [
-      ["Black Pigs", 2],
-      ["Red Pigs", 2],
-      ["3 Consecutive Pairs", 3],
-      ["4 of a Kind", 3],
-      ["4 Consecutive Pairs", 3]
-    ];
+  const types = [
+    ["Black Pigs", 2],
+    ["Red Pigs", 2],
+    ["3 Consecutive Pairs", 3],
+    ["4 of a Kind", 3],
+    ["4 Consecutive Pairs", 3]
+  ];
 
-    const iconMap = {
-      "Black Pigs": "🐷",
-      "Red Pigs": "🔥🐷",
-      "3 Consecutive Pairs": "🔥🐷",
-      "4 of a Kind": "🔥🔥🐷🐷",
-      "4 Consecutive Pairs": "🔥🔥🐷🐷🐷"
-    };
+  const iconMap = {
+    "Black Pigs": "🐷",
+    "Red Pigs": "🔥🐷",
+    "3 Consecutive Pairs": "🔥🐷",
+    "4 of a Kind": "🔥🔥🐷🐷",
+    "4 Consecutive Pairs": "🔥🔥🐷🐷🐷"
+  };
 
-    const tooltipMap = {
-      "Black Pigs": "Black Pig = 1 point",
-      "Red Pigs": "Red Pig = 2 points",
-      "3 Consecutive Pairs": "3 Consecutive Pairs = 2 points",
-      "4 of a Kind": "4 of a Kind = 4 points",
-      "4 Consecutive Pairs": "4 Consecutive Pairs = 5 points"
-    };
+  const tooltipMap = {
+    "Black Pigs": "Black Pig = 1 point",
+    "Red Pigs": "Red Pig = 2 points",
+    "3 Consecutive Pairs": "3 Consecutive Pairs = 2 points",
+    "4 of a Kind": "4 of a Kind = 4 points",
+    "4 Consecutive Pairs": "4 Consecutive Pairs = 5 points"
+  };
 
-    const chopperRows = [];
+  const chopperRows = [];
 
-    function removeChopperBlock(block) {
-      container.removeChild(block);
-      const idxRow = chopperRows.findIndex(r => r.frame === block);
-      if (idxRow >= 0) chopperRows.splice(idxRow, 1);
+  function removeChopperBlock(block) {
+    if (chopperRows.length === 1) {
+      alert("At least one chopper entry is required.");
+      return;
+    }
+    container.removeChild(block);
+    const idxRow = chopperRows.findIndex(r => r.frame === block);
+    if (idxRow >= 0) chopperRows.splice(idxRow, 1);
+  }
+
+  function addChopperRow(existing) {
+    const block = document.createElement("fieldset");
+    block.style.marginBottom = "8px";
+
+    const legend = document.createElement("legend");
+    legend.textContent = "Chopper Entry";
+    block.appendChild(legend);
+
+    const btnRemove = document.createElement("button");
+    btnRemove.textContent = "Remove";
+    btnRemove.className = "btn-small";
+    btnRemove.style.float = "right";
+    btnRemove.onclick = () => removeChopperBlock(block);
+    block.appendChild(btnRemove);
+
+    const labelChopper = document.createElement("div");
+    labelChopper.textContent = "Chopper:";
+    block.appendChild(labelChopper);
+
+    const selChopper = document.createElement("select");
+    selChopper.innerHTML =
+      `<option value="">--</option>` +
+      playerList.map(p => `<option value="${p}">${p}</option>`).join("");
+    if (existing) selChopper.value = existing.chopper;
+    block.appendChild(selChopper);
+
+    const typeVars = {};
+
+    for (const [label, maxVal] of types) {
+      const row = document.createElement("div");
+      row.className = "label-row";
+
+      const lbl = document.createElement("span");
+      lbl.className = "label tooltip";
+      lbl.dataset.tip = tooltipMap[label];
+      lbl.textContent = `${iconMap[label]}  ${label}`;
+      row.appendChild(lbl);
+
+      // minus button
+      const minus = document.createElement("button");
+      minus.textContent = "-";
+      minus.className = "btn-small";
+      row.appendChild(minus);
+
+      // number display (readonly)
+      const input = document.createElement("input");
+      input.type = "number";
+      input.className = "spin";
+      input.min = 0;
+      input.max = maxVal;
+      input.value = existing ? existing.types[label] || 0 : 0;
+      input.readOnly = true;
+      row.appendChild(input);
+
+      // plus button
+      const plus = document.createElement("button");
+      plus.textContent = "+";
+      plus.className = "btn-small";
+      row.appendChild(plus);
+
+      minus.onclick = () => {
+        const v = Math.max(0, parseInt(input.value) - 1);
+        input.value = v;
+      };
+
+      plus.onclick = () => {
+        const v = Math.min(maxVal, parseInt(input.value) + 1);
+        input.value = v;
+      };
+
+      typeVars[label] = input;
+      block.appendChild(row);
     }
 
-    function addChopperRow(existing) {
-      const block = document.createElement("fieldset");
-      block.style.marginBottom = "8px";
+    container.appendChild(block);
+    chopperRows.push({
+      frame: block,
+      chopperSelect: selChopper,
+      typeVars
+    });
+  }
 
-      const legend = document.createElement("legend");
-      legend.textContent = "Chopper Entry";
-      block.appendChild(legend);
+  // Load existing entries
+  for (const entry of chopData[idx]) {
+    addChopperRow(entry);
+  }
+  if (chopperRows.length === 0) addChopperRow(null);
 
-      const btnRemove = document.createElement("button");
-      btnRemove.textContent = "Remove";
-      btnRemove.className = "btn-small";
-      btnRemove.style.float = "right";
-      btnRemove.onclick = () => removeChopperBlock(block);
-      block.appendChild(btnRemove);
+  const btnAdd = document.createElement("button");
+  btnAdd.textContent = "Add another chopper";
+  btnAdd.className = "btn";
+  btnAdd.style.marginTop = "10px";
+  btnAdd.onclick = () => addChopperRow(null);
+  modal.appendChild(btnAdd);
 
-      const labelChopper = document.createElement("div");
-      labelChopper.textContent = "Chopper:";
-      block.appendChild(labelChopper);
+  const btnSave = document.createElement("button");
+  btnSave.textContent = "Save";
+  btnSave.className = "btn";
+  btnSave.style.marginTop = "10px";
+  btnSave.style.marginLeft = "10px";
+  btnSave.onclick = () => {
+    const newList = [];
+    const victim = rowState[idx].playerSelect.value;
 
-      const selChopper = document.createElement("select");
-      selChopper.innerHTML =
-        `<option value="">--</option>` +
-        playerList.map(p => `<option value="${p}">${p}</option>`).join("");
-      if (existing) selChopper.value = existing.chopper;
-      block.appendChild(selChopper);
+    for (const row of chopperRows) {
+      const name = row.chopperSelect.value;
+      if (!name) {
+        alert("Every chopper must have a name.");
+        return;
+      }
+      if (name === victim) {
+        alert("A player cannot chop themselves.");
+        return;
+      }
+      if (newList.some(e => e.chopper === name)) {
+        alert(`${name} is already listed as a chopper.`);
+        return;
+      }
 
-      const typeVars = {};
+      const typesDict = {};
+      let allZero = true;
 
       for (const [label, maxVal] of types) {
-        const frame = document.createElement("div");
-        frame.className = "label-row";
-
-        const lbl = document.createElement("span");
-        lbl.className = "label tooltip";
-        lbl.dataset.tip = tooltipMap[label];
-        lbl.textContent = `${iconMap[label]}  ${label}`;
-        frame.appendChild(lbl);
-
-        const spin = document.createElement("input");
-        spin.type = "number";
-        spin.min = 0;
-        spin.max = maxVal;
-        spin.className = "spin";
-        spin.value = existing ? existing.types[label] || 0 : 0;
-        frame.appendChild(spin);
-
-        typeVars[label] = spin;
-        block.appendChild(frame);
+        let v = parseInt(row.typeVars[label].value || "0");
+        v = Math.max(0, Math.min(maxVal, v));
+        row.typeVars[label].value = v;
+        typesDict[label] = v;
+        if (v > 0) allZero = false;
       }
 
-      container.appendChild(block);
-      chopperRows.push({
-        frame: block,
-        chopperSelect: selChopper,
-        typeVars
-      });
-    }
-
-    for (const entry of chopData[idx]) {
-      addChopperRow(entry);
-    }
-    if (chopperRows.length === 0) addChopperRow(null);
-
-    const btnAdd = document.createElement("button");
-    btnAdd.textContent = "Add another chopper";
-    btnAdd.className = "btn";
-    btnAdd.style.marginTop = "10px";
-    btnAdd.onclick = () => addChopperRow(null);
-    modal.appendChild(btnAdd);
-
-    const btnSave = document.createElement("button");
-    btnSave.textContent = "Save";
-    btnSave.className = "btn";
-    btnSave.style.marginTop = "10px";
-    btnSave.style.marginLeft = "10px";
-    btnSave.onclick = () => {
-      const newList = [];
-      const victim = rowState[idx].playerSelect.value;
-
-      for (const row of chopperRows) {
-        const name = row.chopperSelect.value;
-        if (!name) {
-          alert("Every chopper must have a name.");
-          return;
-        }
-        if (name === victim) {
-          alert("A player cannot chop themselves.");
-          return;
-        }
-        if (newList.some(e => e.chopper === name)) {
-          alert(`${name} is already listed as a chopper.`);
-          return;
-        }
-
-        const typesDict = {};
-        let allZero = true;
-
-        for (const [label, maxVal] of types) {
-          let v = parseInt(row.typeVars[label].value || "0");
-          if (isNaN(v)) v = 0;
-          v = Math.max(0, Math.min(maxVal, v));
-          row.typeVars[label].value = v;
-          typesDict[label] = v;
-          if (v > 0) allZero = false;
-        }
-
-        if (allZero) {
-          alert("Each chopper must have at least one chop type.");
-          return;
-        }
-
-        newList.push({ chopper: name, types: typesDict });
+      if (allZero) {
+        alert("Each chopper must have at least one chop type.");
+        return;
       }
 
-      chopData[idx] = newList;
-      autoFillAllScores();
-      closeModal();
-    };
-    modal.appendChild(btnSave);
+      newList.push({ chopper: name, types: typesDict });
+    }
 
-    openModal();
-  }
+    chopData[idx] = newList;
+    autoFillAllScores();
+    closeModal();
+  };
+  modal.appendChild(btnSave);
+
+  openModal();
+}
+
     /* ---------------------------------------------------------
      SCORING ENGINE
   --------------------------------------------------------- */
