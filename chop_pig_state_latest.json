@@ -55,15 +55,10 @@
       "games": 12,
       "wins": 3
     },
-    "Tes": {
-      "score": 5,
-      "games": 6,
-      "wins": 3
-    },
     "Ted": {
-      "score": -2,
-      "games": 1,
-      "wins": 0
+      "score": 3,
+      "games": 7,
+      "wins": 3
     }
   },
   "playerList": [
@@ -78,7 +73,6 @@
     "Majid",
     "Robert",
     "Ted",
-    "Tes",
     "William "
   ]
 }
