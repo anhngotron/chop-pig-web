@@ -1180,89 +1180,128 @@
     refreshTable();
     saveState();
   }
-    /* ---------------------------------------------------------
-     LEADERBOARD (TABLE VIEW WITH ICONS + WIN RATE + RESPONSIVE)
-  --------------------------------------------------------- */
-  function refreshTable() {
-    const container = document.getElementById("leaderboardContainer");
-    container.innerHTML = "";
+function refreshTable() {
+  const container = document.getElementById("leaderboardContainer");
+  container.innerHTML = "";
 
-    const arr = Object.entries(players).map(([name, data]) => ({
+  const PROVISIONAL_GAMES = 5;
+
+  // Build array with avg score + provisional flag
+  const arr = Object.entries(players).map(([name, data]) => {
+    const avg = data.games > 0 ? data.score / data.games : 0;
+    return {
       name,
       score: data.score,
       games: data.games,
       wins: data.wins,
-      winRate: data.games > 0 ? ((data.wins / data.games) * 100).toFixed(1) : "0.0"
-    }));
+      winRate: data.games > 0 ? ((data.wins / data.games) * 100).toFixed(1) : "0.0",
+      avgScore: avg,
+      avgScoreDisplay: avg.toFixed(2),
+      provisional: data.games < PROVISIONAL_GAMES
+    };
+  });
 
-    arr.sort((a, b) => b.score - a.score);
+  // Split into ranked + provisional
+  const ranked = arr.filter(p => !p.provisional);
+  const provisional = arr.filter(p => p.provisional);
 
-    // Create table
-    const table = document.createElement("table");
-    table.style.width = "100%";
-    table.style.minWidth = "500px"; // prevents squishing on small screens
-    table.style.borderCollapse = "collapse";
-    table.style.background = "white";
-    table.style.borderRadius = "12px";
-    table.style.overflow = "hidden";
-    table.style.margin = "16px auto";
-    table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
+  // Sort ranked players by avg score, tie-breaker total score
+  ranked.sort((a, b) => {
+    if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
+    return b.score - a.score;
+  });
 
-    // Header
-    const thead = document.createElement("thead");
-    thead.innerHTML = `
-      <tr style="background:#f2f2f7;">
-        <th style="padding:10px; text-align:left; white-space:nowrap;">Rank</th>
-        <th style="padding:10px; text-align:left; white-space:nowrap;">Player</th>
-        <th style="padding:10px; text-align:left; white-space:nowrap;">Score</th>
-        <th style="padding:10px; text-align:left; white-space:nowrap;">Games</th>
-        <th style="padding:10px; text-align:left; white-space:nowrap;">Wins</th>
-        <th style="padding:10px; text-align:left; white-space:nowrap;">Win Rate %</th>
-      </tr>
+  // Sort provisional players alphabetically (or however you prefer)
+  provisional.sort((a, b) => a.name.localeCompare(b.name));
+
+  // Final display order: ranked first, provisional last
+  const finalList = [...ranked, ...provisional];
+
+  // Create table
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.minWidth = "650px";
+  table.style.borderCollapse = "collapse";
+  table.style.background = "white";
+  table.style.borderRadius = "12px";
+  table.style.overflow = "hidden";
+  table.style.margin = "16px auto";
+  table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
+
+  // Header
+  const thead = document.createElement("thead");
+  thead.innerHTML = `
+    <tr style="background:#f2f2f7;">
+      <th style="padding:10px; text-align:left; white-space:nowrap;">Rank</th>
+      <th style="padding:10px; text-align:left; white-space:nowrap;">Player</th>
+      <th style="padding:10px; text-align:left; white-space:nowrap;">Avg</th>
+      <th style="padding:10px; text-align:left; white-space:nowrap;">Score</th>
+      <th style="padding:10px; text-align:left; white-space:nowrap;">Games</th>
+      <th style="padding:10px; text-align:left; white-space:nowrap;">Wins</th>
+      <th style="padding:10px; text-align:left; white-space:nowrap;">Win Rate %</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  // Body
+  const tbody = document.createElement("tbody");
+
+  finalList.forEach((p) => {
+    const tr = document.createElement("tr");
+
+    const isRanked = !p.provisional;
+    const rankNumber = isRanked ? ranked.indexOf(p) + 1 : null;
+
+    // Rank icon only for ranked players
+    let icon = "";
+    if (isRanked) {
+      const r = rankNumber - 1;
+      if (r === 0) icon = "🥇";
+      else if (r === 1) icon = "🥈";
+      else if (r === 2) icon = "🥉";
+      else if (r === ranked.length - 1) icon = "💀";
+    }
+
+    // Row coloring for ranked players only
+    if (isRanked) {
+      const r = rankNumber - 1;
+      if (r === 0) tr.style.background = "#fff7d1";
+      else if (r === 1) tr.style.background = "#f2f2f7";
+      else if (r === 2) tr.style.background = "#f8e7d1";
+      else if (r === ranked.length - 1) tr.style.background = "#ffe5e5";
+    } else {
+      // Provisional players dimmed
+      tr.style.opacity = "0.55";
+    }
+
+    tr.innerHTML = `
+      <td style="padding:10px; font-size:18px; white-space:nowrap;">
+        ${isRanked ? `${icon} ${rankNumber}` : "—"}
+      </td>
+      <td style="padding:10px; white-space:nowrap;">
+        ${p.name} ${p.provisional ? "<span style='font-size:12px; color:#888;'>(P)</span>" : ""}
+      </td>
+      <td style="padding:10px; white-space:nowrap;">${p.avgScoreDisplay}</td>
+      <td style="padding:10px; white-space:nowrap;">${p.score}</td>
+      <td style="padding:10px; white-space:nowrap;">${p.games}</td>
+      <td style="padding:10px; white-space:nowrap;">${p.wins}</td>
+      <td style="padding:10px; white-space:nowrap;">${p.winRate}%</td>
     `;
-    table.appendChild(thead);
 
-    // Body
-    const tbody = document.createElement("tbody");
+    tbody.appendChild(tr);
+  });
 
-    arr.forEach((p, idx) => {
-      const tr = document.createElement("tr");
+  table.appendChild(tbody);
 
-      // Rank icon
-      let icon = "";
-      if (idx === 0) icon = "🥇";
-      else if (idx === 1) icon = "🥈";
-      else if (idx === 2) icon = "🥉";
-      else if (idx === arr.length - 1) icon = "💀";
+  // Responsive wrapper
+  const wrapper = document.createElement("div");
+  wrapper.style.overflowX = "auto";
+  wrapper.style.webkitOverflowScrolling = "touch";
+  wrapper.appendChild(table);
 
-      // Rank coloring
-      if (idx === 0) tr.style.background = "#fff7d1";     // gold
-      else if (idx === 1) tr.style.background = "#f2f2f7"; // silver
-      else if (idx === 2) tr.style.background = "#f8e7d1"; // bronze
-      else if (idx === arr.length - 1) tr.style.background = "#ffe5e5"; // last
+  container.appendChild(wrapper);
+}
 
-      tr.innerHTML = `
-        <td style="padding:10px; font-size:18px; white-space:nowrap;">${icon} ${idx + 1}</td>
-        <td style="padding:10px; white-space:nowrap;">${p.name}</td>
-        <td style="padding:10px; white-space:nowrap;">${p.score}</td>
-        <td style="padding:10px; white-space:nowrap;">${p.games}</td>
-        <td style="padding:10px; white-space:nowrap;">${p.wins}</td>
-        <td style="padding:10px; white-space:nowrap;">${p.winRate}%</td>
-      `;
-
-      tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-
-    // Responsive wrapper
-    const wrapper = document.createElement("div");
-    wrapper.style.overflowX = "auto";
-    wrapper.style.webkitOverflowScrolling = "touch";
-    wrapper.appendChild(table);
-
-    container.appendChild(wrapper);
-  }
 
   /* ---------------------------------------------------------
      EXPORT TO EXCEL
