@@ -6,8 +6,8 @@
       "wins": 0
     },
     "Andy": {
-      "score": 7,
-      "games": 5,
+      "score": 9,
+      "games": 6,
       "wins": 3
     },
     "Ana": {
@@ -16,8 +16,8 @@
       "wins": 1
     },
     "David": {
-      "score": 0,
-      "games": 4,
+      "score": -3,
+      "games": 5,
       "wins": 0
     },
     "Lawrence": {
@@ -26,9 +26,9 @@
       "wins": 0
     },
     "William ": {
-      "score": 1,
-      "games": 1,
-      "wins": 1
+      "score": 6,
+      "games": 2,
+      "wins": 2
     },
     "Robert": {
       "score": 0,
@@ -36,8 +36,8 @@
       "wins": 0
     },
     "Kevin": {
-      "score": -2,
-      "games": 5,
+      "score": -6,
+      "games": 6,
       "wins": 0
     },
     "Jeanette": {
