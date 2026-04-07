@@ -6,18 +6,18 @@
       "wins": 0
     },
     "Andy": {
-      "score": 4,
-      "games": 3,
-      "wins": 2
+      "score": 8,
+      "games": 4,
+      "wins": 3
     },
     "Ana": {
-      "score": -4,
-      "games": 3,
+      "score": -8,
+      "games": 4,
       "wins": 1
     },
     "David": {
-      "score": 6,
-      "games": 2,
+      "score": 4,
+      "games": 3,
       "wins": 0
     },
     "Lawrence": {
@@ -36,8 +36,8 @@
       "wins": 0
     },
     "Kevin": {
-      "score": -8,
-      "games": 3,
+      "score": -6,
+      "games": 4,
       "wins": 0
     },
     "Jeanette": {
