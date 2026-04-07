@@ -4,11 +4,9 @@
   <meta charset="UTF-8" />
   <title>Chop Pig Score Tracker (Mobile Friendly)</title>
 
-  <!-- iOS-style mobile-first UI -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Base layout */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       margin: 0;
@@ -23,7 +21,6 @@
       text-align: center;
     }
 
-    /* Top bar */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -56,7 +53,17 @@
       cursor: default;
     }
 
-    /* Mobile card layout */
+    .btn-small {
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #007aff;
+      color: white;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
     .player-card {
       background: white;
       margin: 12px 16px;
@@ -98,7 +105,6 @@
       background: #ff3b30;
     }
 
-    /* Full-width mobile buttons */
     .full-width-btn {
       width: calc(100% - 32px);
       margin: 12px 16px;
@@ -107,7 +113,6 @@
       border-radius: 12px;
     }
 
-    /* Leaderboard cards */
     .leaderboard-card {
       background: white;
       margin: 10px 16px;
@@ -116,23 +121,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    .leaderboard-card h3 {
-      margin: 0 0 6px 0;
-      font-size: 18px;
-    }
-
-    .leaderboard-card .stat {
-      font-size: 14px;
-      margin: 2px 0;
-    }
-
-    /* Rank colors */
-    .rank1 { background: #fff7d1; }
-    .rank2 { background: #f2f2f7; }
-    .rank3 { background: #f8e7d1; }
-    .last { background: #ffe5e5; }
-
-    /* Bottom-sheet modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -153,7 +141,6 @@
       box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
     }
 
-    /* Desktop overrides */
     @media (min-width: 700px) {
       body {
         background: #fafafa;
@@ -183,6 +170,7 @@
     <div class="top-right">
       <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
       <button class="btn" onclick="refreshFromCloud()">Refresh</button>
+      <button class="btn" onclick="openReadMe()">Read Me</button>
     </div>
   </div>
 
@@ -199,7 +187,8 @@
 
   <!-- Player Cards Container -->
   <div id="roundRows"></div>
-    <!-- Full-width action buttons -->
+
+  <!-- Full-width action buttons -->
   <button class="btn full-width-btn" id="addRoundBtn" onclick="addRoundScores()">Add Round</button>
   <button class="btn full-width-btn" id="exportBtn" onclick="exportToExcel()">Export to Excel</button>
   <button class="btn full-width-btn" id="importBtn" onclick="importFromExcel()">Import from Excel</button>
@@ -207,26 +196,40 @@
 
   <div id="syncStatus" style="text-align:center; margin-top:10px; color:#555;"></div>
 
+  <!-- Week Selector -->
+  <div style="text-align:center; margin-top:20px;">
+    <label>Week:</label>
+    <select id="weekSelector" onchange="refreshTable()"></select>
+  </div>
+
   <!-- Leaderboard -->
   <h2 style="text-align:center; margin-top:30px;">Leaderboard</h2>
   <div id="leaderboardContainer"></div>
 
-  <!-- Modal (Bottom Sheet) -->
+  <!-- Modal -->
   <div id="modalBackdrop" class="modal-backdrop" onclick="closeModal()">
     <div id="modalContent" class="modal" onclick="event.stopPropagation()"></div>
   </div>
 
   <!-- ============================
-       FULL SCRIPT STARTS HERE
+       FULL SCRIPT
        ============================ -->
   <script>
   /* ---------------------------------------------------------
      AUTH / MODE
   --------------------------------------------------------- */
-  let canSave = false; 
+  let canSave = false; // dev: true, prod: false until login
   let appPassword = "";
   let players = {};
   let playerList = [];
+
+  // Weekly system
+  let weeklyPlayers = {};      // current week stats
+  let weeklyHistory = {};      // past weeks: { weekId: { playerName: {score,games,wins} } }
+  let currentWeekId = "";
+
+  const rowCount = 4;
+  const rowState = [];
 
   function updateModeBanner() {
     const banner = document.getElementById("modeBanner");
@@ -318,6 +321,11 @@
       playerList = data.playerList || [];
       playerList.sort();
 
+      // Weekly fields (migration-safe)
+      weeklyPlayers = data.weeklyPlayers || {};
+      weeklyHistory = data.weeklyHistory || {};
+      currentWeekId = data.currentWeekId || getWeekId();
+
       console.log("Loaded state from GitHub:", data);
     } catch (err) {
       console.error("Failed to load from GitHub:", err);
@@ -327,6 +335,7 @@
   async function refreshFromCloud() {
     setSyncStatus("Refreshing…", "#888");
     await loadStateFromGitHub();
+    checkWeeklyReset();
     updatePlayerDropdowns();
     refreshTable();
     setSyncStatus("Refreshed ✓", "green");
@@ -348,7 +357,13 @@
       return;
     }
 
-    const data = { players, playerList };
+    const data = {
+      players,
+      playerList,
+      weeklyPlayers,
+      weeklyHistory,
+      currentWeekId
+    };
 
     setSyncStatus("Syncing…", "#888");
 
@@ -375,6 +390,56 @@
   }
 
   /* ---------------------------------------------------------
+     WEEKLY HELPERS
+  --------------------------------------------------------- */
+  function getWeekId(date = new Date()) {
+    const year = date.getFullYear();
+    const oneJan = new Date(year, 0, 1);
+    const dayOfYear = Math.floor((date - oneJan) / 86400000) + 1;
+    const week = Math.ceil(dayOfYear / 7);
+    return `${year}-W${week}`;
+  }
+
+  function checkWeeklyReset() {
+    const today = new Date();
+    const weekId = getWeekId(today);
+
+    if (!currentWeekId) {
+      currentWeekId = weekId;
+      return;
+    }
+
+    if (currentWeekId !== weekId) {
+      // Archive old week
+      if (currentWeekId && Object.keys(weeklyPlayers || {}).length > 0) {
+        weeklyHistory[currentWeekId] = JSON.parse(JSON.stringify(weeklyPlayers));
+      }
+      weeklyPlayers = {};
+      currentWeekId = weekId;
+      saveState();
+    }
+  }
+
+  function populateWeekSelector() {
+    const sel = document.getElementById("weekSelector");
+    if (!sel) return;
+
+    const allWeeks = Object.keys(weeklyHistory).sort().reverse();
+    const current = currentWeekId || getWeekId();
+
+    sel.innerHTML = "";
+
+    sel.innerHTML += `<option value="${current}">This Week (${current})</option>`;
+
+    for (const w of allWeeks) {
+      if (w === current) continue;
+      sel.innerHTML += `<option value="${w}">${w}</option>`;
+    }
+
+    sel.value = current;
+  }
+
+  /* ---------------------------------------------------------
      STATE / CONSTANTS
   --------------------------------------------------------- */
   const baseScores = {
@@ -395,15 +460,13 @@
 
   let chopData = [[], [], [], []];
 
-  const rowCount = 4;
-  const rowState = [];
-
   /* ---------------------------------------------------------
      INIT
   --------------------------------------------------------- */
   function init() {
     const container = document.getElementById("roundRows");
     container.innerHTML = "";
+    rowState.length = 0;
 
     for (let i = 0; i < rowCount; i++) {
       const card = document.createElement("div");
@@ -658,7 +721,8 @@
     updatePlacementOptions();
     autoFillAllScores();
   }
-    /* ---------------------------------------------------------
+
+  /* ---------------------------------------------------------
      STINKY 2
   --------------------------------------------------------- */
   function isStinky2AllowedForRow(idx) {
@@ -813,7 +877,8 @@
 
     openModal();
   }
-    /* ---------------------------------------------------------
+
+  /* ---------------------------------------------------------
      CHOP PIGS
   --------------------------------------------------------- */
   function chopPoints(type) {
@@ -926,13 +991,11 @@
         lbl.textContent = `${iconMap[label]}  ${label}`;
         frame.appendChild(lbl);
 
-        // minus button
         const minus = document.createElement("button");
         minus.textContent = "-";
         minus.className = "btn-small";
         frame.appendChild(minus);
 
-        // read-only number display
         const spin = document.createElement("input");
         spin.type = "number";
         spin.className = "spin";
@@ -942,26 +1005,23 @@
         spin.readOnly = true;
         frame.appendChild(spin);
 
-        // plus button
         const plus = document.createElement("button");
         plus.textContent = "+";
         plus.className = "btn-small";
         frame.appendChild(plus);
 
-        // button logic
         minus.onclick = () => {
-        const v = Math.max(0, parseInt(spin.value) - 1);
-        spin.value = v;
+          const v = Math.max(0, parseInt(spin.value) - 1);
+          spin.value = v;
         };
 
         plus.onclick = () => {
-        const v = Math.min(maxVal, parseInt(spin.value) + 1);
-        spin.value = v;
+          const v = Math.min(maxVal, parseInt(spin.value) + 1);
+          spin.value = v;
         };
 
         typeVars[label] = spin;
         block.appendChild(frame);
-
       }
 
       container.appendChild(block);
@@ -1036,7 +1096,8 @@
 
     openModal();
   }
-    /* ---------------------------------------------------------
+
+  /* ---------------------------------------------------------
      SCORING ENGINE
   --------------------------------------------------------- */
   function findPlayerByPlace(placements, place) {
@@ -1189,6 +1250,10 @@
     );
     for (const w of winners) {
       players[w].wins++;
+      if (!weeklyPlayers[w]) {
+        weeklyPlayers[w] = { score: 0, games: 0, wins: 0 };
+      }
+      weeklyPlayers[w].wins++;
     }
 
     // Apply scores
@@ -1196,6 +1261,12 @@
       const p = selectedPlayers[i];
       players[p].score += scores[i];
       players[p].games++;
+
+      if (!weeklyPlayers[p]) {
+        weeklyPlayers[p] = { score: 0, games: 0, wins: 0 };
+      }
+      weeklyPlayers[p].score += scores[i];
+      weeklyPlayers[p].games++;
     }
 
     // Reset round UI
@@ -1206,203 +1277,324 @@
     refreshTable();
     saveState();
   }
-function refreshTable() {
-  const container = document.getElementById("leaderboardContainer");
-  container.innerHTML = "";
 
-  const PROVISIONAL_GAMES = 5;
+  /* ---------------------------------------------------------
+     LEADERBOARD RENDERING
+  --------------------------------------------------------- */
+  function renderLeaderboardTable(sourcePlayers, title, container) {
+    const PROVISIONAL_GAMES = 5;
 
-  // Build array with avg score + provisional flag
-  const arr = Object.entries(players).map(([name, data]) => {
-    const avg = data.games > 0 ? data.score / data.games : 0;
-    return {
-      name,
-      score: data.score,
-      games: data.games,
-      wins: data.wins,
-      winRate: data.games > 0 ? ((data.wins / data.games) * 100).toFixed(1) : "0.0",
-      avgScore: avg,
-      avgScoreDisplay: avg.toFixed(2),
-      provisional: data.games < PROVISIONAL_GAMES
-    };
-  });
+    const arr = Object.entries(sourcePlayers).map(([name, data]) => {
+      const avg = data.games > 0 ? data.score / data.games : 0;
+      return {
+        name,
+        score: data.score,
+        games: data.games,
+        wins: data.wins,
+        winRate: data.games > 0 ? ((data.wins / data.games) * 100).toFixed(1) : "0.0",
+        avgScore: avg,
+        avgScoreDisplay: avg.toFixed(2),
+        provisional: data.games < PROVISIONAL_GAMES
+      };
+    });
 
-  // Split into ranked + provisional
-  const ranked = arr.filter(p => !p.provisional);
-  const provisional = arr.filter(p => p.provisional);
+    const ranked = arr.filter(p => !p.provisional);
+    const provisional = arr.filter(p => p.provisional);
 
-  // Sort ranked players by avg score, tie-breaker total score
-  ranked.sort((a, b) => {
-    if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
-    return b.score - a.score;
-  });
+    ranked.sort((a, b) => {
+      if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
+      return b.score - a.score;
+    });
 
-  // Sort provisional players alphabetically (or however you prefer)
-  provisional.sort((a, b) => a.name.localeCompare(b.name));
+    provisional.sort((a, b) => a.name.localeCompare(b.name));
 
-  // Final display order: ranked first, provisional last
-  const finalList = [...ranked, ...provisional];
+    const finalList = [...ranked, ...provisional];
 
-  // Create table
-  const table = document.createElement("table");
-  table.style.width = "100%";
-  table.style.minWidth = "650px";
-  table.style.borderCollapse = "collapse";
-  table.style.background = "white";
-  table.style.borderRadius = "12px";
-  table.style.overflow = "hidden";
-  table.style.margin = "16px auto";
-  table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
+    const header = document.createElement("h3");
+    header.textContent = title;
+    header.style.textAlign = "center";
+    header.style.marginTop = "30px";
+    container.appendChild(header);
 
-  // Header
-  const thead = document.createElement("thead");
-  thead.innerHTML = `
-    <tr style="background:#f2f2f7;">
-      <th style="padding:10px; text-align:left; white-space:nowrap;">Rank</th>
-      <th style="padding:10px; text-align:left; white-space:nowrap;">Player</th>
-      <th style="padding:10px; text-align:left; white-space:nowrap;">Avg</th>
-      <th style="padding:10px; text-align:left; white-space:nowrap;">Score</th>
-      <th style="padding:10px; text-align:left; white-space:nowrap;">Games</th>
-      <th style="padding:10px; text-align:left; white-space:nowrap;">Wins</th>
-      <th style="padding:10px; text-align:left; white-space:nowrap;">Win Rate %</th>
-    </tr>
-  `;
-  table.appendChild(thead);
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.minWidth = "650px";
+    table.style.borderCollapse = "collapse";
+    table.style.background = "white";
+    table.style.borderRadius = "12px";
+    table.style.overflow = "hidden";
+    table.style.margin = "16px auto";
+    table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
 
-  // Body
-  const tbody = document.createElement("tbody");
-
-  finalList.forEach((p) => {
-    const tr = document.createElement("tr");
-
-    const isRanked = !p.provisional;
-    const rankNumber = isRanked ? ranked.indexOf(p) + 1 : null;
-
-    // Rank icon only for ranked players
-    let icon = "";
-    if (isRanked) {
-      const r = rankNumber - 1;
-      if (r === 0) icon = "🥇";
-      else if (r === 1) icon = "🥈";
-      else if (r === 2) icon = "🥉";
-      else if (r === ranked.length - 1) icon = "💀";
-    }
-
-    // Row coloring for ranked players only
-    if (isRanked) {
-      const r = rankNumber - 1;
-      if (r === 0) tr.style.background = "#fff7d1";
-      else if (r === 1) tr.style.background = "#f2f2f7";
-      else if (r === 2) tr.style.background = "#f8e7d1";
-      else if (r === ranked.length - 1) tr.style.background = "#ffe5e5";
-    } else {
-      // Provisional players dimmed
-      tr.style.opacity = "0.55";
-    }
-
-    tr.innerHTML = `
-      <td style="padding:10px; font-size:18px; white-space:nowrap;">
-        ${isRanked ? `${icon} ${rankNumber}` : "—"}
-      </td>
-      <td style="padding:10px; white-space:nowrap;">
-        ${p.name} ${p.provisional ? "<span style='font-size:12px; color:#888;'>(P)</span>" : ""}
-      </td>
-      <td style="padding:10px; white-space:nowrap;">${p.avgScoreDisplay}</td>
-      <td style="padding:10px; white-space:nowrap;">${p.score}</td>
-      <td style="padding:10px; white-space:nowrap;">${p.games}</td>
-      <td style="padding:10px; white-space:nowrap;">${p.wins}</td>
-      <td style="padding:10px; white-space:nowrap;">${p.winRate}%</td>
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+      <tr style="background:#f2f2f7;">
+        <th style="padding:10px; text-align:left; white-space:nowrap;">Rank</th>
+        <th style="padding:10px; text-align:left; white-space:nowrap;">Player</th>
+        <th style="padding:10px; text-align:left; white-space:nowrap;">Avg</th>
+        <th style="padding:10px; text-align:left; white-space:nowrap;">Score</th>
+        <th style="padding:10px; text-align:left; white-space:nowrap;">Games</th>
+        <th style="padding:10px; text-align:left; white-space:nowrap;">Wins</th>
+        <th style="padding:10px; text-align:left; white-space:nowrap;">Win Rate %</th>
+      </tr>
     `;
+    table.appendChild(thead);
 
-    tbody.appendChild(tr);
-  });
+    const tbody = document.createElement("tbody");
 
-  table.appendChild(tbody);
+    finalList.forEach((p) => {
+      const tr = document.createElement("tr");
 
-  // Responsive wrapper
-  const wrapper = document.createElement("div");
-  wrapper.style.overflowX = "auto";
-  wrapper.style.webkitOverflowScrolling = "touch";
-  wrapper.appendChild(table);
+      const isRanked = !p.provisional;
+      const rankNumber = isRanked ? ranked.indexOf(p) + 1 : null;
 
-  container.appendChild(wrapper);
-}
+      let icon = "";
+      if (isRanked) {
+        const r = rankNumber - 1;
+        if (r === 0) icon = "🥇";
+        else if (r === 1) icon = "🥈";
+        else if (r === 2) icon = "🥉";
+        else if (r === ranked.length - 1) icon = "💀";
+      }
 
+      if (isRanked) {
+        const r = rankNumber - 1;
+        if (r === 0) tr.style.background = "#fff7d1";
+        else if (r === 1) tr.style.background = "#f2f2f7";
+        else if (r === 2) tr.style.background = "#f8e7d1";
+        else if (r === ranked.length - 1) tr.style.background = "#ffe5e5";
+      } else {
+        tr.style.opacity = "0.55";
+      }
+
+      tr.innerHTML = `
+        <td style="padding:10px; font-size:18px; white-space:nowrap;">
+          ${isRanked ? `${icon} ${rankNumber}` : "—"}
+        </td>
+        <td style="padding:10px; white-space:nowrap;">
+          ${p.name} ${p.provisional ? "<span style='font-size:12px; color:#888;'>(P)</span>" : ""}
+        </td>
+        <td style="padding:10px; white-space:nowrap;">${p.avgScoreDisplay}</td>
+        <td style="padding:10px; white-space:nowrap;">${p.score}</td>
+        <td style="padding:10px; white-space:nowrap;">${p.games}</td>
+        <td style="padding:10px; white-space:nowrap;">${p.wins}</td>
+        <td style="padding:10px; white-space:nowrap;">${p.winRate}%</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+
+    const wrapper = document.createElement("div");
+    wrapper.style.overflowX = "auto";
+    wrapper.style.webkitOverflowScrolling = "touch";
+    wrapper.appendChild(table);
+
+    container.appendChild(wrapper);
+  }
+
+  function refreshTable() {
+    const container = document.getElementById("leaderboardContainer");
+    container.innerHTML = "";
+
+    populateWeekSelector();
+
+    const selectedWeek = document.getElementById("weekSelector").value;
+    let weekData = {};
+    if (selectedWeek === currentWeekId) {
+      weekData = weeklyPlayers;
+    } else {
+      weekData = weeklyHistory[selectedWeek] || {};
+    }
+
+    renderLeaderboardTable(weekData, `This Week (${selectedWeek})`, container);
+    renderLeaderboardTable(players, "All Time", container);
+  }
 
   /* ---------------------------------------------------------
      EXPORT TO EXCEL
   --------------------------------------------------------- */
-  function exportToExcel() {
-    if (!canSave) {
-      alert("Login required to export.");
-      return;
-    }
-
-    const wb = XLSX.utils.book_new();
-    const data = [["Player", "Score", "Games", "Wins"]];
-
-    for (const name of Object.keys(players)) {
-      const p = players[name];
-      data.push([name, p.score, p.games, p.wins]);
-    }
-
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, "Leaderboard");
-
-    XLSX.writeFile(wb, "chop_pig_scores.xlsx");
+function exportToExcel() {
+  if (!canSave) {
+    alert("Login required to export.");
+    return;
   }
+
+  const wb = XLSX.utils.book_new();
+
+  /* -------------------------------
+     SHEET 1 — THIS WEEK
+  --------------------------------*/
+  const selectedWeek = document.getElementById("weekSelector").value;
+  const weekData =
+    selectedWeek === currentWeekId
+      ? weeklyPlayers
+      : weeklyHistory[selectedWeek] || {};
+
+  const weekSheetData = [["Player", "Score", "Games", "Wins"]];
+  for (const name of Object.keys(weekData)) {
+    const p = weekData[name];
+    weekSheetData.push([name, p.score, p.games, p.wins]);
+  }
+
+  const wsWeek = XLSX.utils.aoa_to_sheet(weekSheetData);
+  XLSX.utils.book_append_sheet(wb, wsWeek, `Week_${selectedWeek}`);
+
+
+  /* -------------------------------
+     SHEET 2 — ALL TIME
+  --------------------------------*/
+  const allTimeData = [["Player", "Score", "Games", "Wins"]];
+  for (const name of Object.keys(players)) {
+    const p = players[name];
+    allTimeData.push([name, p.score, p.games, p.wins]);
+  }
+
+  const wsAllTime = XLSX.utils.aoa_to_sheet(allTimeData);
+  XLSX.utils.book_append_sheet(wb, wsAllTime, "All_Time");
+
+
+  /* -------------------------------
+     SHEET 3 — WEEKLY HISTORY
+  --------------------------------*/
+  const historyData = [["Week", "Player", "Score", "Games", "Wins"]];
+
+  for (const weekId of Object.keys(weeklyHistory).sort()) {
+    const weekObj = weeklyHistory[weekId];
+    for (const name of Object.keys(weekObj)) {
+      const p = weekObj[name];
+      historyData.push([weekId, name, p.score, p.games, p.wins]);
+    }
+  }
+
+  const wsHistory = XLSX.utils.aoa_to_sheet(historyData);
+  XLSX.utils.book_append_sheet(wb, wsHistory, "Weekly_History");
+
+
+  /* -------------------------------
+     WRITE FILE
+  --------------------------------*/
+  XLSX.writeFile(wb, "chop_pig_stats.xlsx");
+}
+
 
   /* ---------------------------------------------------------
      IMPORT FROM EXCEL
   --------------------------------------------------------- */
-  function importFromExcel() {
-    if (!canSave) {
-      alert("Login required to import.");
-      return;
-    }
+function importFromExcel() {
+  if (!canSave) {
+    alert("Login required to import.");
+    return;
+  }
 
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".xlsx";
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".xlsx";
 
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const data = evt.target.result;
-        const wb = XLSX.read(data, { type: "binary" });
-        const ws = wb.Sheets[wb.SheetNames[0]];
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const data = evt.target.result;
+      const wb = XLSX.read(data, { type: "binary" });
+
+      /* -----------------------------------------
+         SHEET 1 — CURRENT WEEK (if exists)
+      ----------------------------------------- */
+      const weekSheetName = wb.SheetNames.find(n => n.startsWith("Week_"));
+      if (weekSheetName) {
+        const ws = wb.Sheets[weekSheetName];
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-        players = {};
-        playerList = [];
-
+        weeklyPlayers = {};
         for (let i = 1; i < rows.length; i++) {
           const [name, score, games, wins] = rows[i];
           if (!name) continue;
-
-          players[name] = {
+          weeklyPlayers[name] = {
             score: Number(score) || 0,
             games: Number(games) || 0,
             wins: Number(wins) || 0
           };
-          playerList.push(name);
         }
 
-        playerList.sort();
-        updatePlayerDropdowns();
-        refreshTable();
-        saveState();
-      };
+        // Extract week ID from sheet name
+        currentWeekId = weekSheetName.replace("Week_", "");
+      }
 
-      reader.readAsBinaryString(file);
+      /* -----------------------------------------
+         SHEET 2 — ALL TIME (required)
+      ----------------------------------------- */
+      if (!wb.Sheets["All_Time"]) {
+        alert("Excel file missing required sheet: All_Time");
+        return;
+      }
+
+      const wsAll = wb.Sheets["All_Time"];
+      const rowsAll = XLSX.utils.sheet_to_json(wsAll, { header: 1 });
+
+      players = {};
+      playerList = [];
+
+      for (let i = 1; i < rowsAll.length; i++) {
+        const [name, score, games, wins] = rowsAll[i];
+        if (!name) continue;
+
+        players[name] = {
+          score: Number(score) || 0,
+          games: Number(games) || 0,
+          wins: Number(wins) || 0
+        };
+        playerList.push(name);
+      }
+
+      playerList.sort();
+
+      /* -----------------------------------------
+         SHEET 3 — WEEKLY HISTORY (optional)
+      ----------------------------------------- */
+      if (wb.Sheets["Weekly_History"]) {
+        const wsHist = wb.Sheets["Weekly_History"];
+        const rowsHist = XLSX.utils.sheet_to_json(wsHist, { header: 1 });
+
+        weeklyHistory = {};
+
+        for (let i = 1; i < rowsHist.length; i++) {
+          const [weekId, name, score, games, wins] = rowsHist[i];
+          if (!weekId || !name) continue;
+
+          if (!weeklyHistory[weekId]) {
+            weeklyHistory[weekId] = {};
+          }
+
+          weeklyHistory[weekId][name] = {
+            score: Number(score) || 0,
+            games: Number(games) || 0,
+            wins: Number(wins) || 0
+          };
+        }
+      }
+
+      /* -----------------------------------------
+         FINALIZE
+      ----------------------------------------- */
+      updatePlayerDropdowns();
+      refreshTable();
+      saveState();
+
+      alert("Import complete!");
     };
 
-    input.click();
-  }
-    /* ---------------------------------------------------------
+    reader.readAsBinaryString(file);
+  };
+
+  input.click();
+}
+
+
+  /* ---------------------------------------------------------
      READ ME (Rules / Info Modal)
   --------------------------------------------------------- */
   function openReadMe() {
@@ -1416,7 +1608,7 @@ function refreshTable() {
         <li>Stinky 2 scoring</li>
         <li>Chop Pigs (Black, Red, Pairs, 4-of-a-kind, etc.)</li>
         <li>Automatic score transfers</li>
-        <li>Leaderboard with wins, games, and total score</li>
+        <li>Weekly and all-time leaderboards</li>
         <li>Excel import/export</li>
         <li>Cloud sync to GitHub</li>
       </ul>
@@ -1444,6 +1636,8 @@ function refreshTable() {
   --------------------------------------------------------- */
   window.onload = async function () {
     await loadStateFromGitHub();
+    currentWeekId = currentWeekId || getWeekId();
+    checkWeeklyReset();
     init();
     refreshTable();
   };
