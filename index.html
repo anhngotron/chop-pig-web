@@ -392,13 +392,18 @@
   /* ---------------------------------------------------------
      WEEKLY HELPERS
   --------------------------------------------------------- */
-  function getWeekId(date = new Date()) {
-    const year = date.getFullYear();
-    const oneJan = new Date(year, 0, 1);
-    const dayOfYear = Math.floor((date - oneJan) / 86400000) + 1;
-    const week = Math.ceil(dayOfYear / 7);
-    return `${year}-W${week}`;
+    function getWeekId() {
+      const now = new Date();
+      const year = now.getFullYear();
+
+      // ISO week number
+      const oneJan = new Date(year, 0, 1);
+      const numberOfDays = Math.floor((now - oneJan) / 86400000);
+      const week = Math.ceil((now.getDay() + 1 + numberOfDays) / 7);
+
+      return `Week_${year}-W${String(week).padStart(2, "0")}`;
   }
+
 
   function checkWeeklyReset() {
     const today = new Date();
