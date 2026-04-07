@@ -1,56 +1,78 @@
 {
   "players": {
-    "James": { "score": 43, "games": 33, "wins": 12 },
-    "Andy": { "score": 56, "games": 35, "wins": 15 },
-    "Ana": { "score": -25, "games": 36, "wins": 6 },
-    "David": { "score": -11, "games": 13, "wins": 1 },
-    "Lawrence": { "score": -8, "games": 11, "wins": 1 },
-    "William": { "score": -16, "games": 35, "wins": 10 },
-    "Robert": { "score": -6, "games": 17, "wins": 3 },
-    "Kevin": { "score": -16, "games": 39, "wins": 10 },
-    "Jeanette": { "score": -9, "games": 8, "wins": 1 },
-    "Majid": { "score": -3, "games": 14, "wins": 1 },
-    "Ian": { "score": -8, "games": 12, "wins": 3 },
-    "Ted": { "score": 3, "games": 7, "wins": 3 }
-  },
-
-  "playerList": [
-    "Ana", "Andy", "David", "Ian", "James",
-    "Jeanette", "Kevin", "Lawrence", "Majid",
-    "Robert", "Ted", "William"
-  ],
-
-  "weeklyPlayers": {
-    "James": { "score": 0, "games": 0, "wins": 0 },
-    "Andy": { "score": 5, "games": 7, "wins": 3 },
-    "Ana": { "score": -6, "games": 5, "wins": 1 },
-    "David": { "score": -3, "games": 5, "wins": 0 },
-    "Lawrence": { "score": 0, "games": 0, "wins": 0 },
-    "William": { "score": -7, "games": 6, "wins": 2 },
-    "Robert": { "score": -2, "games": 3, "wins": 1 },
-    "Kevin": { "score": 13, "games": 9, "wins": 2 },
-    "Jeanette": { "score": 2, "games": 3, "wins": 1 },
-    "Majid": { "score": -2, "games": 2, "wins": 0 },
-    "Ian": { "score": 0, "games": 0, "wins": 0 },
-    "Ted": { "score": 0, "games": 0, "wins": 0 }
-  },
-
-  "weeklyHistory": {
-    "2026-W13": {
-      "James": { "score": 43, "games": 33, "wins": 12 },
-      "Andy": { "score": 51, "games": 28, "wins": 12 },
-      "Ana": { "score": -19, "games": 31, "wins": 5 },
-      "David": { "score": -8, "games": 8, "wins": 1 },
-      "Lawrence": { "score": -8, "games": 11, "wins": 1 },
-      "William": { "score": -9, "games": 29, "wins": 8 },
-      "Robert": { "score": -4, "games": 14, "wins": 2 },
-      "Kevin": { "score": -29, "games": 30, "wins": 8 },
-      "Jeanette": { "score": -11, "games": 5, "wins": 0 },
-      "Majid": { "score": -1, "games": 12, "wins": 1 },
-      "Ian": { "score": -8, "games": 12, "wins": 3 },
-      "Ted": { "score": 3, "games": 7, "wins": 3 }
+    "James": {
+      "score": 43,
+      "games": 33,
+      "wins": 12
+    },
+    "Andy": {
+      "score": 56,
+      "games": 35,
+      "wins": 15
+    },
+    "Ana": {
+      "score": -25,
+      "games": 36,
+      "wins": 6
+    },
+    "David": {
+      "score": -11,
+      "games": 13,
+      "wins": 1
+    },
+    "Lawrence": {
+      "score": -8,
+      "games": 11,
+      "wins": 1
+    },
+    "William ": {
+      "score": -16,
+      "games": 35,
+      "wins": 10
+    },
+    "Robert": {
+      "score": -6,
+      "games": 17,
+      "wins": 3
+    },
+    "Kevin": {
+      "score": -16,
+      "games": 39,
+      "wins": 10
+    },
+    "Jeanette": {
+      "score": -9,
+      "games": 8,
+      "wins": 1
+    },
+    "Majid": {
+      "score": -3,
+      "games": 14,
+      "wins": 1
+    },
+    "Ian": {
+      "score": -8,
+      "games": 12,
+      "wins": 3
+    },
+    "Ted": {
+      "score": 3,
+      "games": 7,
+      "wins": 3
     }
   },
-
-  "currentWeekId": "2026-W14"
+  "playerList": [
+    "Ana",
+    "Andy",
+    "David",
+    "Ian",
+    "James",
+    "Jeanette",
+    "Kevin",
+    "Lawrence",
+    "Majid",
+    "Robert",
+    "Ted",
+    "William "
+  ]
 }
