@@ -27,8 +27,16 @@ export default async function handler(req, res) {
       currentWeekId
     } = req.body;
 
-    if (!players || !playerList || !weeklyPlayers || !weeklyHistory || !currentWeekId) {
-      return res.status(400).json({ error: "Invalid payload — missing weekly fields" });
+    if (
+      !players ||
+      !playerList ||
+      !weeklyPlayers ||
+      !weeklyHistory ||
+      !currentWeekId
+    ) {
+      return res.status(400).json({
+        error: "Invalid payload — missing weekly fields"
+      });
     }
 
     // -------------------------------
@@ -39,7 +47,9 @@ export default async function handler(req, res) {
     const token = process.env.GITHUB_TOKEN;
 
     if (!owner || !repo || !token) {
-      return res.status(500).json({ error: "Missing GitHub environment variables" });
+      return res.status(500).json({
+        error: "Missing GitHub environment variables"
+      });
     }
 
     const octokit = new Octokit({ auth: token });
@@ -50,7 +60,11 @@ export default async function handler(req, res) {
     // -------------------------------
     let sha = null;
     try {
-      const { data } = await octokit.repos.getContent({ owner, repo, path });
+      const { data } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path
+      });
       sha = data.sha;
     } catch (err) {
       sha = null; // first save
@@ -61,7 +75,13 @@ export default async function handler(req, res) {
     // -------------------------------
     const content = Buffer.from(
       JSON.stringify(
-        { players, playerList, weeklyPlayers, weeklyHistory, currentWeekId },
+        {
+          players,
+          playerList,
+          weeklyPlayers,
+          weeklyHistory,
+          currentWeekId
+        },
         null,
         2
       )
