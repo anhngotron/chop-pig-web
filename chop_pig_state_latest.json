@@ -25,7 +25,7 @@
       "games": 11,
       "wins": 1
     },
-    "William ": {
+    "William": {
       "score": -16,
       "games": 35,
       "wins": 10
@@ -73,7 +73,7 @@
     "Majid",
     "Robert",
     "Ted",
-    "William "
+    "William"
   ],
   "weeklyPlayers": {},
   "weeklyHistory": {
@@ -103,7 +103,7 @@
         "games": 11,
         "wins": 1
       },
-      "William ": {
+      "William": {
         "score": -9,
         "games": 29,
         "wins": 8
@@ -165,7 +165,7 @@
         "games": 0,
         "wins": 0
       },
-      "William ": {
+      "William": {
         "score": -7,
         "games": 6,
         "wins": 2
@@ -202,5 +202,5 @@
       }
     }
   },
-  "currentWeekId": "2026-W14"
+  "currentWeekId": "Week_2026-W14"
 }
