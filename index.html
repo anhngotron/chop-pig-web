@@ -1502,30 +1502,62 @@ function importFromExcel() {
       const wb = XLSX.read(data, { type: "binary" });
 
       /* -----------------------------------------
-         SHEET 1 — CURRENT WEEK (if exists)
+         1. Detect week sheet (Week_YYYY-W##)
       ----------------------------------------- */
       const weekSheetName = wb.SheetNames.find(n => n.startsWith("Week_"));
-      if (weekSheetName) {
-        const ws = wb.Sheets[weekSheetName];
-        const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      if (!weekSheetName) {
+        alert("Excel file missing a Week_XXXX-W## sheet.");
+        return;
+      }
 
-        weeklyPlayers = {};
-        for (let i = 1; i < rows.length; i++) {
-          const [name, score, games, wins] = rows[i];
-          if (!name) continue;
-          weeklyPlayers[name] = {
-            score: Number(score) || 0,
-            games: Number(games) || 0,
-            wins: Number(wins) || 0
-          };
-        }
+      const importedWeekId = weekSheetName.replace("Week_", "");
+      const realCurrentWeek = getWeekId();
 
-        // Extract week ID from sheet name
-        currentWeekId = weekSheetName.replace("Week_", "");
+      /* -----------------------------------------
+         2. Load the week sheet
+      ----------------------------------------- */
+      const wsWeek = wb.Sheets[weekSheetName];
+      const rowsWeek = XLSX.utils.sheet_to_json(wsWeek, { header: 1 });
+
+      const importedWeeklyPlayers = {};
+      for (let i = 1; i < rowsWeek.length; i++) {
+        const [name, score, games, wins] = rowsWeek[i];
+        if (!name) continue;
+        importedWeeklyPlayers[name] = {
+          score: Number(score) || 0,
+          games: Number(games) || 0,
+          wins: Number(wins) || 0
+        };
       }
 
       /* -----------------------------------------
-         SHEET 2 — ALL TIME (required)
+         3. Decide what to do with this week
+      ----------------------------------------- */
+
+      if (importedWeekId === realCurrentWeek) {
+        // Excel week matches real calendar week
+        currentWeekId = importedWeekId;
+        weeklyPlayers = importedWeeklyPlayers;
+      }
+      else if (importedWeekId < realCurrentWeek) {
+        // Excel week is a past week → archive it
+        weeklyHistory[importedWeekId] = importedWeeklyPlayers;
+
+        // And reset current week to real week
+        currentWeekId = realCurrentWeek;
+        weeklyPlayers = {};
+      }
+      else {
+        // Excel week is in the future → reject
+        alert(
+          `The Excel file contains a future week (${importedWeekId}). ` +
+          `Cannot import future data.`
+        );
+        return;
+      }
+
+      /* -----------------------------------------
+         4. Load All_Time sheet (required)
       ----------------------------------------- */
       if (!wb.Sheets["All_Time"]) {
         alert("Excel file missing required sheet: All_Time");
@@ -1553,13 +1585,11 @@ function importFromExcel() {
       playerList.sort();
 
       /* -----------------------------------------
-         SHEET 3 — WEEKLY HISTORY (optional)
+         5. Load Weekly_History (optional)
       ----------------------------------------- */
       if (wb.Sheets["Weekly_History"]) {
         const wsHist = wb.Sheets["Weekly_History"];
         const rowsHist = XLSX.utils.sheet_to_json(wsHist, { header: 1 });
-
-        weeklyHistory = {};
 
         for (let i = 1; i < rowsHist.length; i++) {
           const [weekId, name, score, games, wins] = rowsHist[i];
@@ -1578,7 +1608,7 @@ function importFromExcel() {
       }
 
       /* -----------------------------------------
-         FINALIZE
+         6. Finalize
       ----------------------------------------- */
       updatePlayerDropdowns();
       refreshTable();
@@ -1592,7 +1622,6 @@ function importFromExcel() {
 
   input.click();
 }
-
 
   /* ---------------------------------------------------------
      READ ME (Rules / Info Modal)
