@@ -26,23 +26,23 @@
       "wins": 0
     },
     "William ": {
-      "score": -3,
-      "games": 3,
+      "score": -1,
+      "games": 4,
       "wins": 2
     },
     "Robert": {
-      "score": 0,
-      "games": 0,
+      "score": -4,
+      "games": 1,
       "wins": 0
     },
     "Kevin": {
-      "score": 3,
-      "games": 7,
-      "wins": 0
+      "score": 9,
+      "games": 8,
+      "wins": 1
     },
     "Jeanette": {
-      "score": 4,
-      "games": 1,
+      "score": 0,
+      "games": 2,
       "wins": 1
     },
     "Majid": {
