@@ -19,10 +19,16 @@ export default async function handler(req, res) {
     // -------------------------------
     // 2. Validate incoming data
     // -------------------------------
-    const { players, playerList } = req.body;
+    const {
+      players,
+      playerList,
+      weeklyPlayers,
+      weeklyHistory,
+      currentWeekId
+    } = req.body;
 
-    if (!players || !playerList) {
-      return res.status(400).json({ error: "Invalid payload" });
+    if (!players || !playerList || !weeklyPlayers || !weeklyHistory || !currentWeekId) {
+      return res.status(400).json({ error: "Invalid payload — missing weekly fields" });
     }
 
     // -------------------------------
@@ -37,30 +43,28 @@ export default async function handler(req, res) {
     }
 
     const octokit = new Octokit({ auth: token });
-
-    const path = "chop_pig_state_latest.json"; // IMPORTANT: matches front-end loader
+    const path = "chop_pig_state_latest.json";
 
     // -------------------------------
-    // 4. Get current file SHA (required for updates)
+    // 4. Get current file SHA
     // -------------------------------
     let sha = null;
     try {
-      const { data } = await octokit.repos.getContent({
-        owner,
-        repo,
-        path
-      });
+      const { data } = await octokit.repos.getContent({ owner, repo, path });
       sha = data.sha;
     } catch (err) {
-      // File does not exist yet — first save
-      sha = null;
+      sha = null; // first save
     }
 
     // -------------------------------
     // 5. Commit new JSON
     // -------------------------------
     const content = Buffer.from(
-      JSON.stringify({ players, playerList }, null, 2)
+      JSON.stringify(
+        { players, playerList, weeklyPlayers, weeklyHistory, currentWeekId },
+        null,
+        2
+      )
     ).toString("base64");
 
     await octokit.repos.createOrUpdateFileContents({
