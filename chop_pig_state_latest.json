@@ -25,7 +25,7 @@
       "games": 11,
       "wins": 1
     },
-    "William": {
+    "William ": {
       "score": -16,
       "games": 35,
       "wins": 10
@@ -73,6 +73,6 @@
     "Majid",
     "Robert",
     "Ted",
-    "William"
+    "William "
   ]
 }
