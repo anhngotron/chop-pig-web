@@ -11,8 +11,8 @@
       "wins": 3
     },
     "Ana": {
-      "score": -8,
-      "games": 4,
+      "score": -6,
+      "games": 5,
       "wins": 1
     },
     "David": {
@@ -26,19 +26,19 @@
       "wins": 0
     },
     "William ": {
-      "score": -1,
-      "games": 4,
+      "score": -5,
+      "games": 5,
       "wins": 2
     },
     "Robert": {
-      "score": -4,
-      "games": 1,
+      "score": -6,
+      "games": 2,
       "wins": 0
     },
     "Kevin": {
-      "score": 9,
-      "games": 8,
-      "wins": 1
+      "score": 13,
+      "games": 9,
+      "wins": 2
     },
     "Jeanette": {
       "score": 0,
