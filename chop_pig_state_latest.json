@@ -138,7 +138,7 @@
     }
   },
   "weeklyHistory": {
-    "2026-W13": {
+    "Week_2026-W13": {
       "James": {
         "score": 43,
         "games": 33,
@@ -201,5 +201,5 @@
       }
     }
   },
-  "currentWeekId": "2026-W14"
+  "currentWeekId": "Week_2026-W14"
 }
