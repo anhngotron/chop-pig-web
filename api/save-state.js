@@ -19,24 +19,10 @@ export default async function handler(req, res) {
     // -------------------------------
     // 2. Validate incoming data
     // -------------------------------
-    const {
-      players,
-      playerList,
-      weeklyPlayers,
-      weeklyHistory,
-      currentWeekId
-    } = req.body;
+    const { players, playerList } = req.body;
 
-    if (
-      !players ||
-      !playerList ||
-      !weeklyPlayers ||
-      !weeklyHistory ||
-      !currentWeekId
-    ) {
-      return res.status(400).json({
-        error: "Invalid payload — missing weekly fields"
-      });
+    if (!players || !playerList) {
+      return res.status(400).json({ error: "Invalid payload" });
     }
 
     // -------------------------------
@@ -47,16 +33,15 @@ export default async function handler(req, res) {
     const token = process.env.GITHUB_TOKEN;
 
     if (!owner || !repo || !token) {
-      return res.status(500).json({
-        error: "Missing GitHub environment variables"
-      });
+      return res.status(500).json({ error: "Missing GitHub environment variables" });
     }
 
     const octokit = new Octokit({ auth: token });
-    const path = "chop_pig_state_latest.json";
+
+    const path = "chop_pig_state_latest.json"; // IMPORTANT: matches front-end loader
 
     // -------------------------------
-    // 4. Get current file SHA
+    // 4. Get current file SHA (required for updates)
     // -------------------------------
     let sha = null;
     try {
@@ -67,24 +52,15 @@ export default async function handler(req, res) {
       });
       sha = data.sha;
     } catch (err) {
-      sha = null; // first save
+      // File does not exist yet — first save
+      sha = null;
     }
 
     // -------------------------------
     // 5. Commit new JSON
     // -------------------------------
     const content = Buffer.from(
-      JSON.stringify(
-        {
-          players,
-          playerList,
-          weeklyPlayers,
-          weeklyHistory,
-          currentWeekId
-        },
-        null,
-        2
-      )
+      JSON.stringify({ players, playerList }, null, 2)
     ).toString("base64");
 
     await octokit.repos.createOrUpdateFileContents({
