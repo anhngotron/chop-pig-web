@@ -6,9 +6,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // -------------------------------
-    // 1. Password Protection
-    // -------------------------------
     const adminPassword = process.env.ADMIN_PASSWORD;
     const provided = req.headers["x-app-password"];
 
@@ -16,33 +13,26 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    // -------------------------------
-    // 2. Validate incoming data
-    // -------------------------------
-    const { players, playerList } = req.body;
+    const { allTime, weekly, weeklyReset, weeklyHistory } = req.body;
 
-    if (!players || !playerList) {
+    if (!allTime || !weekly || !weeklyReset || !weeklyHistory) {
       return res.status(400).json({ error: "Invalid payload" });
     }
 
-    // -------------------------------
-    // 3. GitHub Setup
-    // -------------------------------
     const owner = process.env.GITHUB_OWNER;
     const repo = process.env.GITHUB_REPO;
     const token = process.env.GITHUB_TOKEN;
 
     if (!owner || !repo || !token) {
-      return res.status(500).json({ error: "Missing GitHub environment variables" });
+      return res
+        .status(500)
+        .json({ error: "Missing GitHub environment variables" });
     }
 
     const octokit = new Octokit({ auth: token });
 
-    const path = "chop_pig_state_latest.json"; // IMPORTANT: matches front-end loader
+    const path = "chop_pig_state_latest.json";
 
-    // -------------------------------
-    // 4. Get current file SHA (required for updates)
-    // -------------------------------
     let sha = null;
     try {
       const { data } = await octokit.repos.getContent({
@@ -52,15 +42,11 @@ export default async function handler(req, res) {
       });
       sha = data.sha;
     } catch (err) {
-      // File does not exist yet — first save
       sha = null;
     }
 
-    // -------------------------------
-    // 5. Commit new JSON
-    // -------------------------------
     const content = Buffer.from(
-      JSON.stringify({ players, playerList }, null, 2)
+      JSON.stringify({ allTime, weekly, weeklyReset, weeklyHistory }, null, 2)
     ).toString("base64");
 
     await octokit.repos.createOrUpdateFileContents({
