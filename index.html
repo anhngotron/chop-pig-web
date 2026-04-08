@@ -44,7 +44,7 @@
 
     .btn:disabled {
       opacity: 0.4;
-      cursor: default;
+      cursor: not-allowed;
     }
 
     .btn-small {
@@ -120,11 +120,6 @@
     .leaderboard-card h3 {
       margin: 0 0 6px 0;
       font-size: 18px;
-    }
-
-    .leaderboard-card .stat {
-      font-size: 14px;
-      margin: 2px 0;
     }
 
     .modal-backdrop {
@@ -222,8 +217,21 @@
       background: #ff453a;
     }
 
-    body.dark-mode #syncStatus {
-      color: #ccc !important;
+    /* DARK MODE — disabled elements should still look disabled */
+    body.dark-mode .btn:disabled {
+      background: #444 !important;
+      color: #777 !important;
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+    }
+
+    body.dark-mode select:disabled,
+    body.dark-mode input:disabled {
+      background: #2a2a2a !important;
+      color: #555 !important;
+      border-color: #444 !important;
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
     }
 
     /* Reverse Mode button ON style */
@@ -231,6 +239,17 @@
       background: #ff9f0a !important;
       color: #000 !important;
       box-shadow: 0 0 8px rgba(255,159,10,0.8);
+    }
+
+    #syncStatus {
+      font-size: 14px;
+      padding: 8px 0;
+      min-height: 20px;
+      text-align: center;
+    }
+
+    body.dark-mode #syncStatus {
+      color: #ccc !important;
     }
   </style>
 
@@ -264,7 +283,7 @@
   <button class="btn full-width-btn" id="importBtn" onclick="importFromExcel()">Import from Excel</button>
   <button class="btn full-width-btn" id="syncNowBtn" onclick="manualSync()">Sync Now</button>
 
-  <div id="syncStatus" style="text-align:center; margin-top:10px; color:#555;"></div>
+  <div id="syncStatus"></div>
 
   <div style="text-align:center; margin-top:20px;">
     <label style="font-size:14px; margin-right:6px;">Select Week:</label>
@@ -276,1479 +295,1329 @@
   <div id="modalBackdrop" class="modal-backdrop" onclick="closeModal()">
     <div id="modalContent" class="modal" onclick="event.stopPropagation()"></div>
   </div>
+<script>
+/* ---------------- AUTH / STATE ---------------- */
+let canSave = false;
+let appPassword = "";
 
-  <script>
-    /* ---------------- AUTH / STATE ---------------- */
-    let canSave = false;
-    let appPassword = "";
+let allTime = { players: {}, playerList: [] };
+let weekly = { players: {}, playerList: [] };
+let weeklyReset = null;
+let weeklyHistory = [];
 
-    let allTime = { players: {}, playerList: [] };
-    let weekly = { players: {}, playerList: [] };
-    let weeklyReset = null;
-    let weeklyHistory = [];
+const baseScores = {
+  "1st": 4,
+  "2nd": 2,
+  "3rd": -2,
+  "4th": -4,
+  "Stinky 13": -5
+};
+const basePlacements = ["1st", "2nd", "3rd", "4th", "Stinky 13"];
 
-    const baseScores = {
-      "1st": 4,
-      "2nd": 2,
-      "3rd": -2,
-      "4th": -4,
-      "Stinky 13": -5
+let stinky2Enabled = [false, false, false, false];
+let Stinky2_red = [0, 0, 0, 0];
+let Stinky2_black = [0, 0, 0, 0];
+let Stinky2_pairs3 = [0, 0, 0, 0];
+let Stinky2_kind4 = [0, 0, 0, 0];
+let Stinky2_pairs4 = [0, 0, 0, 0];
+
+let chopData = [[], [], [], []];
+
+const rowCount = 4;
+const rowState = [];
+
+/* REVERSE MODE FLAG */
+let reverseMode = false;
+
+/* ---------------- LOCK SYSTEM (FIXED) ---------------- */
+function updateModeBanner() {
+  const banner = document.getElementById("modeBanner");
+  const loginBtn = document.getElementById("loginBtn");
+
+  const disabled = !canSave;
+
+  // Disable all main buttons
+  document.getElementById("addPlayerBtn").disabled = disabled;
+  document.getElementById("addRoundBtn").disabled = disabled;
+  document.getElementById("exportBtn").disabled = disabled;
+  document.getElementById("importBtn").disabled = disabled;
+  document.getElementById("syncNowBtn").disabled = disabled;
+
+  // Disable all row inputs
+  for (const r of rowState) {
+    r.playerSelect.disabled = disabled;
+    r.placeSelect.disabled = disabled;
+    r.stinky2Checkbox.disabled = disabled;
+    r.chopCheckbox.disabled = disabled;
+  }
+
+  // Banner + login button
+  if (canSave) {
+    banner.textContent = "";
+    loginBtn.textContent = "Logout";
+  } else {
+    banner.textContent = "🔒 View-only mode — login to make changes";
+    loginBtn.textContent = "Login";
+  }
+}
+
+/* ---------------- LOGIN ---------------- */
+async function handleLoginClick() {
+  if (canSave) {
+    canSave = false;
+    appPassword = "";
+    setSyncStatus("Logged out — view-only mode", "gray");
+    updateModeBanner();
+    return;
+  }
+
+  const pwd = prompt("Enter password to enable saving:");
+  if (!pwd) {
+    setSyncStatus("View-only mode", "gray");
+    return;
+  }
+
+  try {
+    const resp = await fetch("/api/check-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pwd })
+    });
+
+    if (!resp.ok) {
+      alert("Incorrect password. View-only mode enabled.");
+      setSyncStatus("View-only mode", "gray");
+      canSave = false;
+      appPassword = "";
+      updateModeBanner();
+      return;
+    }
+
+    canSave = true;
+    appPassword = pwd;
+    setSyncStatus("Logged in — saving enabled", "green");
+    updateModeBanner();
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Error checking password. Staying in view-only mode.");
+    setSyncStatus("View-only mode", "gray");
+  }
+}
+
+/* ---------------- CLOUD LOAD / SAVE ---------------- */
+async function loadStateFromGitHub() {
+  try {
+    const owner = "anhngotron";
+    const repo = "chop-pig-web";
+    const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json`;
+
+    const resp = await fetch(url, { cache: "no-store" });
+
+    if (!resp.ok) {
+      console.warn("No GitHub state found yet.");
+      return;
+    }
+
+    const data = await resp.json();
+
+    if (data.allTime) {
+      allTime = data.allTime;
+      weekly = data.weekly || { players: {}, playerList: [] };
+      weeklyReset = data.weeklyReset || new Date().toISOString();
+      weeklyHistory = data.weeklyHistory || [];
+    } else {
+      allTime = { players: data.players || {}, playerList: data.playerList || [] };
+      weekly = { players: {}, playerList: [] };
+      weeklyReset = new Date().toISOString();
+      weeklyHistory = [];
+    }
+
+    console.log("Loaded state from GitHub:", data);
+  } catch (err) {
+    console.error("Failed to load from GitHub:", err);
+  }
+}
+
+async function refreshFromCloud() {
+  setSyncStatus("Refreshing…", "#888");
+  await loadStateFromGitHub();
+  updatePlayerDropdowns();
+  updateWeeklyDropdown();
+  refreshTable();
+  updateModeBanner(); // lock after refresh
+  setSyncStatus("Refreshed ✓", "green");
+}
+
+function setSyncStatus(text, color = "#555") {
+  const el = document.getElementById("syncStatus");
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = color;
+}
+
+/* ---------------- SAVE STATE (LOCK FIX APPLIED) ---------------- */
+function saveState() {
+  updateModeBanner(); // ← CRITICAL FIX
+
+  if (!canSave) {
+    setSyncStatus("View-only mode — not synced", "gray");
+    return;
+  }
+
+  const payload = {
+    allTime,
+    weekly,
+    weeklyReset,
+    weeklyHistory
+  };
+
+  setSyncStatus("Syncing…", "#888");
+
+  fetch("/api/save-state", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-App-Password": appPassword
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("GitHub sync failed");
+      setSyncStatus("Saved ✓", "green");
+    })
+    .catch(err => {
+      console.warn("GitHub autosave failed:", err);
+      setSyncStatus("Sync failed ⚠", "red");
+    });
+  
+}
+
+function manualSync() {
+  saveState();
+}
+
+/* ---------------- WEEKLY FRESHNESS ---------------- */
+function ensureWeeklyFreshness() {
+  if (!weeklyReset) {
+    weeklyReset = new Date().toISOString();
+    return;
+  }
+
+  const now = new Date();
+  const last = new Date(weeklyReset);
+  const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+
+  if (diffDays >= 7) {
+    weeklyHistory.push({
+      weekStart: weeklyReset,
+      weekEnd: now.toISOString(),
+      players: weekly.players,
+      playerList: weekly.playerList
+    });
+
+    weekly = { players: {}, playerList: [] };
+    weeklyReset = now.toISOString();
+    saveState();
+  }
+}
+
+/* ---------------- REVERSE MODE ---------------- */
+function setReverseMode(on) {
+  reverseMode = on;
+  const btn = document.getElementById("reverseBtn");
+
+  if (reverseMode) {
+    document.body.classList.add("dark-mode");
+    btn.classList.add("reverse-on");
+    btn.textContent = "Reverse Mode (ON)";
+  } else {
+    document.body.classList.remove("dark-mode");
+    btn.classList.remove("reverse-on");
+    btn.textContent = "Reverse Mode";
+  }
+
+  autoFillAllScores();
+  updateModeBanner(); // ensure lock applies in dark mode
+}
+
+function toggleReverseMode() {
+  setReverseMode(!reverseMode);
+}
+
+/* ---------------- INIT UI ---------------- */
+function init() {
+  const container = document.getElementById("roundRows");
+  container.innerHTML = "";
+
+  for (let i = 0; i < rowCount; i++) {
+    const card = document.createElement("div");
+    card.className = "player-card";
+
+    // Player select
+    const rowPlayer = document.createElement("div");
+    rowPlayer.className = "card-row";
+    const lblPlayer = document.createElement("label");
+    lblPlayer.textContent = "Player";
+    const selPlayer = document.createElement("select");
+    selPlayer.innerHTML = `<option value="">--</option>`;
+    selPlayer.onchange = () => { onPlayerSelected(i); saveState(); };
+    rowPlayer.appendChild(lblPlayer);
+    rowPlayer.appendChild(selPlayer);
+    card.appendChild(rowPlayer);
+
+    // Placement select
+    const rowPlace = document.createElement("div");
+    rowPlace.className = "card-row";
+    const lblPlace = document.createElement("label");
+    lblPlace.textContent = "Placement";
+    const selPlace = document.createElement("select");
+    selPlace.innerHTML =
+      `<option value="">--</option>` +
+      basePlacements.map(p => `<option value="${p}">${p}</option>`).join("");
+    selPlace.onchange = () => { onPlacementChanged(); saveState(); };
+    rowPlace.appendChild(lblPlace);
+    rowPlace.appendChild(selPlace);
+    card.appendChild(rowPlace);
+
+    // Score
+    const rowScore = document.createElement("div");
+    rowScore.className = "card-row";
+    const lblScore = document.createElement("label");
+    lblScore.textContent = "Score";
+    const inpScore = document.createElement("input");
+    inpScore.type = "text";
+    inpScore.readOnly = true;
+    rowScore.appendChild(lblScore);
+    rowScore.appendChild(inpScore);
+    card.appendChild(rowScore);
+
+    // Stinky 2
+    const rowStinky = document.createElement("div");
+    rowStinky.className = "checkbox-row";
+    const chkStinky = document.createElement("input");
+    chkStinky.type = "checkbox";
+    chkStinky.onchange = () => { handleStinky2Checkbox(i); saveState(); };
+    const lblStinky = document.createElement("span");
+    lblStinky.textContent = "Stinky 2";
+    rowStinky.appendChild(chkStinky);
+    rowStinky.appendChild(lblStinky);
+    card.appendChild(rowStinky);
+
+    // Chop Pigs
+    const rowChop = document.createElement("div");
+    rowChop.className = "checkbox-row";
+    const chkChop = document.createElement("input");
+    chkChop.type = "checkbox";
+    chkChop.onchange = () => { handleChopCheckbox(i); saveState(); };
+    const lblChop = document.createElement("span");
+    lblChop.textContent = "Chop Pigs";
+    const btnEdit = document.createElement("button");
+    btnEdit.textContent = "Edit";
+    btnEdit.className = "btn-small";
+    btnEdit.onclick = () => editChop(i);
+    rowChop.appendChild(chkChop);
+    rowChop.appendChild(lblChop);
+    rowChop.appendChild(btnEdit);
+    card.appendChild(rowChop);
+
+    // Chopped By
+    const rowChoppedBy = document.createElement("div");
+    rowChoppedBy.className = "card-row";
+    const lblChoppedBy = document.createElement("label");
+    lblChoppedBy.textContent = "Chopped By";
+    const spanChoppedBy = document.createElement("div");
+    spanChoppedBy.className = "chopped-by";
+    rowChoppedBy.appendChild(lblChoppedBy);
+    rowChoppedBy.appendChild(spanChoppedBy);
+    card.appendChild(rowChoppedBy);
+
+    // Clear button
+    const btnClear = document.createElement("button");
+    btnClear.textContent = "Clear";
+    btnClear.className = "btn clear-btn";
+    btnClear.onclick = () => { clearRow(i); saveState(); };
+    card.appendChild(btnClear);
+
+    container.appendChild(card);
+
+    rowState.push({
+      playerSelect: selPlayer,
+      placeSelect: selPlace,
+      scoreInput: inpScore,
+      stinky2Checkbox: chkStinky,
+      chopCheckbox: chkChop,
+      choppedBySpan: spanChoppedBy
+    });
+  }
+
+  updatePlayerDropdowns();
+  updateModeBanner();
+}
+/* ---------------- STINKY 2 ---------------- */
+function isStinky2AllowedForRow(idx) {
+  const placementsNow = rowState.map(r => r.placeSelect.value);
+  const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
+  const place = placementsNow[idx];
+
+  if (!place) return false;
+
+  if (place === "4th" && stinky13Count === 0) return true;
+  if (place === "Stinky 13") return true;
+  if (place === "3rd" && stinky13Count === 1) return true;
+
+  return false;
+}
+
+function validStinky2Combo(red, black) {
+  const combos = [
+    [1, 0],
+    [0, 1],
+    [1, 1],
+    [2, 0],
+    [0, 2],
+    [2, 1],
+    [1, 2]
+  ];
+  return combos.some(([r, b]) => r === red && b === black);
+}
+
+function stinky2Total(red, black, p3, k4, p4) {
+  return -2 * red - 1 * black - 2 * p3 - 4 * k4 - 5 * p4;
+}
+
+function handleStinky2Checkbox(idx) {
+  const chk = rowState[idx].stinky2Checkbox;
+  if (!chk.checked) {
+    stinky2Enabled[idx] = false;
+    Stinky2_red[idx] = 0;
+    Stinky2_black[idx] = 0;
+    Stinky2_pairs3[idx] = 0;
+    Stinky2_kind4[idx] = 0;
+    Stinky2_pairs4[idx] = 0;
+    autoFillAllScores();
+    return;
+  }
+  openStinky2Popup(idx);
+}
+
+function openStinky2Popup(idx) {
+  if (!isStinky2AllowedForRow(idx)) {
+    alert(
+      "Stinky 2 is allowed only for:\n" +
+      "- 4th place (when no Stinky 13)\n" +
+      "- Stinky 13 (any time there is Stinky 13)\n" +
+      "- 3rd place (only when there is exactly one Stinky 13)"
+    );
+    rowState[idx].stinky2Checkbox.checked = false;
+    return;
+  }
+
+  const modal = document.getElementById("modalContent");
+  modal.innerHTML = `<h2>Stinky 2 for Player Row ${idx + 1}</h2>`;
+
+  function addRow(icon, labelText, currentVal, maxVal) {
+    const div = document.createElement("div");
+    div.className = "label-row";
+
+    const label = document.createElement("span");
+    label.className = "label";
+    label.textContent = `${icon}  ${labelText}:`;
+    div.appendChild(label);
+
+    const minus = document.createElement("button");
+    minus.textContent = "-";
+    minus.className = "btn-small";
+    minus.onclick = () => {
+      currentVal.input.value = Math.max(
+        0,
+        parseInt(currentVal.input.value || "0") - 1
+      );
     };
-    const basePlacements = ["1st", "2nd", "3rd", "4th", "Stinky 13"];
+    div.appendChild(minus);
 
-    let stinky2Enabled = [false, false, false, false];
-    let Stinky2_red = [0, 0, 0, 0];
-    let Stinky2_black = [0, 0, 0, 0];
-    let Stinky2_pairs3 = [0, 0, 0, 0];
-    let Stinky2_kind4 = [0, 0, 0, 0];
-    let Stinky2_pairs4 = [0, 0, 0, 0];
+    const input = document.createElement("input");
+    input.type = "number";
+    input.className = "spin";
+    input.value = currentVal.value;
+    input.min = 0;
+    input.max = maxVal;
+    currentVal.input = input;
+    div.appendChild(input);
 
-    let chopData = [[], [], [], []];
+    const plus = document.createElement("button");
+    plus.textContent = "+";
+    plus.className = "btn-small";
+    plus.onclick = () => {
+      const v = Math.min(
+        maxVal,
+        parseInt(currentVal.input.value || "0") + 1
+      );
+      currentVal.input.value = v;
+    };
+    div.appendChild(plus);
 
-    const rowCount = 4;
-    const rowState = [];
+    modal.appendChild(div);
+  }
 
-    /* REVERSE MODE FLAG */
-    let reverseMode = false;
+  const red = { value: Stinky2_red[idx] };
+  const black = { value: Stinky2_black[idx] };
+  const p3 = { value: Stinky2_pairs3[idx] };
+  const k4 = { value: Stinky2_kind4[idx] };
+  const p4 = { value: Stinky2_pairs4[idx] };
 
-    function setReverseMode(on) {
-      reverseMode = on;
-      const btn = document.getElementById("reverseBtn");
-      if (reverseMode) {
-        document.body.classList.add("dark-mode");
-        btn.classList.add("reverse-on");
-        btn.textContent = "Reverse Mode (ON)";
-      } else {
-        document.body.classList.remove("dark-mode");
-        btn.classList.remove("reverse-on");
-        btn.textContent = "Reverse Mode";
-      }
-      autoFillAllScores();
+  addRow("🔥🐷", "Red Pigs", red, 3);
+  addRow("🐷", "Black Pigs", black, 3);
+  addRow("🔥🐷", "3 Consecutive Pairs", p3, 3);
+  addRow("🔥🔥🐷🐷", "4 of a Kind", k4, 3);
+  addRow("🔥🔥🐷🐷🐷", "4 Consecutive Pairs", p4, 3);
+
+  const btnSave = document.createElement("button");
+  btnSave.textContent = "Save";
+  btnSave.className = "btn";
+  btnSave.style.marginTop = "10px";
+  btnSave.onclick = () => {
+    const r = parseInt(red.input.value || "0");
+    const b = parseInt(black.input.value || "0");
+    const pp3 = parseInt(p3.input.value || "0");
+    const kk4 = parseInt(k4.input.value || "0");
+    const pp4 = parseInt(p4.input.value || "0");
+
+    if (!validStinky2Combo(r, b)) {
+      alert(
+        "Allowed Stinky 2 red/black combos:\n" +
+        "1 Red\n1 Black\n1 Red + 1 Black\n" +
+        "2 Red\n2 Black\n2 Red + 1 Black\n1 Red + 2 Black"
+      );
+      return;
     }
 
-    function toggleReverseMode() {
-      setReverseMode(!reverseMode);
-    }
+    stinky2Enabled[idx] = true;
+    Stinky2_red[idx] = r;
+    Stinky2_black[idx] = b;
+    Stinky2_pairs3[idx] = pp3;
+    Stinky2_kind4[idx] = kk4;
+    Stinky2_pairs4[idx] = pp4;
 
-    function updateModeBanner() {
-      const banner = document.getElementById("modeBanner");
-      const loginBtn = document.getElementById("loginBtn");
-      const disabled = !canSave;
+    autoFillAllScores();
+    closeModal();
+  };
+  modal.appendChild(btnSave);
 
-      document.getElementById("addPlayerBtn").disabled = disabled;
-      document.getElementById("addRoundBtn").disabled = disabled;
-      document.getElementById("exportBtn").disabled = disabled;
-      document.getElementById("importBtn").disabled = disabled;
-      document.getElementById("syncNowBtn").disabled = disabled;
+  openModal();
+}
 
-      for (const r of rowState) {
-        r.playerSelect.disabled = disabled;
-        r.placeSelect.disabled = disabled;
-        r.stinky2Checkbox.disabled = disabled;
-        r.chopCheckbox.disabled = disabled;
-      }
+/* ---------------- CHOP PIGS ---------------- */
+function chopPoints(type) {
+  if (type === "Black Pigs") return 1;
+  if (type === "Red Pigs") return 2;
+  if (type === "3 Consecutive Pairs") return 2;
+  if (type === "4 of a Kind") return 4;
+  if (type === "4 Consecutive Pairs") return 5;
+  return 0;
+}
 
-      if (canSave) {
-        banner.textContent = "";
-        loginBtn.textContent = "Logout";
-      } else {
-        banner.textContent = "🔒 View-only mode — login to make changes";
-        loginBtn.textContent = "Login";
-      }
-    }
+function handleChopCheckbox(idx) {
+  const chk = rowState[idx].chopCheckbox;
+  if (!chk.checked) {
+    chopData[idx] = [];
+    autoFillAllScores();
+    return;
+  }
+  const player = rowState[idx].playerSelect.value;
+  if (!player) {
+    alert("Select a player before using Chop Pigs.");
+    chk.checked = false;
+    return;
+  }
+  openChopPopup(idx);
+}
 
-    async function handleLoginClick() {
-      if (canSave) {
-        canSave = false;
-        appPassword = "";
-        setSyncStatus("Logged out — view-only mode", "gray");
-        updateModeBanner();
-        return;
-      }
+function editChop(idx) {
+  if (!rowState[idx].chopCheckbox.checked) {
+    alert("This player has no chop data to edit.");
+    return;
+  }
+  openChopPopup(idx);
+}
 
-      const pwd = prompt("Enter password to enable saving:");
-      if (!pwd) {
-        setSyncStatus("View-only mode", "gray");
-        return;
-      }
+function openChopPopup(idx) {
+  const modal = document.getElementById("modalContent");
+  modal.innerHTML = `<h2>Chop Pigs for Player Row ${idx + 1}</h2>`;
 
-      try {
-        const resp = await fetch("/api/check-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: pwd })
-        });
+  const container = document.createElement("div");
+  modal.appendChild(container);
 
-        if (!resp.ok) {
-          alert("Incorrect password. View-only mode enabled.");
-          setSyncStatus("View-only mode", "gray");
-          canSave = false;
-          appPassword = "";
-          updateModeBanner();
-          return;
-        }
+  const types = [
+    ["Black Pigs", 2],
+    ["Red Pigs", 2],
+    ["3 Consecutive Pairs", 3],
+    ["4 of a Kind", 3],
+    ["4 Consecutive Pairs", 3]
+  ];
 
-        canSave = true;
-        appPassword = pwd;
-        setSyncStatus("Logged in — saving enabled", "green");
-        updateModeBanner();
-      } catch (err) {
-        console.error("Login error:", err);
-        alert("Error checking password. Staying in view-only mode.");
-        setSyncStatus("View-only mode", "gray");
-      }
-    }
+  const iconMap = {
+    "Black Pigs": "🐷",
+    "Red Pigs": "🔥🐷",
+    "3 Consecutive Pairs": "🔥🐷",
+    "4 of a Kind": "🔥🔥🐷🐷",
+    "4 Consecutive Pairs": "🔥🔥🐷🐷🐷"
+  };
 
-    /* ---------------- CLOUD LOAD / SAVE ---------------- */
-    async function loadStateFromGitHub() {
-      try {
-        const owner = "anhngotron";
-        const repo = "chop-pig-web";
-        const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json`;
+  const chopperRows = [];
 
-        const resp = await fetch(url, { cache: "no-store" });
+  function removeChopperBlock(block) {
+    container.removeChild(block);
+    const idxRow = chopperRows.findIndex(r => r.frame === block);
+    if (idxRow >= 0) chopperRows.splice(idxRow, 1);
+  }
 
-        if (!resp.ok) {
-          console.warn("No GitHub state found yet.");
-          return;
-        }
+  function addChopperRow(existing) {
+    const allNames = Array.from(new Set([
+      ...allTime.playerList,
+      ...weekly.playerList
+    ])).sort();
 
-        const data = await resp.json();
+    const block = document.createElement("fieldset");
+    block.style.marginBottom = "8px";
 
-        if (data.allTime) {
-          allTime = data.allTime;
-          weekly = data.weekly || { players: {}, playerList: [] };
-          weeklyReset = data.weeklyReset || new Date().toISOString();
-          weeklyHistory = data.weeklyHistory || [];
-        } else {
-          allTime = { players: data.players || {}, playerList: data.playerList || [] };
-          weekly = { players: {}, playerList: [] };
-          weeklyReset = new Date().toISOString();
-          weeklyHistory = [];
-        }
+    const legend = document.createElement("legend");
+    legend.textContent = "Chopper Entry";
+    block.appendChild(legend);
 
-        console.log("Loaded state from GitHub:", data);
-      } catch (err) {
-        console.error("Failed to load from GitHub:", err);
-      }
-    }
+    const btnRemove = document.createElement("button");
+    btnRemove.textContent = "Remove";
+    btnRemove.className = "btn-small";
+    btnRemove.style.float = "right";
+    btnRemove.onclick = () => removeChopperBlock(block);
+    block.appendChild(btnRemove);
 
-    async function refreshFromCloud() {
-      setSyncStatus("Refreshing…", "#888");
-      await loadStateFromGitHub();
-      updatePlayerDropdowns();
-      updateWeeklyDropdown();
-      refreshTable();
-      setSyncStatus("Refreshed ✓", "green");
-    }
+    const labelChopper = document.createElement("div");
+    labelChopper.textContent = "Chopper:";
+    block.appendChild(labelChopper);
 
-    function setSyncStatus(text, color = "#555") {
-      const el = document.getElementById("syncStatus");
-      if (!el) return;
-      el.textContent = text;
-      el.style.color = color;
-    }
+    const selChopper = document.createElement("select");
+    selChopper.innerHTML =
+      `<option value="">--</option>` +
+      allNames.map(p => `<option value="${p}">${p}</option>`).join("");
+    if (existing) selChopper.value = existing.chopper;
+    block.appendChild(selChopper);
 
-    function saveState() {
-      if (!canSave) {
-        setSyncStatus("View-only mode — not synced", "gray");
-        return;
-      }
+    const typeVars = {};
 
-      const payload = {
-        allTime,
-        weekly,
-        weeklyReset,
-        weeklyHistory
+    for (const [label, maxVal] of types) {
+      const frame = document.createElement("div");
+      frame.className = "label-row";
+
+      const lbl = document.createElement("span");
+      lbl.className = "label";
+      lbl.textContent = `${iconMap[label]}  ${label}`;
+      frame.appendChild(lbl);
+
+      const minus = document.createElement("button");
+      minus.textContent = "-";
+      minus.className = "btn-small";
+      frame.appendChild(minus);
+
+      const spin = document.createElement("input");
+      spin.type = "number";
+      spin.className = "spin";
+      spin.min = 0;
+      spin.max = maxVal;
+      spin.value = existing ? existing.types[label] || 0 : 0;
+      spin.readOnly = true;
+      frame.appendChild(spin);
+
+      const plus = document.createElement("button");
+      plus.textContent = "+";
+      plus.className = "btn-small";
+      frame.appendChild(plus);
+
+      minus.onclick = () => {
+        const v = Math.max(0, parseInt(spin.value) - 1);
+        spin.value = v;
       };
 
-      setSyncStatus("Syncing…", "#888");
+      plus.onclick = () => {
+        const v = Math.min(maxVal, parseInt(spin.value) + 1);
+        spin.value = v;
+      };
 
-      fetch("/api/save-state", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-App-Password": appPassword
-        },
-        body: JSON.stringify(payload)
-      })
-        .then(res => {
-          if (!res.ok) throw new Error("GitHub sync failed");
-          setSyncStatus("Saved ✓", "green");
-        })
-        .catch(err => {
-          console.warn("GitHub autosave failed:", err);
-          setSyncStatus("Sync failed ⚠", "red");
-        });
+      typeVars[label] = spin;
+      block.appendChild(frame);
     }
 
-    function manualSync() {
-      saveState();
-    }
+    container.appendChild(block);
+    chopperRows.push({
+      frame: block,
+      chopperSelect: selChopper,
+      typeVars
+    });
+  }
 
-    /* ---------------- WEEKLY FRESHNESS + HISTORY ---------------- */
-    function ensureWeeklyFreshness() {
-      if (!weeklyReset) {
-        weeklyReset = new Date().toISOString();
+  for (const entry of chopData[idx]) {
+    addChopperRow(entry);
+  }
+  if (chopperRows.length === 0) addChopperRow(null);
+
+  const btnAdd = document.createElement("button");
+  btnAdd.textContent = "Add another chopper";
+  btnAdd.className = "btn";
+  btnAdd.style.marginTop = "10px";
+  btnAdd.onclick = () => addChopperRow(null);
+  modal.appendChild(btnAdd);
+
+  const btnSave = document.createElement("button");
+  btnSave.textContent = "Save";
+  btnSave.className = "btn";
+  btnSave.style.marginTop = "10px";
+  btnSave.style.marginLeft = "10px";
+  btnSave.onclick = () => {
+    const newList = [];
+    const victim = rowState[idx].playerSelect.value;
+
+    for (const row of chopperRows) {
+      const name = row.chopperSelect.value;
+      if (!name) {
+        alert("Every chopper must have a name.");
+        return;
+      }
+      if (name === victim) {
+        alert("A player cannot chop themselves.");
+        return;
+      }
+      if (newList.some(e => e.chopper === name)) {
+        alert(`${name} is already listed as a chopper.`);
         return;
       }
 
-      const now = new Date();
-      const last = new Date(weeklyReset);
-      const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+      const typesDict = {};
+      let allZero = true;
 
-      if (diffDays >= 7) {
-        weeklyHistory.push({
-          weekStart: weeklyReset,
-          weekEnd: now.toISOString(),
-          players: weekly.players,
-          playerList: weekly.playerList
-        });
-
-        weekly = { players: {}, playerList: [] };
-        weeklyReset = now.toISOString();
-        saveState();
+      for (const [label, maxVal] of types) {
+        let v = parseInt(row.typeVars[label].value || "0");
+        if (isNaN(v)) v = 0;
+        v = Math.max(0, Math.min(maxVal, v));
+        row.typeVars[label].value = v;
+        typesDict[label] = v;
+        if (v > 0) allZero = false;
       }
+
+      if (allZero) {
+        alert("Each chopper must have at least one chop type.");
+        return;
+      }
+
+      newList.push({ chopper: name, types: typesDict });
     }
 
-    function updateWeeklyDropdown() {
-      const sel = document.getElementById("weeklySelect");
-      if (!sel) return;
+    chopData[idx] = newList;
+    autoFillAllScores();
+    closeModal();
+  };
+  modal.appendChild(btnSave);
 
-      sel.innerHTML = "";
+  openModal();
+}
 
-      const optCurrent = document.createElement("option");
-      optCurrent.value = "current";
-      optCurrent.textContent = "Current Week";
-      sel.appendChild(optCurrent);
+/* ---------------- SCORING ENGINE ---------------- */
+function findPlayerByPlace(placements, place) {
+  for (let i = 0; i < placements.length; i++) {
+    if (placements[i] === place) return i;
+  }
+  return null;
+}
 
-      weeklyHistory.forEach((week, i) => {
-        const start = new Date(week.weekStart).toLocaleDateString();
-        const end = new Date(week.weekEnd).toLocaleDateString();
+function autoFillAllScores() {
+  const placementsNow = rowState.map(r => r.placeSelect.value);
+  const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
 
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = `${start} → ${end}`;
-        sel.appendChild(opt);
-      });
+  const baseScoresRow = [0, 0, 0, 0];
 
-      sel.value = "current";
+  for (let i = 0; i < rowCount; i++) {
+    const placement = placementsNow[i];
+    if (!placement) {
+      baseScoresRow[i] = 0;
+      continue;
     }
 
-    /* ---------------- INIT ---------------- */
-    function init() {
-      const container = document.getElementById("roundRows");
-      container.innerHTML = "";
+    let score;
+    if (!reverseMode) {
+      if (placement === "Stinky 13") score = -5;
+      else if (placement === "1st")
+        score = stinky13Count > 0 ? 5 * stinky13Count : 4;
+      else if (placement === "2nd")
+        score = stinky13Count === 2 ? 0 : 2;
+      else score = baseScores[placement];
+    } else {
+      if (placement === "Stinky 13") score = +5;
+      else if (placement === "1st")
+        score = -(stinky13Count > 0 ? 5 * stinky13Count : 4);
+      else if (placement === "2nd")
+        score = -(stinky13Count === 2 ? 0 : 2);
+      else score = -baseScores[placement];
+    }
 
-      for (let i = 0; i < rowCount; i++) {
-        const card = document.createElement("div");
-        card.className = "player-card";
+    baseScoresRow[i] = score;
+  }
 
-        const rowPlayer = document.createElement("div");
-        rowPlayer.className = "card-row";
-        const lblPlayer = document.createElement("label");
-        lblPlayer.textContent = "Player";
-        const selPlayer = document.createElement("select");
-        selPlayer.innerHTML = `<option value="">--</option>`;
-        selPlayer.onchange = () => { onPlayerSelected(i); saveState(); };
-        rowPlayer.appendChild(lblPlayer);
-        rowPlayer.appendChild(selPlayer);
-        card.appendChild(rowPlayer);
+  const finalScores = baseScoresRow.slice();
 
-        const rowPlace = document.createElement("div");
-        rowPlace.className = "card-row";
-        const lblPlace = document.createElement("label");
-        lblPlace.textContent = "Placement";
-        const selPlace = document.createElement("select");
-        selPlace.innerHTML =
-          `<option value="">--</option>` +
-          basePlacements.map(p => `<option value="${p}">${p}</option>`).join("");
-        selPlace.onchange = () => { onPlacementChanged(); saveState(); };
-        rowPlace.appendChild(lblPlace);
-        rowPlace.appendChild(selPlace);
-        card.appendChild(rowPlace);
+  // STINKY 2 TRANSFERS
+  for (let i = 0; i < rowCount; i++) {
+    if (!stinky2Enabled[i]) continue;
 
-        const rowScore = document.createElement("div");
-        rowScore.className = "card-row";
-        const lblScore = document.createElement("label");
-        lblScore.textContent = "Score";
-        const inpScore = document.createElement("input");
-        inpScore.type = "text";
-        inpScore.readOnly = true;
-        rowScore.appendChild(lblScore);
-        rowScore.appendChild(inpScore);
-        card.appendChild(rowScore);
+    const total = stinky2Total(
+      Stinky2_red[i],
+      Stinky2_black[i],
+      Stinky2_pairs3[i],
+      Stinky2_kind4[i],
+      Stinky2_pairs4[i]
+    );
 
-        const rowStinky = document.createElement("div");
-        rowStinky.className = "checkbox-row";
-        const chkStinky = document.createElement("input");
-        chkStinky.type = "checkbox";
-        chkStinky.onchange = () => { handleStinky2Checkbox(i); saveState(); };
-        const lblStinky = document.createElement("span");
-        lblStinky.textContent = "Stinky 2";
-        rowStinky.appendChild(chkStinky);
-        rowStinky.appendChild(lblStinky);
-        card.appendChild(rowStinky);
+    const placementsNow = rowState.map(r => r.placeSelect.value);
+    const giverPlace = placementsNow[i];
+    let receiverIdx = null;
 
-        const rowChop = document.createElement("div");
-        rowChop.className = "checkbox-row";
-        const chkChop = document.createElement("input");
-        chkChop.type = "checkbox";
-        chkChop.onchange = () => { handleChopCheckbox(i); saveState(); };
-        const lblChop = document.createElement("span");
-        lblChop.textContent = "Chop Pigs";
-        const btnEdit = document.createElement("button");
-        btnEdit.textContent = "Edit";
-        btnEdit.className = "btn-small";
-        btnEdit.onclick = () => editChop(i);
-        rowChop.appendChild(chkChop);
-        rowChop.appendChild(lblChop);
-        rowChop.appendChild(btnEdit);
-        card.appendChild(rowChop);
+    if (giverPlace === "4th")
+      receiverIdx = findPlayerByPlace(placementsNow, "3rd");
+    else if (giverPlace === "Stinky 13")
+      receiverIdx = findPlayerByPlace(placementsNow, "1st");
+    else if (giverPlace === "3rd")
+      receiverIdx = findPlayerByPlace(placementsNow, "2nd");
 
-        const rowChoppedBy = document.createElement("div");
-        rowChoppedBy.className = "card-row";
-        const lblChoppedBy = document.createElement("label");
-        lblChoppedBy.textContent = "Chopped By";
-        const spanChoppedBy = document.createElement("div");
-        spanChoppedBy.className = "chopped-by";
-        rowChoppedBy.appendChild(lblChoppedBy);
-        rowChoppedBy.appendChild(spanChoppedBy);
-        card.appendChild(rowChoppedBy);
-
-        const btnClear = document.createElement("button");
-        btnClear.textContent = "Clear";
-        btnClear.className = "btn clear-btn";
-        btnClear.onclick = () => { clearRow(i); saveState(); };
-        card.appendChild(btnClear);
-
-        container.appendChild(card);
-
-        rowState.push({
-          playerSelect: selPlayer,
-          placeSelect: selPlace,
-          scoreInput: inpScore,
-          stinky2Checkbox: chkStinky,
-          chopCheckbox: chkChop,
-          choppedBySpan: spanChoppedBy
-        });
+    if (receiverIdx !== null && receiverIdx !== undefined) {
+      if (!reverseMode) {
+        finalScores[i] += total;
+        finalScores[receiverIdx] -= total;
+      } else {
+        finalScores[i] -= total;
+        finalScores[receiverIdx] += total;
       }
+    }
+  }
+
+  // CHOP PIGS TRANSFERS
+  for (let i = 0; i < rowCount; i++) {
+    const victimName = rowState[i].playerSelect.value;
+    if (!victimName) continue;
+
+    for (const entry of chopData[i]) {
+      const chopper = entry.chopper;
+      const types = entry.types;
+      const chopperIdx = findPlayerRow(chopper);
+      if (chopperIdx === null) continue;
+
+      let totalPoints = 0;
+      for (const [t, amt] of Object.entries(types)) {
+        if (amt <= 0) continue;
+        totalPoints += chopPoints(t) * amt;
+      }
+
+      if (!reverseMode) {
+        finalScores[i] -= totalPoints;
+        finalScores[chopperIdx] += totalPoints;
+      } else {
+        finalScores[i] += totalPoints;
+        finalScores[chopperIdx] -= totalPoints;
+      }
+    }
+  }
+
+  for (let i = 0; i < rowCount; i++) {
+    const r = rowState[i];
+    const player = r.playerSelect.value;
+    const placement = r.placeSelect.value;
+
+    if (!player && !placement && chopData[i].length === 0) {
+      r.scoreInput.value = "";
+      r.choppedBySpan.textContent = "";
+      continue;
+    }
+
+    r.scoreInput.value = finalScores[i].toString();
+    const choppedBy = chopData[i].map(e => e.chopper);
+    r.choppedBySpan.textContent = choppedBy.length
+      ? choppedBy.join(", ")
+      : "";
+  }
+
+  refreshTable();
+  updateModeBanner(); // lock after table rebuild
+}
+
+/* ---------------- ROUND COMMIT ---------------- */
+function addRoundScores() {
+  const selectedPlayers = [];
+  const placements = [];
+  const scores = [];
+
+  for (let i = 0; i < rowCount; i++) {
+    const r = rowState[i];
+    const player = r.playerSelect.value;
+    const placement = r.placeSelect.value;
+    const scoreText = r.scoreInput.value;
+
+    if (!player || !placement) {
+      alert("All 4 players and placements must be selected.");
+      return;
+    }
+    if (selectedPlayers.includes(player)) {
+      alert("Each player can only appear once per round.");
+      return;
+    }
+    if (scoreText === "") {
+      alert("Scores must be calculated before adding the round.");
+      return;
+    }
+
+    const scoreVal = parseInt(scoreText, 10);
+    if (isNaN(scoreVal)) {
+      alert("Invalid score format.");
+      return;
+    }
+
+    selectedPlayers.push(player);
+    placements.push(placement);
+    scores.push(scoreVal);
+  }
+
+  function applyScore(bucket, name, score, isWin) {
+    if (!bucket.players[name]) {
+      bucket.players[name] = { score: 0, games: 0, wins: 0 };
+      bucket.playerList.push(name);
+    }
+    bucket.players[name].score += score;
+    bucket.players[name].games++;
+    if (isWin) bucket.players[name].wins++;
+  }
+
+  for (let i = 0; i < 4; i++) {
+    const p = selectedPlayers[i];
+    const score = scores[i];
+    const isWin = placements[i] === "1st";
+
+    applyScore(allTime, p, score, isWin);
+    applyScore(weekly, p, score, isWin);
+  }
+
+  for (let i = 0; i < rowCount; i++) {
+    clearRow(i);
+  }
+
+  if (reverseMode) {
+    setReverseMode(false);
+  }
+
+  refreshTable();
+  updateModeBanner();
+  saveState();
+}
+
+/* ---------------- LEADERBOARD ---------------- */
+function refreshTable() {
+  const container = document.getElementById("leaderboardContainer");
+  container.innerHTML = "";
+
+  const sel = document.getElementById("weeklySelect");
+  const selected = sel ? sel.value : "current";
+
+  let weeklyBucket;
+  let title;
+
+  if (selected === "current") {
+    weeklyBucket = weekly;
+    title = "Weekly Leaderboard — Current Week";
+  } else {
+    const index = parseInt(selected);
+    weeklyBucket = weeklyHistory[index];
+
+    const start = new Date(weeklyBucket.weekStart).toLocaleDateString();
+    const end = new Date(weeklyBucket.weekEnd).toLocaleDateString();
+
+    title = `Weekly Leaderboard — ${start} → ${end}`;
+  }
+
+  renderLeaderboardSection(title, weeklyBucket, container);
+  renderLeaderboardSection("All‑Time Leaderboard", allTime, container);
+
+  updateModeBanner(); // ← CRITICAL FIX
+}
+
+function renderLeaderboardSection(title, bucket, container) {
+  if (!bucket || !bucket.players) {
+    const titleEl = document.createElement("h2");
+    titleEl.style.textAlign = "center";
+    titleEl.style.marginTop = "30px";
+    titleEl.textContent = title;
+    container.appendChild(titleEl);
+
+    const empty = document.createElement("p");
+    empty.style.textAlign = "center";
+    empty.textContent = "No data.";
+    container.appendChild(empty);
+    return;
+  }
+
+  const players = bucket.players;
+
+  const PROVISIONAL_GAMES = 5;
+
+  const arr = Object.entries(players).map(([name, data]) => {
+    const avg = data.games > 0 ? data.score / data.games : 0;
+    return {
+      name,
+      score: data.score,
+      games: data.games,
+      wins: data.wins,
+      winRate: data.games > 0 ? ((data.wins / data.games) * 100).toFixed(1) : "0.0",
+      avgScore: avg,
+      avgScoreDisplay: avg.toFixed(2),
+      provisional: data.games < PROVISIONAL_GAMES
+    };
+  });
+
+  const ranked = arr.filter(p => !p.provisional);
+  const provisional = arr.filter(p => p.provisional);
+
+  ranked.sort((a, b) => {
+    if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
+    return b.score - a.score;
+  });
+
+  provisional.sort((a, b) => a.name.localeCompare(b.name));
+
+  const finalList = [...ranked, ...provisional];
+
+  const titleEl = document.createElement("h2");
+  titleEl.style.textAlign = "center";
+  titleEl.style.marginTop = "30px";
+  titleEl.textContent = title;
+  container.appendChild(titleEl);
+
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.minWidth = "650px";
+  table.style.borderCollapse = "collapse";
+  table.style.background = "white";
+  table.style.borderRadius = "12px";
+  table.style.overflow = "hidden";
+  table.style.margin = "16px auto";
+  table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
+
+  if (document.body.classList.contains("dark-mode")) {
+    table.style.background = "#1e1e1e";
+    table.style.color = "#eee";
+  }
+
+  const thead = document.createElement("thead");
+  thead.innerHTML = `
+    <tr style="background:#f2f2f7;">
+      <th style="padding:10px;">Rank</th>
+      <th style="padding:10px;">Player</th>
+      <th style="padding:10px;">Avg</th>
+      <th style="padding:10px;">Score</th>
+      <th style="padding:10px;">Games</th>
+      <th style="padding:10px;">Wins</th>
+      <th style="padding:10px;">Win Rate %</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+
+  finalList.forEach((p) => {
+    const tr = document.createElement("tr");
+
+    const isRanked = !p.provisional;
+    const rankNumber = isRanked ? ranked.indexOf(p) + 1 : null;
+
+    let icon = "";
+    if (isRanked) {
+      const r = rankNumber - 1;
+      if (r === 0) icon = "🥇";
+      else if (r === 1) icon = "🥈";
+      else if (r === 2) icon = "🥉";
+      else if (r === ranked.length - 1) icon = "💀";
+    }
+
+    if (isRanked) {
+      const r = rankNumber - 1;
+      if (r === 0) tr.style.background = "#fff7d1";
+      else if (r === 1) tr.style.background = "#f2f2f7";
+      else if (r === 2) tr.style.background = "#f8e7d1";
+      else if (r === ranked.length - 1) tr.style.background = "#ffe5e5";
+    } else {
+      tr.style.opacity = "0.55";
+    }
+
+    if (document.body.classList.contains("dark-mode")) {
+      tr.style.background = isRanked ? "#222" : "#1a1a1a";
+      tr.style.color = "#eee";
+    }
+
+    tr.innerHTML = `
+      <td style="padding:10px;">${isRanked ? `${icon} ${rankNumber}` : "—"}</td>
+      <td style="padding:10px;">${p.name} ${p.provisional ? "<span style='font-size:12px; color:#888;'>(P)</span>" : ""}</td>
+      <td style="padding:10px;">${p.avgScoreDisplay}</td>
+      <td style="padding:10px;">${p.score}</td>
+      <td style="padding:10px;">${p.games}</td>
+      <td style="padding:10px;">${p.wins}</td>
+      <td style="padding:10px;">${p.winRate}%</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+
+  const wrapper = document.createElement("div");
+  wrapper.style.overflowX = "auto";
+  wrapper.style.webkitOverflowScrolling = "touch";
+  wrapper.appendChild(table);
+
+  container.appendChild(wrapper);
+}
+
+/* ---------------- WEEKLY HISTORY ---------------- */
+function openWeeklyHistory() {
+  const modal = document.getElementById("modalContent");
+
+  let html = `<h2>Weekly History</h2>`;
+
+  if (weeklyHistory.length === 0) {
+    html += `<p>No weekly history yet.</p>`;
+  } else {
+    weeklyHistory.forEach((week, i) => {
+      html += `
+        <div class="leaderboard-card">
+          <h3>${new Date(week.weekStart).toLocaleDateString()} → ${new Date(week.weekEnd).toLocaleDateString()}</h3>
+          <button class="btn" onclick="openWeeklyHistoryDetail(${i})">View Details</button>
+        </div>
+      `;
+    });
+  }
+
+  modal.innerHTML = html;
+  openModal();
+}
+
+function openWeeklyHistoryDetail(index) {
+  const week = weeklyHistory[index];
+  const modal = document.getElementById("modalContent");
+
+  let html = `
+    <h2>Week Details</h2>
+    <p>${new Date(week.weekStart).toLocaleDateString()} → ${new Date(week.weekEnd).toLocaleDateString()}</p>
+  `;
+
+  const arr = week.playerList.map(name => {
+    const p = week.players[name];
+    return {
+      name,
+      score: p.score,
+      games: p.games,
+      wins: p.wins,
+      avg: p.games > 0 ? (p.score / p.games).toFixed(2) : "0.00"
+    };
+  });
+
+  arr.sort((a, b) => b.avg - a.avg);
+
+  html += `<table style="width:100%; margin-top:10px;">`;
+  html += `
+    <tr>
+      <th>Player</th>
+      <th>Avg</th>
+      <th>Score</th>
+      <th>Games</th>
+      <th>Wins</th>
+    </tr>
+  `;
+
+  arr.forEach(p => {
+    html += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.avg}</td>
+        <td>${p.score}</td>
+        <td>${p.games}</td>
+        <td>${p.wins}</td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+
+  modal.innerHTML = html;
+  openModal();
+}
+
+/* ---------------- EXPORT TO EXCEL ---------------- */
+function exportToExcel() {
+  if (!canSave) {
+    alert("Login required to export.");
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+
+  function sheetFrom(bucket, name) {
+    const rows = [["Player", "Score", "Games", "Wins"]];
+    for (const p of bucket.playerList) {
+      const d = bucket.players[p];
+      rows.push([p, d.score, d.games, d.wins]);
+    }
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, name);
+  }
+
+  sheetFrom(allTime, "AllTime");
+  sheetFrom(weekly, "Weekly");
+
+  const historyRows = [["Start", "End", "Player", "Score", "Games", "Wins"]];
+  weeklyHistory.forEach((week) => {
+    const start = new Date(week.weekStart).toLocaleDateString();
+    const end = new Date(week.weekEnd).toLocaleDateString();
+
+    week.playerList.forEach(name => {
+      const p = week.players[name];
+      historyRows.push([
+        start,
+        end,
+        name,
+        p.score,
+        p.games,
+        p.wins
+      ]);
+    });
+  });
+
+  const wsHistory = XLSX.utils.aoa_to_sheet(historyRows);
+  XLSX.utils.book_append_sheet(wb, wsHistory, "WeeklyHistory");
+
+  XLSX.writeFile(wb, "chop_pig_stats.xlsx");
+}
+
+/* ---------------- IMPORT FROM EXCEL ---------------- */
+function importFromExcel() {
+  if (!canSave) {
+    alert("Login required to import.");
+    return;
+  }
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".xlsx";
+
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const wb = XLSX.read(evt.target.result, { type: "binary" });
+
+      function loadSheet(name) {
+        const ws = wb.Sheets[name];
+        if (!ws) return { players: {}, playerList: [] };
+
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        const bucket = { players: {}, playerList: [] };
+
+        for (let i = 1; i < rows.length; i++) {
+          const [name, score, games, wins] = rows[i];
+          if (!name) continue;
+          bucket.players[name] = {
+            score: Number(score) || 0,
+            games: Number(games) || 0,
+            wins: Number(wins) || 0
+          };
+          bucket.playerList.push(name);
+        }
+        return bucket;
+      }
+
+      function loadHistorySheet(name) {
+        const ws = wb.Sheets[name];
+        if (!ws) return [];
+
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        const history = [];
+
+        for (let i = 1; i < rows.length; i++) {
+          const [start, end, player, score, games, wins] = rows[i];
+          if (!start || !end || !player) continue;
+
+          let week = history.find(
+            w => w.weekStart === start && w.weekEnd === end
+          );
+
+          if (!week) {
+            week = {
+              weekStart: start,
+              weekEnd: end,
+              players: {},
+              playerList: []
+            };
+            history.push(week);
+          }
+
+          week.players[player] = {
+            score: Number(score) || 0,
+            games: Number(games) || 0,
+            wins: Number(wins) || 0
+          };
+
+          week.playerList.push(player);
+        }
+
+        return history;
+      }
+
+      allTime = loadSheet("AllTime");
+      weekly = loadSheet("Weekly");
+      weeklyHistory = loadHistorySheet("WeeklyHistory");
+      weeklyReset = new Date().toISOString();
 
       updatePlayerDropdowns();
+      updateWeeklyDropdown();
       refreshTable();
       updateModeBanner();
-    }
-
-    /* ---------------- PLAYER MANAGEMENT ---------------- */
-    function addPlayer() {
-      const input = document.getElementById("newPlayerName");
-      const name = input.value.trim();
-      if (!name) {
-        alert("Please enter a player name.");
-        return;
-      }
-
-      const buckets = [allTime, weekly];
-      for (const bucket of buckets) {
-        if (!bucket.players[name]) {
-          bucket.players[name] = { score: 0, games: 0, wins: 0 };
-          bucket.playerList.push(name);
-          bucket.playerList.sort();
-        }
-      }
-
-      updatePlayerDropdowns();
-      refreshTable();
       saveState();
-      input.value = "";
-    }
-
-    function onPlayerSelected(idx) {
-      updatePlayerDropdowns();
-      autoFillAllScores();
-    }
-
-    function updatePlayerDropdowns() {
-      const allNames = Array.from(new Set([
-        ...allTime.playerList,
-        ...weekly.playerList
-      ])).sort();
-
-      const selected = rowState.map(r => r.playerSelect.value);
-      for (let i = 0; i < rowCount; i++) {
-        const sel = rowState[i].playerSelect;
-        const current = sel.value;
-        const allowed = allNames.filter(
-          p => !selected.includes(p) || p === current
-        );
-        const oldVal = sel.value;
-        sel.innerHTML =
-          `<option value="">--</option>` +
-          allowed.map(p => `<option value="${p}">${p}</option>`).join("");
-        if (oldVal && allowed.includes(oldVal)) {
-          sel.value = oldVal;
-        } else if (!allowed.includes(oldVal)) {
-          sel.value = "";
-        }
-      }
-    }
-
-    function findPlayerRow(name) {
-      for (let i = 0; i < rowCount; i++) {
-        if (rowState[i].playerSelect.value === name) return i;
-      }
-      return null;
-    }
-
-    /* ---------------- PLACEMENT & CLEARING ---------------- */
-    function onPlacementChanged() {
-      updatePlacementOptions();
-      autoFillAllScores();
-    }
-
-    function updatePlacementOptions() {
-      const placementsNow = rowState.map(r => r.placeSelect.value);
-      const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
-
-      let allowedGlobal = basePlacements.slice();
-
-      if (stinky13Count === 1) {
-        allowedGlobal = allowedGlobal.filter(p => p !== "4th");
-      } else if (stinky13Count === 2) {
-        allowedGlobal = allowedGlobal.filter(p => !["3rd", "4th"].includes(p));
-      } else if (stinky13Count >= 3) {
-        allowedGlobal = allowedGlobal.filter(
-          p => !["2nd", "3rd", "4th"].includes(p)
-        );
-      }
-
-      for (let i = 0; i < rowCount; i++) {
-        const current = placementsNow[i];
-        const usedByOthers = [];
-        for (let j = 0; j < rowCount; j++) {
-          if (
-            j !== i &&
-            ["1st", "2nd", "3rd", "4th"].includes(placementsNow[j])
-          ) {
-            usedByOthers.push(placementsNow[j]);
-          }
-        }
-
-        const allowedForRow = [];
-        for (const p of allowedGlobal) {
-          if (p === "Stinky 13") {
-            allowedForRow.push(p);
-          } else if (!usedByOthers.includes(p)) {
-            allowedForRow.push(p);
-          }
-        }
-
-        const sel = rowState[i].placeSelect;
-        const oldVal = sel.value;
-        sel.innerHTML =
-          `<option value="">--</option>` +
-          allowedForRow.map(p => `<option value="${p}">${p}</option>`).join("");
-        if (oldVal && allowedForRow.includes(oldVal)) {
-          sel.value = oldVal;
-        } else if (oldVal && !allowedForRow.includes(oldVal)) {
-          sel.value = "";
-          rowState[i].scoreInput.value = "";
-          stinky2Enabled[i] = false;
-          Stinky2_red[i] = 0;
-          Stinky2_black[i] = 0;
-          Stinky2_pairs3[i] = 0;
-          Stinky2_kind4[i] = 0;
-          Stinky2_pairs4[i] = 0;
-          rowState[i].stinky2Checkbox.checked = false;
-
-          chopData[i] = [];
-          rowState[i].chopCheckbox.checked = false;
-          rowState[i].choppedBySpan.textContent = "";
-        }
-      }
-    }
-
-    function clearRow(idx) {
-      const r = rowState[idx];
-      r.playerSelect.value = "";
-      r.placeSelect.value = "";
-      r.scoreInput.value = "";
-
-      stinky2Enabled[idx] = false;
-      Stinky2_red[idx] = 0;
-      Stinky2_black[idx] = 0;
-      Stinky2_pairs3[idx] = 0;
-      Stinky2_kind4[idx] = 0;
-      Stinky2_pairs4[idx] = 0;
-      r.stinky2Checkbox.checked = false;
-
-      chopData[idx] = [];
-      r.chopCheckbox.checked = false;
-      r.choppedBySpan.textContent = "";
-
-      updatePlayerDropdowns();
-      updatePlacementOptions();
-      autoFillAllScores();
-    }
-
-    /* ---------------- STINKY 2 ---------------- */
-    function isStinky2AllowedForRow(idx) {
-      const placementsNow = rowState.map(r => r.placeSelect.value);
-      const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
-      const place = placementsNow[idx];
-
-      if (!place) return false;
-
-      if (place === "4th" && stinky13Count === 0) return true;
-      if (place === "Stinky 13") return true;
-      if (place === "3rd" && stinky13Count === 1) return true;
-
-      return false;
-    }
-
-    function validStinky2Combo(red, black) {
-      const combos = [
-        [1, 0],
-        [0, 1],
-        [1, 1],
-        [2, 0],
-        [0, 2],
-        [2, 1],
-        [1, 2]
-      ];
-      return combos.some(([r, b]) => r === red && b === black);
-    }
-
-    function stinky2Total(red, black, p3, k4, p4) {
-      return -2 * red - 1 * black - 2 * p3 - 4 * k4 - 5 * p4;
-    }
-
-    function handleStinky2Checkbox(idx) {
-      const chk = rowState[idx].stinky2Checkbox;
-      if (!chk.checked) {
-        stinky2Enabled[idx] = false;
-        Stinky2_red[idx] = 0;
-        Stinky2_black[idx] = 0;
-        Stinky2_pairs3[idx] = 0;
-        Stinky2_kind4[idx] = 0;
-        Stinky2_pairs4[idx] = 0;
-        autoFillAllScores();
-        return;
-      }
-      openStinky2Popup(idx);
-    }
-
-    function openStinky2Popup(idx) {
-      if (!isStinky2AllowedForRow(idx)) {
-        alert(
-          "Stinky 2 is allowed only for:\n" +
-          "- 4th place (when no Stinky 13)\n" +
-          "- Stinky 13 (any time there is Stinky 13)\n" +
-          "- 3rd place (only when there is exactly one Stinky 13)"
-        );
-        rowState[idx].stinky2Checkbox.checked = false;
-        return;
-      }
-
-      const modal = document.getElementById("modalContent");
-      modal.innerHTML = `<h2>Stinky 2 for Player Row ${idx + 1}</h2>`;
-
-      function addRow(icon, labelText, currentVal, maxVal) {
-        const div = document.createElement("div");
-        div.className = "label-row";
-
-        const label = document.createElement("span");
-        label.className = "label";
-        label.textContent = `${icon}  ${labelText}:`;
-        div.appendChild(label);
-
-        const minus = document.createElement("button");
-        minus.textContent = "-";
-        minus.className = "btn-small";
-        minus.onclick = () => {
-          currentVal.input.value = Math.max(
-            0,
-            parseInt(currentVal.input.value || "0") - 1
-          );
-        };
-        div.appendChild(minus);
-
-        const input = document.createElement("input");
-        input.type = "number";
-        input.className = "spin";
-        input.value = currentVal.value;
-        input.min = 0;
-        input.max = maxVal;
-        currentVal.input = input;
-        div.appendChild(input);
-
-        const plus = document.createElement("button");
-        plus.textContent = "+";
-        plus.className = "btn-small";
-        plus.onclick = () => {
-          const v = Math.min(
-            maxVal,
-            parseInt(currentVal.input.value || "0") + 1
-          );
-          currentVal.input.value = v;
-        };
-        div.appendChild(plus);
-
-        modal.appendChild(div);
-      }
-
-      const red = { value: Stinky2_red[idx] };
-      const black = { value: Stinky2_black[idx] };
-      const p3 = { value: Stinky2_pairs3[idx] };
-      const k4 = { value: Stinky2_kind4[idx] };
-      const p4 = { value: Stinky2_pairs4[idx] };
-
-      addRow("🔥🐷", "Red Pigs", red, 3);
-      addRow("🐷", "Black Pigs", black, 3);
-      addRow("🔥🐷", "3 Consecutive Pairs", p3, 3);
-      addRow("🔥🔥🐷🐷", "4 of a Kind", k4, 3);
-      addRow("🔥🔥🐷🐷🐷", "4 Consecutive Pairs", p4, 3);
-
-      const btnSave = document.createElement("button");
-      btnSave.textContent = "Save";
-      btnSave.className = "btn";
-      btnSave.style.marginTop = "10px";
-      btnSave.onclick = () => {
-        const r = parseInt(red.input.value || "0");
-        const b = parseInt(black.input.value || "0");
-        const pp3 = parseInt(p3.input.value || "0");
-        const kk4 = parseInt(k4.input.value || "0");
-        const pp4 = parseInt(p4.input.value || "0");
-
-        if (!validStinky2Combo(r, b)) {
-          alert(
-            "Allowed Stinky 2 red/black combos:\n" +
-            "1 Red\n1 Black\n1 Red + 1 Black\n" +
-            "2 Red\n2 Black\n2 Red + 1 Black\n1 Red + 2 Black"
-          );
-          return;
-        }
-
-        stinky2Enabled[idx] = true;
-        Stinky2_red[idx] = r;
-        Stinky2_black[idx] = b;
-        Stinky2_pairs3[idx] = pp3;
-        Stinky2_kind4[idx] = kk4;
-        Stinky2_pairs4[idx] = pp4;
-
-        autoFillAllScores();
-        closeModal();
-      };
-      modal.appendChild(btnSave);
-
-      openModal();
-    }
-
-    /* ---------------- CHOP PIGS ---------------- */
-    function chopPoints(type) {
-      if (type === "Black Pigs") return 1;
-      if (type === "Red Pigs") return 2;
-      if (type === "3 Consecutive Pairs") return 2;
-      if (type === "4 of a Kind") return 4;
-      if (type === "4 Consecutive Pairs") return 5;
-      return 0;
-    }
-
-    function handleChopCheckbox(idx) {
-      const chk = rowState[idx].chopCheckbox;
-      if (!chk.checked) {
-        chopData[idx] = [];
-        autoFillAllScores();
-        return;
-      }
-      const player = rowState[idx].playerSelect.value;
-      if (!player) {
-        alert("Select a player before using Chop Pigs.");
-        chk.checked = false;
-        return;
-      }
-      openChopPopup(idx);
-    }
-
-    function editChop(idx) {
-      if (!rowState[idx].chopCheckbox.checked) {
-        alert("This player has no chop data to edit.");
-        return;
-      }
-      openChopPopup(idx);
-    }
-
-    function openChopPopup(idx) {
-      const modal = document.getElementById("modalContent");
-      modal.innerHTML = `<h2>Chop Pigs for Player Row ${idx + 1}</h2>`;
-
-      const container = document.createElement("div");
-      modal.appendChild(container);
-
-      const types = [
-        ["Black Pigs", 2],
-        ["Red Pigs", 2],
-        ["3 Consecutive Pairs", 3],
-        ["4 of a Kind", 3],
-        ["4 Consecutive Pairs", 3]
-      ];
-
-      const iconMap = {
-        "Black Pigs": "🐷",
-        "Red Pigs": "🔥🐷",
-        "3 Consecutive Pairs": "🔥🐷",
-        "4 of a Kind": "🔥🔥🐷🐷",
-        "4 Consecutive Pairs": "🔥🔥🐷🐷🐷"
-      };
-
-      const chopperRows = [];
-
-      function removeChopperBlock(block) {
-        container.removeChild(block);
-        const idxRow = chopperRows.findIndex(r => r.frame === block);
-        if (idxRow >= 0) chopperRows.splice(idxRow, 1);
-      }
-
-      function addChopperRow(existing) {
-        const allNames = Array.from(new Set([
-          ...allTime.playerList,
-          ...weekly.playerList
-        ])).sort();
-
-        const block = document.createElement("fieldset");
-        block.style.marginBottom = "8px";
-
-        const legend = document.createElement("legend");
-        legend.textContent = "Chopper Entry";
-        block.appendChild(legend);
-
-        const btnRemove = document.createElement("button");
-        btnRemove.textContent = "Remove";
-        btnRemove.className = "btn-small";
-        btnRemove.style.float = "right";
-        btnRemove.onclick = () => removeChopperBlock(block);
-        block.appendChild(btnRemove);
-
-        const labelChopper = document.createElement("div");
-        labelChopper.textContent = "Chopper:";
-        block.appendChild(labelChopper);
-
-        const selChopper = document.createElement("select");
-        selChopper.innerHTML =
-          `<option value="">--</option>` +
-          allNames.map(p => `<option value="${p}">${p}</option>`).join("");
-        if (existing) selChopper.value = existing.chopper;
-        block.appendChild(selChopper);
-
-        const typeVars = {};
-
-        for (const [label, maxVal] of types) {
-          const frame = document.createElement("div");
-          frame.className = "label-row";
-
-          const lbl = document.createElement("span");
-          lbl.className = "label";
-          lbl.textContent = `${iconMap[label]}  ${label}`;
-          frame.appendChild(lbl);
-
-          const minus = document.createElement("button");
-          minus.textContent = "-";
-          minus.className = "btn-small";
-          frame.appendChild(minus);
-
-          const spin = document.createElement("input");
-          spin.type = "number";
-          spin.className = "spin";
-          spin.min = 0;
-          spin.max = maxVal;
-          spin.value = existing ? existing.types[label] || 0 : 0;
-          spin.readOnly = true;
-          frame.appendChild(spin);
-
-          const plus = document.createElement("button");
-          plus.textContent = "+";
-          plus.className = "btn-small";
-          frame.appendChild(plus);
-
-          minus.onclick = () => {
-            const v = Math.max(0, parseInt(spin.value) - 1);
-            spin.value = v;
-          };
-
-          plus.onclick = () => {
-            const v = Math.min(maxVal, parseInt(spin.value) + 1);
-            spin.value = v;
-          };
-
-          typeVars[label] = spin;
-          block.appendChild(frame);
-        }
-
-        container.appendChild(block);
-        chopperRows.push({
-          frame: block,
-          chopperSelect: selChopper,
-          typeVars
-        });
-      }
-
-      for (const entry of chopData[idx]) {
-        addChopperRow(entry);
-      }
-      if (chopperRows.length === 0) addChopperRow(null);
-
-      const btnAdd = document.createElement("button");
-      btnAdd.textContent = "Add another chopper";
-      btnAdd.className = "btn";
-      btnAdd.style.marginTop = "10px";
-      btnAdd.onclick = () => addChopperRow(null);
-      modal.appendChild(btnAdd);
-
-      const btnSave = document.createElement("button");
-      btnSave.textContent = "Save";
-      btnSave.className = "btn";
-      btnSave.style.marginTop = "10px";
-      btnSave.style.marginLeft = "10px";
-      btnSave.onclick = () => {
-        const newList = [];
-        const victim = rowState[idx].playerSelect.value;
-
-        for (const row of chopperRows) {
-          const name = row.chopperSelect.value;
-          if (!name) {
-            alert("Every chopper must have a name.");
-            return;
-          }
-          if (name === victim) {
-            alert("A player cannot chop themselves.");
-            return;
-          }
-          if (newList.some(e => e.chopper === name)) {
-            alert(`${name} is already listed as a chopper.`);
-            return;
-          }
-
-          const typesDict = {};
-          let allZero = true;
-
-          for (const [label, maxVal] of types) {
-            let v = parseInt(row.typeVars[label].value || "0");
-            if (isNaN(v)) v = 0;
-            v = Math.max(0, Math.min(maxVal, v));
-            row.typeVars[label].value = v;
-            typesDict[label] = v;
-            if (v > 0) allZero = false;
-          }
-
-          if (allZero) {
-            alert("Each chopper must have at least one chop type.");
-            return;
-          }
-
-          newList.push({ chopper: name, types: typesDict });
-        }
-
-        chopData[idx] = newList;
-        autoFillAllScores();
-        closeModal();
-      };
-      modal.appendChild(btnSave);
-
-      openModal();
-    }
-
-    /* ---------------- SCORING ENGINE ---------------- */
-    function findPlayerByPlace(placements, place) {
-      for (let i = 0; i < placements.length; i++) {
-        if (placements[i] === place) return i;
-      }
-      return null;
-    }
-
-    function autoFillAllScores() {
-      const placementsNow = rowState.map(r => r.placeSelect.value);
-      const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
-
-      const baseScoresRow = [0, 0, 0, 0];
-
-      for (let i = 0; i < rowCount; i++) {
-        const placement = placementsNow[i];
-        if (!placement) {
-          baseScoresRow[i] = 0;
-          continue;
-        }
-
-        let score;
-        if (!reverseMode) {
-          // NORMAL MODE
-          if (placement === "Stinky 13") score = -5;
-          else if (placement === "1st")
-            score = stinky13Count > 0 ? 5 * stinky13Count : 4;
-          else if (placement === "2nd")
-            score = stinky13Count === 2 ? 0 : 2;
-          else score = baseScores[placement];
-        } else {
-          // REVERSE MODE
-          if (placement === "Stinky 13") score = +5;
-          else if (placement === "1st")
-            score = -(stinky13Count > 0 ? 5 * stinky13Count : 4);
-          else if (placement === "2nd")
-            score = -(stinky13Count === 2 ? 0 : 2);
-          else score = -baseScores[placement];
-        }
-
-        baseScoresRow[i] = score;
-      }
-
-      const finalScores = baseScoresRow.slice();
-
-      // STINKY 2 TRANSFERS
-      for (let i = 0; i < rowCount; i++) {
-        if (!stinky2Enabled[i]) continue;
-
-        const total = stinky2Total(
-          Stinky2_red[i],
-          Stinky2_black[i],
-          Stinky2_pairs3[i],
-          Stinky2_kind4[i],
-          Stinky2_pairs4[i]
-        );
-
-        const placementsNow = rowState.map(r => r.placeSelect.value);
-        const giverPlace = placementsNow[i];
-        let receiverIdx = null;
-
-        if (giverPlace === "4th")
-          receiverIdx = findPlayerByPlace(placementsNow, "3rd");
-        else if (giverPlace === "Stinky 13")
-          receiverIdx = findPlayerByPlace(placementsNow, "1st");
-        else if (giverPlace === "3rd")
-          receiverIdx = findPlayerByPlace(placementsNow, "2nd");
-
-        if (receiverIdx !== null && receiverIdx !== undefined) {
-          if (!reverseMode) {
-            finalScores[i] += total;          // giver loses
-            finalScores[receiverIdx] -= total; // receiver gains
-          } else {
-            finalScores[i] -= total;          // giver gains
-            finalScores[receiverIdx] += total; // receiver loses
-          }
-        }
-      }
-
-      // CHOP PIGS TRANSFERS
-      for (let i = 0; i < rowCount; i++) {
-        const victimName = rowState[i].playerSelect.value;
-        if (!victimName) continue;
-
-        for (const entry of chopData[i]) {
-          const chopper = entry.chopper;
-          const types = entry.types;
-          const chopperIdx = findPlayerRow(chopper);
-          if (chopperIdx === null) continue;
-
-          let totalPoints = 0;
-          for (const [t, amt] of Object.entries(types)) {
-            if (amt <= 0) continue;
-            totalPoints += chopPoints(t) * amt;
-          }
-
-          if (!reverseMode) {
-            finalScores[i] -= totalPoints;          // victim loses
-            finalScores[chopperIdx] += totalPoints; // chopper gains
-          } else {
-            finalScores[i] += totalPoints;          // victim gains
-            finalScores[chopperIdx] -= totalPoints; // chopper loses
-          }
-        }
-      }
-
-      for (let i = 0; i < rowCount; i++) {
-        const r = rowState[i];
-        const player = r.playerSelect.value;
-        const placement = r.placeSelect.value;
-
-        if (!player && !placement && chopData[i].length === 0) {
-          r.scoreInput.value = "";
-          r.choppedBySpan.textContent = "";
-          continue;
-        }
-
-        r.scoreInput.value = finalScores[i].toString();
-        const choppedBy = chopData[i].map(e => e.chopper);
-        r.choppedBySpan.textContent = choppedBy.length
-          ? choppedBy.join(", ")
-          : "";
-      }
-
-      refreshTable();
-    }
-
-    /* ---------------- ROUND COMMIT ---------------- */
-    function addRoundScores() {
-      const selectedPlayers = [];
-      const placements = [];
-      const scores = [];
-
-      for (let i = 0; i < rowCount; i++) {
-        const r = rowState[i];
-        const player = r.playerSelect.value;
-        const placement = r.placeSelect.value;
-        const scoreText = r.scoreInput.value;
-
-        if (!player || !placement) {
-          alert("All 4 players and placements must be selected.");
-          return;
-        }
-        if (selectedPlayers.includes(player)) {
-          alert("Each player can only appear once per round.");
-          return;
-        }
-        if (scoreText === "") {
-          alert("Scores must be calculated before adding the round.");
-          return;
-        }
-
-        const scoreVal = parseInt(scoreText, 10);
-        if (isNaN(scoreVal)) {
-          alert("Invalid score format.");
-          return;
-        }
-
-        selectedPlayers.push(player);
-        placements.push(placement);
-        scores.push(scoreVal);
-      }
-
-      function applyScore(bucket, name, score, isWin) {
-        if (!bucket.players[name]) {
-          bucket.players[name] = { score: 0, games: 0, wins: 0 };
-          bucket.playerList.push(name);
-        }
-        bucket.players[name].score += score;
-        bucket.players[name].games++;
-        if (isWin) bucket.players[name].wins++;
-      }
-
-      for (let i = 0; i < 4; i++) {
-        const p = selectedPlayers[i];
-        const score = scores[i];
-        const isWin = placements[i] === "1st"; // winner still 1st, even in Reverse Mode
-
-        applyScore(allTime, p, score, isWin);
-        applyScore(weekly, p, score, isWin);
-      }
-
-      for (let i = 0; i < rowCount; i++) {
-        clearRow(i);
-      }
-
-      // After a Reverse Mode round, automatically go back to normal mode
-      if (reverseMode) {
-        setReverseMode(false);
-      }
-
-      refreshTable();
-      saveState();
-    }
-
-    /* ---------------- LEADERBOARD (WEEKLY + ALL-TIME) ---------------- */
-    function refreshTable() {
-      const container = document.getElementById("leaderboardContainer");
-      container.innerHTML = "";
-
-      const sel = document.getElementById("weeklySelect");
-      const selected = sel ? sel.value : "current";
-
-      let weeklyBucket;
-      let title;
-
-      if (selected === "current") {
-        weeklyBucket = weekly;
-        title = "Weekly Leaderboard — Current Week";
-      } else {
-        const index = parseInt(selected);
-        weeklyBucket = weeklyHistory[index];
-
-        const start = new Date(weeklyBucket.weekStart).toLocaleDateString();
-        const end = new Date(weeklyBucket.weekEnd).toLocaleDateString();
-
-        title = `Weekly Leaderboard — ${start} → ${end}`;
-      }
-
-      renderLeaderboardSection(title, weeklyBucket, container);
-      renderLeaderboardSection("All‑Time Leaderboard", allTime, container);
-    }
-
-    function renderLeaderboardSection(title, bucket, container) {
-      if (!bucket || !bucket.players) {
-        const titleEl = document.createElement("h2");
-        titleEl.style.textAlign = "center";
-        titleEl.style.marginTop = "30px";
-        titleEl.textContent = title;
-        container.appendChild(titleEl);
-
-        const empty = document.createElement("p");
-        empty.style.textAlign = "center";
-        empty.textContent = "No data.";
-        container.appendChild(empty);
-        return;
-      }
-
-      const players = bucket.players;
-
-      const PROVISIONAL_GAMES = 5;
-
-      const arr = Object.entries(players).map(([name, data]) => {
-        const avg = data.games > 0 ? data.score / data.games : 0;
-        return {
-          name,
-          score: data.score,
-          games: data.games,
-          wins: data.wins,
-          winRate: data.games > 0 ? ((data.wins / data.games) * 100).toFixed(1) : "0.0",
-          avgScore: avg,
-          avgScoreDisplay: avg.toFixed(2),
-          provisional: data.games < PROVISIONAL_GAMES
-        };
-      });
-
-      const ranked = arr.filter(p => !p.provisional);
-      const provisional = arr.filter(p => p.provisional);
-
-      ranked.sort((a, b) => {
-        if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
-        return b.score - a.score;
-      });
-
-      provisional.sort((a, b) => a.name.localeCompare(b.name));
-
-      const finalList = [...ranked, ...provisional];
-
-      const titleEl = document.createElement("h2");
-      titleEl.style.textAlign = "center";
-      titleEl.style.marginTop = "30px";
-      titleEl.textContent = title;
-      container.appendChild(titleEl);
-
-      const table = document.createElement("table");
-      table.style.width = "100%";
-      table.style.minWidth = "650px";
-      table.style.borderCollapse = "collapse";
-      table.style.background = "white";
-      table.style.borderRadius = "12px";
-      table.style.overflow = "hidden";
-      table.style.margin = "16px auto";
-      table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
-
-      if (document.body.classList.contains("dark-mode")) {
-        table.style.background = "#1e1e1e";
-        table.style.color = "#eee";
-      }
-
-      const thead = document.createElement("thead");
-      thead.innerHTML = `
-        <tr style="background:#f2f2f7;">
-          <th style="padding:10px;">Rank</th>
-          <th style="padding:10px;">Player</th>
-          <th style="padding:10px;">Avg</th>
-          <th style="padding:10px;">Score</th>
-          <th style="padding:10px;">Games</th>
-          <th style="padding:10px;">Wins</th>
-          <th style="padding:10px;">Win Rate %</th>
-        </tr>
-      `;
-      table.appendChild(thead);
-
-      const tbody = document.createElement("tbody");
-
-      finalList.forEach((p) => {
-        const tr = document.createElement("tr");
-
-        const isRanked = !p.provisional;
-        const rankNumber = isRanked ? ranked.indexOf(p) + 1 : null;
-
-        let icon = "";
-        if (isRanked) {
-          const r = rankNumber - 1;
-          if (r === 0) icon = "🥇";
-          else if (r === 1) icon = "🥈";
-          else if (r === 2) icon = "🥉";
-          else if (r === ranked.length - 1) icon = "💀";
-        }
-
-        if (isRanked) {
-          const r = rankNumber - 1;
-          if (r === 0) tr.style.background = "#fff7d1";
-          else if (r === 1) tr.style.background = "#f2f2f7";
-          else if (r === 2) tr.style.background = "#f8e7d1";
-          else if (r === ranked.length - 1) tr.style.background = "#ffe5e5";
-        } else {
-          tr.style.opacity = "0.55";
-        }
-
-        if (document.body.classList.contains("dark-mode")) {
-          tr.style.background = isRanked ? "#222" : "#1a1a1a";
-          tr.style.color = "#eee";
-        }
-
-        tr.innerHTML = `
-          <td style="padding:10px;">${isRanked ? `${icon} ${rankNumber}` : "—"}</td>
-          <td style="padding:10px;">${p.name} ${p.provisional ? "<span style='font-size:12px; color:#888;'>(P)</span>" : ""}</td>
-          <td style="padding:10px;">${p.avgScoreDisplay}</td>
-          <td style="padding:10px;">${p.score}</td>
-          <td style="padding:10px;">${p.games}</td>
-          <td style="padding:10px;">${p.wins}</td>
-          <td style="padding:10px;">${p.winRate}%</td>
-        `;
-
-        tbody.appendChild(tr);
-      });
-
-      table.appendChild(tbody);
-
-      const wrapper = document.createElement("div");
-      wrapper.style.overflowX = "auto";
-      wrapper.style.webkitOverflowScrolling = "touch";
-      wrapper.appendChild(table);
-
-      container.appendChild(wrapper);
-    }
-
-    /* ---------------- WEEKLY HISTORY UI ---------------- */
-    function openWeeklyHistory() {
-      const modal = document.getElementById("modalContent");
-
-      let html = `<h2>Weekly History</h2>`;
-
-      if (weeklyHistory.length === 0) {
-        html += `<p>No weekly history yet.</p>`;
-      } else {
-        weeklyHistory.forEach((week, i) => {
-          html += `
-            <div class="leaderboard-card">
-              <h3>${new Date(week.weekStart).toLocaleDateString()} → ${new Date(week.weekEnd).toLocaleDateString()}</h3>
-              <button class="btn" onclick="openWeeklyHistoryDetail(${i})">View Details</button>
-            </div>
-          `;
-        });
-      }
-
-      modal.innerHTML = html;
-      openModal();
-    }
-
-    function openWeeklyHistoryDetail(index) {
-      const week = weeklyHistory[index];
-      const modal = document.getElementById("modalContent");
-
-      let html = `
-        <h2>Week Details</h2>
-        <p>${new Date(week.weekStart).toLocaleDateString()} → ${new Date(week.weekEnd).toLocaleDateString()}</p>
-      `;
-
-      const arr = week.playerList.map(name => {
-        const p = week.players[name];
-        return {
-          name,
-          score: p.score,
-          games: p.games,
-          wins: p.wins,
-          avg: p.games > 0 ? (p.score / p.games).toFixed(2) : "0.00"
-        };
-      });
-
-      arr.sort((a, b) => b.avg - a.avg);
-
-      html += `<table style="width:100%; margin-top:10px;">`;
-      html += `
-        <tr>
-          <th>Player</th>
-          <th>Avg</th>
-          <th>Score</th>
-          <th>Games</th>
-          <th>Wins</th>
-        </tr>
-      `;
-
-      arr.forEach(p => {
-        html += `
-          <tr>
-            <td>${p.name}</td>
-            <td>${p.avg}</td>
-            <td>${p.score}</td>
-            <td>${p.games}</td>
-            <td>${p.wins}</td>
-          </tr>
-        `;
-      });
-
-      html += `</table>`;
-
-      modal.innerHTML = html;
-      openModal();
-    }
-
-    /* ---------------- EXPORT TO EXCEL ---------------- */
-    function exportToExcel() {
-      if (!canSave) {
-        alert("Login required to export.");
-        return;
-      }
-
-      const wb = XLSX.utils.book_new();
-
-      function sheetFrom(bucket, name) {
-        const rows = [["Player", "Score", "Games", "Wins"]];
-        for (const p of bucket.playerList) {
-          const d = bucket.players[p];
-          rows.push([p, d.score, d.games, d.wins]);
-        }
-        const ws = XLSX.utils.aoa_to_sheet(rows);
-        XLSX.utils.book_append_sheet(wb, ws, name);
-      }
-
-      sheetFrom(allTime, "AllTime");
-      sheetFrom(weekly, "Weekly");
-
-      const historyRows = [["Start", "End", "Player", "Score", "Games", "Wins"]];
-      weeklyHistory.forEach((week) => {
-        const start = new Date(week.weekStart).toLocaleDateString();
-        const end = new Date(week.weekEnd).toLocaleDateString();
-
-        week.playerList.forEach(name => {
-          const p = week.players[name];
-          historyRows.push([
-            start,
-            end,
-            name,
-            p.score,
-            p.games,
-            p.wins
-          ]);
-        });
-      });
-
-      const wsHistory = XLSX.utils.aoa_to_sheet(historyRows);
-      XLSX.utils.book_append_sheet(wb, wsHistory, "WeeklyHistory");
-
-      XLSX.writeFile(wb, "chop_pig_stats.xlsx");
-    }
-
-    /* ---------------- IMPORT FROM EXCEL ---------------- */
-    function importFromExcel() {
-      if (!canSave) {
-        alert("Login required to import.");
-        return;
-      }
-
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = ".xlsx";
-
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          const wb = XLSX.read(evt.target.result, { type: "binary" });
-
-          function loadSheet(name) {
-            const ws = wb.Sheets[name];
-            if (!ws) return { players: {}, playerList: [] };
-
-            const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-            const bucket = { players: {}, playerList: [] };
-
-            for (let i = 1; i < rows.length; i++) {
-              const [name, score, games, wins] = rows[i];
-              if (!name) continue;
-              bucket.players[name] = {
-                score: Number(score) || 0,
-                games: Number(games) || 0,
-                wins: Number(wins) || 0
-              };
-              bucket.playerList.push(name);
-            }
-            return bucket;
-          }
-
-          function loadHistorySheet(name) {
-            const ws = wb.Sheets[name];
-            if (!ws) return [];
-
-            const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-            const history = [];
-
-            for (let i = 1; i < rows.length; i++) {
-              const [start, end, player, score, games, wins] = rows[i];
-              if (!start || !end || !player) continue;
-
-              let week = history.find(
-                w => w.weekStart === start && w.weekEnd === end
-              );
-
-              if (!week) {
-                week = {
-                  weekStart: start,
-                  weekEnd: end,
-                  players: {},
-                  playerList: []
-                };
-                history.push(week);
-              }
-
-              week.players[player] = {
-                score: Number(score) || 0,
-                games: Number(games) || 0,
-                wins: Number(wins) || 0
-              };
-
-              week.playerList.push(player);
-            }
-
-            return history;
-          }
-
-          allTime = loadSheet("AllTime");
-          weekly = loadSheet("Weekly");
-          weeklyHistory = loadHistorySheet("WeeklyHistory");
-          weeklyReset = new Date().toISOString();
-
-          updatePlayerDropdowns();
-          updateWeeklyDropdown();
-          refreshTable();
-          saveState();
-        };
-
-        reader.readAsBinaryString(file);
-      };
-
-      input.click();
-    }
-
-    /* ---------------- MODAL HELPERS ---------------- */
-    function openModal() {
-      const backdrop = document.getElementById("modalBackdrop");
-      backdrop.style.display = "flex";
-    }
-
-    function closeModal() {
-      const backdrop = document.getElementById("modalBackdrop");
-      backdrop.style.display = "none";
-    }
-
-    /* ---------------- STARTUP ---------------- */
-    window.onload = async function () {
-      await loadStateFromGitHub();
-      ensureWeeklyFreshness();
-      init();
-      updateWeeklyDropdown();
-      refreshTable();
-      setSyncStatus("View-only mode", "gray");
-      setReverseMode(false);
     };
-  </script>
+
+    reader.readAsBinaryString(file);
+  };
+
+  input.click();
+}
+
+/* ---------------- MODAL HELPERS ---------------- */
+function openModal() {
+  const backdrop = document.getElementById("modalBackdrop");
+  backdrop.style.display = "flex";
+}
+
+function closeModal() {
+  const backdrop = document.getElementById("modalBackdrop");
+  backdrop.style.display = "none";
+}
+
+/* ---------------- STARTUP ---------------- */
+window.onload = async function () {
+  await loadStateFromGitHub();
+  ensureWeeklyFreshness();
+  updateModeBanner();
+
+  init();
+  updateWeeklyDropdown();
+  refreshTable();
+
+  updateModeBanner(); // ← CRITICAL FIX
+
+  setReverseMode(false);
+  setSyncStatus("View-only mode", "gray");
+};
+</script>
 </body>
 </html>
