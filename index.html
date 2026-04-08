@@ -11,29 +11,27 @@
       margin: 0;
       padding: 0;
       background: #f5f5f7;
+      color: #000;
     }
+
     h1 {
       margin: 0;
-      padding: 12px 0;
-      font-size: 22px;
+      padding: 16px 0 8px 0;
+      font-size: 26px;
       text-align: center;
-    }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
       background: white;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      position: sticky;
-      top: 0;
-      z-index: 50;
     }
-    .top-right {
+
+    .top-bar {
       display: flex;
-      gap: 8px;
-      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 0;
+      background: white;
+      border-bottom: 1px solid #ddd;
     }
+
     .btn {
       padding: 8px 14px;
       border-radius: 10px;
@@ -43,6 +41,12 @@
       font-size: 14px;
       cursor: pointer;
     }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
     .btn-small {
       padding: 4px 8px;
       border-radius: 8px;
@@ -53,10 +57,7 @@
       cursor: pointer;
       margin-left: 4px;
     }
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
+
     .player-card {
       background: white;
       margin: 12px 16px;
@@ -64,14 +65,17 @@
       border-radius: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
+
     .card-row {
       margin-bottom: 12px;
     }
+
     .card-row label {
       display: block;
       font-size: 14px;
       margin-bottom: 4px;
     }
+
     .card-row select,
     .card-row input[type="text"],
     .card-row input[type="number"] {
@@ -80,18 +84,23 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       font-size: 14px;
+      background: #fff;
+      color: #000;
     }
+
     .checkbox-row {
       display: flex;
       align-items: center;
       gap: 8px;
       margin: 10px 0;
     }
+
     .clear-btn {
       margin-top: 10px;
       width: 100%;
       background: #ff3b30;
     }
+
     .full-width-btn {
       width: calc(100% - 32px);
       margin: 12px 16px;
@@ -99,6 +108,7 @@
       font-size: 16px;
       border-radius: 12px;
     }
+
     .leaderboard-card {
       background: white;
       margin: 10px 16px;
@@ -106,14 +116,17 @@
       border-radius: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
+
     .leaderboard-card h3 {
       margin: 0 0 6px 0;
       font-size: 18px;
     }
+
     .leaderboard-card .stat {
       font-size: 14px;
       margin: 2px 0;
     }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -123,6 +136,7 @@
       justify-content: center;
       z-index: 1000;
     }
+
     .modal {
       background: white;
       width: 100%;
@@ -132,20 +146,24 @@
       overflow-y: auto;
       box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
     }
+
     .label-row {
       display: flex;
       align-items: center;
       gap: 8px;
       margin: 6px 0;
     }
+
     .label-row .label {
       flex: 1;
       font-size: 14px;
     }
+
     .spin {
       width: 50px;
       text-align: center;
     }
+
     @media (min-width: 700px) {
       body {
         background: #fafafa;
@@ -161,19 +179,72 @@
         margin: 16px auto;
       }
     }
+
+    /* DARK MODE WHEN REVERSE MODE IS ON */
+    body.dark-mode {
+      background: #111;
+      color: #eee;
+    }
+
+    body.dark-mode h1 {
+      background: #181818;
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+
+    body.dark-mode .top-bar {
+      background: #181818;
+      border-bottom-color: #333;
+    }
+
+    body.dark-mode .player-card,
+    body.dark-mode .leaderboard-card,
+    body.dark-mode .modal {
+      background: #1e1e1e;
+      color: #eee;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+    }
+
+    body.dark-mode .card-row select,
+    body.dark-mode .card-row input[type="text"],
+    body.dark-mode .card-row input[type="number"] {
+      background: #333;
+      color: #eee;
+      border-color: #555;
+    }
+
+    body.dark-mode .btn {
+      background: #0a84ff;
+      color: #fff;
+    }
+
+    body.dark-mode .clear-btn {
+      background: #ff453a;
+    }
+
+    body.dark-mode #syncStatus {
+      color: #ccc !important;
+    }
+
+    /* Reverse Mode button ON style */
+    .reverse-on {
+      background: #ff9f0a !important;
+      color: #000 !important;
+      box-shadow: 0 0 8px rgba(255,159,10,0.8);
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
+  <h1>Chop Pig Score Tracker</h1>
+
   <div class="top-bar">
-    <h1>Chop Pig Score Tracker</h1>
-    <div class="top-right">
-      <button class="btn" onclick="openWeeklyHistory()">History</button>
-      <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
-      <button class="btn" onclick="refreshFromCloud()">Refresh</button>
-    </div>
+    <button class="btn" onclick="openWeeklyHistory()">History</button>
+    <button class="btn" id="reverseBtn" onclick="toggleReverseMode()">Reverse Mode</button>
+    <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
+    <button class="btn" onclick="refreshFromCloud()">Refresh</button>
   </div>
 
   <div id="modeBanner" style="text-align:center; color:#a00; margin-top:8px;"></div>
@@ -208,7 +279,7 @@
 
   <script>
     /* ---------------- AUTH / STATE ---------------- */
-    let canSave = false; // optimistically assume we can save until we check with the server
+    let canSave = false;
     let appPassword = "";
 
     let allTime = { players: {}, playerList: [] };
@@ -236,6 +307,28 @@
 
     const rowCount = 4;
     const rowState = [];
+
+    /* REVERSE MODE FLAG */
+    let reverseMode = false;
+
+    function setReverseMode(on) {
+      reverseMode = on;
+      const btn = document.getElementById("reverseBtn");
+      if (reverseMode) {
+        document.body.classList.add("dark-mode");
+        btn.classList.add("reverse-on");
+        btn.textContent = "Reverse Mode (ON)";
+      } else {
+        document.body.classList.remove("dark-mode");
+        btn.classList.remove("reverse-on");
+        btn.textContent = "Reverse Mode";
+      }
+      autoFillAllScores();
+    }
+
+    function toggleReverseMode() {
+      setReverseMode(!reverseMode);
+    }
 
     function updateModeBanner() {
       const banner = document.getElementById("modeBanner");
@@ -1086,18 +1179,30 @@
         }
 
         let score;
-        if (placement === "Stinky 13") score = -5;
-        else if (placement === "1st")
-          score = stinky13Count > 0 ? 5 * stinky13Count : 4;
-        else if (placement === "2nd")
-          score = stinky13Count === 2 ? 0 : 2;
-        else score = baseScores[placement];
+        if (!reverseMode) {
+          // NORMAL MODE
+          if (placement === "Stinky 13") score = -5;
+          else if (placement === "1st")
+            score = stinky13Count > 0 ? 5 * stinky13Count : 4;
+          else if (placement === "2nd")
+            score = stinky13Count === 2 ? 0 : 2;
+          else score = baseScores[placement];
+        } else {
+          // REVERSE MODE
+          if (placement === "Stinky 13") score = +5;
+          else if (placement === "1st")
+            score = -(stinky13Count > 0 ? 5 * stinky13Count : 4);
+          else if (placement === "2nd")
+            score = -(stinky13Count === 2 ? 0 : 2);
+          else score = -baseScores[placement];
+        }
 
         baseScoresRow[i] = score;
       }
 
       const finalScores = baseScoresRow.slice();
 
+      // STINKY 2 TRANSFERS
       for (let i = 0; i < rowCount; i++) {
         if (!stinky2Enabled[i]) continue;
 
@@ -1108,8 +1213,6 @@
           Stinky2_kind4[i],
           Stinky2_pairs4[i]
         );
-
-        finalScores[i] += total;
 
         const placementsNow = rowState.map(r => r.placeSelect.value);
         const giverPlace = placementsNow[i];
@@ -1122,10 +1225,18 @@
         else if (giverPlace === "3rd")
           receiverIdx = findPlayerByPlace(placementsNow, "2nd");
 
-        if (receiverIdx !== null && receiverIdx !== undefined)
-          finalScores[receiverIdx] -= total;
+        if (receiverIdx !== null && receiverIdx !== undefined) {
+          if (!reverseMode) {
+            finalScores[i] += total;          // giver loses
+            finalScores[receiverIdx] -= total; // receiver gains
+          } else {
+            finalScores[i] -= total;          // giver gains
+            finalScores[receiverIdx] += total; // receiver loses
+          }
+        }
       }
 
+      // CHOP PIGS TRANSFERS
       for (let i = 0; i < rowCount; i++) {
         const victimName = rowState[i].playerSelect.value;
         if (!victimName) continue;
@@ -1142,8 +1253,13 @@
             totalPoints += chopPoints(t) * amt;
           }
 
-          finalScores[i] -= totalPoints;
-          finalScores[chopperIdx] += totalPoints;
+          if (!reverseMode) {
+            finalScores[i] -= totalPoints;          // victim loses
+            finalScores[chopperIdx] += totalPoints; // chopper gains
+          } else {
+            finalScores[i] += totalPoints;          // victim gains
+            finalScores[chopperIdx] -= totalPoints; // chopper loses
+          }
         }
       }
 
@@ -1217,7 +1333,7 @@
       for (let i = 0; i < 4; i++) {
         const p = selectedPlayers[i];
         const score = scores[i];
-        const isWin = placements[i] === "1st";
+        const isWin = placements[i] === "1st"; // winner still 1st, even in Reverse Mode
 
         applyScore(allTime, p, score, isWin);
         applyScore(weekly, p, score, isWin);
@@ -1225,6 +1341,11 @@
 
       for (let i = 0; i < rowCount; i++) {
         clearRow(i);
+      }
+
+      // After a Reverse Mode round, automatically go back to normal mode
+      if (reverseMode) {
+        setReverseMode(false);
       }
 
       refreshTable();
@@ -1320,6 +1441,11 @@
       table.style.margin = "16px auto";
       table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
 
+      if (document.body.classList.contains("dark-mode")) {
+        table.style.background = "#1e1e1e";
+        table.style.color = "#eee";
+      }
+
       const thead = document.createElement("thead");
       thead.innerHTML = `
         <tr style="background:#f2f2f7;">
@@ -1359,6 +1485,11 @@
           else if (r === ranked.length - 1) tr.style.background = "#ffe5e5";
         } else {
           tr.style.opacity = "0.55";
+        }
+
+        if (document.body.classList.contains("dark-mode")) {
+          tr.style.background = isRanked ? "#222" : "#1a1a1a";
+          tr.style.color = "#eee";
         }
 
         tr.innerHTML = `
@@ -1597,29 +1728,6 @@
       input.click();
     }
 
-    /* ---------------- READ ME ---------------- 
-    function openReadMe() {
-      const modal = document.getElementById("modalContent");
-
-      modal.innerHTML = `
-        <h2>Chop Pig — Rules & Info</h2>
-        <p>This app tracks scores for Chop Pig with full support for:</p>
-        <ul>
-          <li>Placements (1st, 2nd, 3rd, 4th, Stinky 13)</li>
-          <li>Stinky 2 scoring</li>
-          <li>Chop Pigs (Black, Red, Pairs, 4-of-a-kind, etc.)</li>
-          <li>Automatic score transfers</li>
-          <li>Weekly vs All-time leaderboards</li>
-          <li>Weekly history snapshots</li>
-          <li>Excel import/export</li>
-          <li>Cloud sync to GitHub</li>
-        </ul>
-        <p>All scoring logic is fully automated.</p>
-      `;
-
-      openModal();
-    }*/
-
     /* ---------------- MODAL HELPERS ---------------- */
     function openModal() {
       const backdrop = document.getElementById("modalBackdrop");
@@ -1639,6 +1747,7 @@
       updateWeeklyDropdown();
       refreshTable();
       setSyncStatus("View-only mode", "gray");
+      setReverseMode(false);
     };
   </script>
 </body>
