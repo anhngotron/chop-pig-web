@@ -1169,67 +1169,78 @@
     }
 
     /* ---------------- ROUND COMMIT ---------------- */
-    function addRoundScores() {
-      const selectedPlayers = [];
-      const placements = [];
-      const scores = [];
+    async function addRoundScores() {
+    // --- ALWAYS refresh from cloud first ---
+    await loadStateFromGitHub();
+   ensureWeeklyFreshness();
 
-      for (let i = 0; i < rowCount; i++) {
-        const r = rowState[i];
-        const player = r.playerSelect.value;
-        const placement = r.placeSelect.value;
-        const scoreText = r.scoreInput.value;
+   const selectedPlayers = [];
+   const placements = [];
+   const scores = [];
 
-        if (!player || !placement) {
-          alert("All 4 players and placements must be selected.");
-          return;
-        }
-        if (selectedPlayers.includes(player)) {
-          alert("Each player can only appear once per round.");
-          return;
-        }
-        if (scoreText === "") {
-          alert("Scores must be calculated before adding the round.");
-          return;
-        }
+   // --- Validate all 4 rows ---
+    for (let i = 0; i < rowCount; i++) {
+      const r = rowState[i];
+      const player = r.playerSelect.value;
+      const placement = r.placeSelect.value;
+      const scoreText = r.scoreInput.value;
 
-        const scoreVal = parseInt(scoreText, 10);
-        if (isNaN(scoreVal)) {
-          alert("Invalid score format.");
-          return;
-        }
+      if (!player || !placement) {
+       alert("All 4 players and placements must be selected.");
+       return;
+     }
+     if (selectedPlayers.includes(player)) {
+       alert("Each player can only appear once per round.");
+       return;
+      }
+      if (scoreText === "") {
+       alert("Scores must be calculated before adding the round.");
+        return;
+     }
 
-        selectedPlayers.push(player);
-        placements.push(placement);
-        scores.push(scoreVal);
+      const scoreVal = parseInt(scoreText, 10);
+      if (isNaN(scoreVal)) {
+        alert("Invalid score format.");
+        return;
       }
 
-      function applyScore(bucket, name, score, isWin) {
-        if (!bucket.players[name]) {
-          bucket.players[name] = { score: 0, games: 0, wins: 0 };
-          bucket.playerList.push(name);
-        }
-        bucket.players[name].score += score;
-        bucket.players[name].games++;
-        if (isWin) bucket.players[name].wins++;
-      }
-
-      for (let i = 0; i < 4; i++) {
-        const p = selectedPlayers[i];
-        const score = scores[i];
-        const isWin = placements[i] === "1st";
-
-        applyScore(allTime, p, score, isWin);
-        applyScore(weekly, p, score, isWin);
-      }
-
-      for (let i = 0; i < rowCount; i++) {
-        clearRow(i);
-      }
-
-      refreshTable();
-      saveState();
+      selectedPlayers.push(player);
+      placements.push(placement);
+      scores.push(scoreVal);
     }
+
+    // --- Apply scores to buckets ---
+    function applyScore(bucket, name, score, isWin) {
+     if (!bucket.players[name]) {
+       bucket.players[name] = { score: 0, games: 0, wins: 0 };
+       bucket.playerList.push(name);
+     }
+      bucket.players[name].score += score;
+      bucket.players[name].games++;
+      if (isWin) bucket.players[name].wins++;
+    }
+
+   for (let i = 0; i < 4; i++) {
+    const p = selectedPlayers[i];
+    const score = scores[i];
+    const isWin = placements[i] === "1st";
+
+    applyScore(allTime, p, score, isWin);
+    applyScore(weekly, p, score, isWin);
+    }
+
+    // --- Clear UI rows ---
+    for (let i = 0; i < rowCount; i++) {
+     clearRow(i);
+    }
+
+   // --- Refresh UI ---
+    refreshTable();
+
+   // --- Save updated state to cloud ---
+    saveState();
+  }
+
 
     /* ---------------- LEADERBOARD (WEEKLY + ALL-TIME) ---------------- */
     function refreshTable() {
