@@ -12,12 +12,12 @@
         "wins": 17
       },
       "Ana": {
-        "score": -27,
+        "score": -41,
         "games": 43,
         "wins": 7
       },
       "David": {
-        "score": -8,
+        "score": -20,
         "games": 27,
         "wins": 5
       },
@@ -27,7 +27,7 @@
         "wins": 1
       },
       "William": {
-        "score": -12,
+        "score": -10,
         "games": 38,
         "wins": 11
       },
@@ -37,7 +37,7 @@
         "wins": 3
       },
       "Kevin": {
-        "score": 1,
+        "score": 11,
         "games": 45,
         "wins": 12
       },
@@ -47,7 +47,7 @@
         "wins": 1
       },
       "Majid": {
-        "score": 0,
+        "score": -7,
         "games": 21,
         "wins": 3
       },
@@ -57,7 +57,7 @@
         "wins": 3
       },
       "Ted": {
-        "score": 3,
+        "score": 5,
         "games": 18,
         "wins": 6
       }
@@ -95,7 +95,7 @@
         "wins": 2
       },
       "David": {
-        "score": 0,
+        "score": -12,
         "games": 19,
         "wins": 4
       },
@@ -105,7 +105,7 @@
         "wins": 0
       },
       "William": {
-        "score": -3,
+        "score": -1,
         "games": 9,
         "wins": 3
       },
@@ -115,7 +115,7 @@
         "wins": 1
       },
       "Kevin": {
-        "score": 30,
+        "score": 40,
         "games": 15,
         "wins": 4
       },
@@ -125,7 +125,7 @@
         "wins": 1
       },
       "Majid": {
-        "score": 1,
+        "score": -6,
         "games": 9,
         "wins": 2
       },
@@ -135,7 +135,7 @@
         "wins": 0
       },
       "Ted": {
-        "score": 0,
+        "score": 2,
         "games": 11,
         "wins": 3
       }
@@ -155,7 +155,7 @@
       "Ted"
     ]
   },
-  "weeklyReset": "2026-04-09T20:05:31.717Z",
+  "weeklyReset": "2026-04-09T20:13:42.155Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
