@@ -62,23 +62,23 @@
         "wins": 6
       },
       "a": {
-        "score": 4,
-        "games": 1,
-        "wins": 1
+        "score": 8,
+        "games": 2,
+        "wins": 2
       },
       "b": {
-        "score": 2,
-        "games": 1,
+        "score": 4,
+        "games": 2,
         "wins": 0
       },
       "c": {
-        "score": -2,
-        "games": 1,
+        "score": 0,
+        "games": 2,
         "wins": 0
       },
       "d": {
-        "score": -4,
-        "games": 1,
+        "score": -12,
+        "games": 2,
         "wins": 0
       }
     },
@@ -164,23 +164,23 @@
         "wins": 3
       },
       "a": {
-        "score": 4,
-        "games": 1,
-        "wins": 1
+        "score": 8,
+        "games": 2,
+        "wins": 2
       },
       "b": {
-        "score": 2,
-        "games": 1,
+        "score": 4,
+        "games": 2,
         "wins": 0
       },
       "c": {
-        "score": -2,
-        "games": 1,
+        "score": 0,
+        "games": 2,
         "wins": 0
       },
       "d": {
-        "score": -4,
-        "games": 1,
+        "score": -12,
+        "games": 2,
         "wins": 0
       }
     },
