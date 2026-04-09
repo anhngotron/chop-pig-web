@@ -75,6 +75,11 @@
         "score": 0,
         "games": 0,
         "wins": 0
+      },
+      "d": {
+        "score": 0,
+        "games": 0,
+        "wins": 0
       }
     },
     "playerList": [
@@ -92,7 +97,8 @@
       "William",
       "a",
       "b",
-      "c"
+      "c",
+      "d"
     ]
   },
   "weekly": {
@@ -171,6 +177,11 @@
         "score": 0,
         "games": 0,
         "wins": 0
+      },
+      "d": {
+        "score": 0,
+        "games": 0,
+        "wins": 0
       }
     },
     "playerList": [
@@ -188,7 +199,8 @@
       "William",
       "a",
       "b",
-      "c"
+      "c",
+      "d"
     ]
   },
   "weeklyReset": "2026-04-09T20:13:42.155Z",
