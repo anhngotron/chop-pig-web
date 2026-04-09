@@ -70,6 +70,11 @@
         "score": 0,
         "games": 0,
         "wins": 0
+      },
+      "c": {
+        "score": 0,
+        "games": 0,
+        "wins": 0
       }
     },
     "playerList": [
@@ -86,7 +91,8 @@
       "Ted",
       "William",
       "a",
-      "b"
+      "b",
+      "c"
     ]
   },
   "weekly": {
@@ -160,6 +166,11 @@
         "score": 0,
         "games": 0,
         "wins": 0
+      },
+      "c": {
+        "score": 0,
+        "games": 0,
+        "wins": 0
       }
     },
     "playerList": [
@@ -176,7 +187,8 @@
       "Ted",
       "William",
       "a",
-      "b"
+      "b",
+      "c"
     ]
   },
   "weeklyReset": "2026-04-09T20:13:42.155Z",
