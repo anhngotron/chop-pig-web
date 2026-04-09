@@ -60,26 +60,6 @@
         "score": 5,
         "games": 18,
         "wins": 6
-      },
-      "a": {
-        "score": 8,
-        "games": 2,
-        "wins": 2
-      },
-      "b": {
-        "score": 4,
-        "games": 2,
-        "wins": 0
-      },
-      "c": {
-        "score": -4,
-        "games": 2,
-        "wins": 0
-      },
-      "d": {
-        "score": -8,
-        "games": 2,
-        "wins": 0
       }
     },
     "playerList": [
@@ -94,11 +74,7 @@
       "Jeanette",
       "Majid",
       "Ian",
-      "Ted",
-      "a",
-      "b",
-      "c",
-      "d"
+      "Ted"
     ]
   },
   "weekly": {
@@ -162,26 +138,6 @@
         "score": 2,
         "games": 11,
         "wins": 3
-      },
-      "a": {
-        "score": 8,
-        "games": 2,
-        "wins": 2
-      },
-      "b": {
-        "score": 4,
-        "games": 2,
-        "wins": 0
-      },
-      "c": {
-        "score": -4,
-        "games": 2,
-        "wins": 0
-      },
-      "d": {
-        "score": -8,
-        "games": 2,
-        "wins": 0
       }
     },
     "playerList": [
@@ -196,11 +152,7 @@
       "Jeanette",
       "Majid",
       "Ian",
-      "Ted",
-      "a",
-      "b",
-      "c",
-      "d"
+      "Ted"
     ]
   },
   "weeklyReset": "2026-04-09T20:13:42.155Z",
