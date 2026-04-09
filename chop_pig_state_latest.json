@@ -72,12 +72,12 @@
         "wins": 0
       },
       "c": {
-        "score": 0,
+        "score": -4,
         "games": 2,
         "wins": 0
       },
       "d": {
-        "score": -12,
+        "score": -8,
         "games": 2,
         "wins": 0
       }
@@ -174,12 +174,12 @@
         "wins": 0
       },
       "c": {
-        "score": 0,
+        "score": -4,
         "games": 2,
         "wins": 0
       },
       "d": {
-        "score": -12,
+        "score": -8,
         "games": 2,
         "wins": 0
       }
