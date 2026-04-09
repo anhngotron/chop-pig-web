@@ -7,13 +7,13 @@
         "wins": 12
       },
       "Andy": {
-        "score": 61,
-        "games": 40,
+        "score": 57,
+        "games": 41,
         "wins": 17
       },
       "Ana": {
-        "score": -34,
-        "games": 43,
+        "score": -36,
+        "games": 44,
         "wins": 7
       },
       "David": {
@@ -37,8 +37,8 @@
         "wins": 3
       },
       "Kevin": {
-        "score": -16,
-        "games": 45,
+        "score": -14,
+        "games": 46,
         "wins": 12
       },
       "Jeanette": {
@@ -57,9 +57,9 @@
         "wins": 3
       },
       "Ted": {
-        "score": 1,
-        "games": 19,
-        "wins": 6
+        "score": 5,
+        "games": 20,
+        "wins": 7
       }
     },
     "playerList": [
@@ -85,13 +85,13 @@
         "wins": 0
       },
       "Andy": {
-        "score": 10,
-        "games": 12,
+        "score": 6,
+        "games": 13,
         "wins": 5
       },
       "Ana": {
-        "score": -15,
-        "games": 12,
+        "score": -17,
+        "games": 13,
         "wins": 2
       },
       "David": {
@@ -115,8 +115,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": 13,
-        "games": 15,
+        "score": 15,
+        "games": 16,
         "wins": 4
       },
       "Jeanette": {
@@ -135,9 +135,9 @@
         "wins": 0
       },
       "Ted": {
-        "score": -2,
-        "games": 12,
-        "wins": 3
+        "score": 2,
+        "games": 13,
+        "wins": 4
       }
     },
     "playerList": [
