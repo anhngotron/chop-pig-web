@@ -7,12 +7,12 @@
         "wins": 12
       },
       "Andy": {
-        "score": 53,
+        "score": 65,
         "games": 41,
         "wins": 17
       },
       "Ana": {
-        "score": -34,
+        "score": -27,
         "games": 43,
         "wins": 7
       },
@@ -85,7 +85,7 @@
         "wins": 0
       },
       "Andy": {
-        "score": 2,
+        "score": 14,
         "games": 13,
         "wins": 5
       },
@@ -155,11 +155,11 @@
       "Ted"
     ]
   },
-  "weeklyReset": "2026-04-08T16:40:48.875Z",
+  "weeklyReset": "2026-04-09T20:04:47.335Z",
   "weeklyHistory": [
     {
-      "weekStart": "2026-03-30",
-      "weekEnd": "2026-04-06",
+      "weekStart": "3/29/2026",
+      "weekEnd": "4/5/2026",
       "players": {
         "James": {
           "score": 43,
