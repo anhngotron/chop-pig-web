@@ -292,32 +292,31 @@
         const repo = "chop-pig-web";
         const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json`;
 
-        const resp = await fetch(url, { cache: "no-store" });
+        const resp = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
 
         if (!resp.ok) {
           console.warn("No GitHub state found yet.");
-          return;
+        return;
         }
 
         const data = await resp.json();
 
-        if (data.allTime) {
-          allTime = data.allTime;
-          weekly = data.weekly || { players: {}, playerList: [] };
-          weeklyReset = data.weeklyReset || new Date().toISOString();
-          weeklyHistory = data.weeklyHistory || [];
-        } else {
-          allTime = { players: data.players || {}, playerList: data.playerList || [] };
-          weekly = { players: {}, playerList: [] };
-          weeklyReset = new Date().toISOString();
-          weeklyHistory = [];
-        }
+    // --- NEW: unified schema + version extraction ---
+        allTime = data.allTime || { players: {}, playerList: [] };
+        weekly = data.weekly || { players: {}, playerList: [] };
+        weeklyReset = data.weeklyReset || new Date().toISOString();
+        weeklyHistory = data.weeklyHistory || [];
+
+        cloudVersion = data.version || 0;
 
         console.log("Loaded state from GitHub:", data);
+        setSyncStatus("Loaded latest cloud data", "green");
       } catch (err) {
         console.error("Failed to load from GitHub:", err);
+        setSyncStatus("Failed to load cloud data", "red");
       }
     }
+
 
     async function refreshFromCloud() {
       setSyncStatus("Refreshing…", "#888");
@@ -335,42 +334,69 @@
       el.style.color = color;
     }
 
-    function saveState() {
+    async function saveState() {
       if (!canSave) {
         setSyncStatus("View-only mode — not synced", "gray");
         return;
       }
 
+      setSyncStatus("Syncing…", "#888");
+
       const payload = {
         allTime,
         weekly,
         weeklyReset,
-        weeklyHistory
+        weeklyHistory,
+        version: cloudVersion + 1   // NEW: send next version
       };
 
-      setSyncStatus("Syncing…", "#888");
-
-      fetch("/api/save-state", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-App-Password": appPassword
-        },
-        body: JSON.stringify(payload)
-      })
-        .then(res => {
-          if (!res.ok) throw new Error("GitHub sync failed");
-          setSyncStatus("Saved ✓", "green");
-        })
-        .catch(err => {
-          console.warn("GitHub autosave failed:", err);
-          setSyncStatus("Sync failed ⚠", "red");
+      try {
+        const res = await fetch("/api/save-state", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-App-Password": appPassword
+          },
+          body: JSON.stringify(payload)
         });
+
+        // --- NEW: conflict handling ---
+        if (res.status === 409) {
+          setSyncStatus("Conflict — reloading cloud", "red");
+
+          // Load latest cloud state
+          await loadStateFromGitHub();
+          refreshTable();
+
+          alert(
+            "Another device updated the cloud before you.\n" +
+            "Your round was NOT saved.\n" +
+            "Please re-enter it."
+          );
+
+          return;
+        }
+
+        if (!res.ok) {
+          setSyncStatus("Sync failed ⚠", "red");
+          alert("Failed to save to cloud.");
+          return;
+        }
+
+        // --- NEW: update local version ---
+        cloudVersion += 1;
+
+        setSyncStatus("Saved ✓", "green");
+      } catch (err) {
+        console.warn("GitHub autosave failed:", err);
+        setSyncStatus("Sync failed ⚠", "red");
+      }
     }
 
     function manualSync() {
       saveState();
     }
+
 
     /* ---------------- WEEKLY FRESHNESS + HISTORY ---------------- */
     function ensureWeeklyFreshness() {
@@ -1148,77 +1174,96 @@
     }
 
     /* ---------------- ROUND COMMIT ---------------- */
+    let isCommittingRound = false;
+
     async function addRoundScores() {
-    // --- ALWAYS refresh from cloud first ---
-    await loadStateFromGitHub();
-   ensureWeeklyFreshness();
-
-   const selectedPlayers = [];
-   const placements = [];
-   const scores = [];
-
-   // --- Validate all 4 rows ---
-    for (let i = 0; i < rowCount; i++) {
-      const r = rowState[i];
-      const player = r.playerSelect.value;
-      const placement = r.placeSelect.value;
-      const scoreText = r.scoreInput.value;
-
-      if (!player || !placement) {
-       alert("All 4 players and placements must be selected.");
-       return;
-     }
-     if (selectedPlayers.includes(player)) {
-       alert("Each player can only appear once per round.");
-       return;
-      }
-      if (scoreText === "") {
-       alert("Scores must be calculated before adding the round.");
-        return;
-     }
-
-      const scoreVal = parseInt(scoreText, 10);
-      if (isNaN(scoreVal)) {
-        alert("Invalid score format.");
+      // --- Prevent double commits ---
+      if (isCommittingRound) {
+        alert("A round is already being committed. Please wait.");
         return;
       }
+      isCommittingRound = true;
 
-      selectedPlayers.push(player);
-      placements.push(placement);
-      scores.push(scoreVal);
+      setSyncStatus("Loading latest cloud data…", "blue");
+
+      // --- ALWAYS refresh from cloud first ---
+      await loadStateFromGitHub();
+      ensureWeeklyFreshness();
+      refreshTable(); // show any remote changes before applying new round
+
+      const selectedPlayers = [];
+      const placements = [];
+      const scores = [];
+
+      // --- Validate all 4 rows ---
+      for (let i = 0; i < rowCount; i++) {
+        const r = rowState[i];
+        const player = r.playerSelect.value;
+        const placement = r.placeSelect.value;
+        const scoreText = r.scoreInput.value;
+
+        if (!player || !placement) {
+          alert("All 4 players and placements must be selected.");
+          isCommittingRound = false;
+          return;
+        }
+        if (selectedPlayers.includes(player)) {
+          alert("Each player can only appear once per round.");
+          isCommittingRound = false;
+          return;
+        }
+        if (scoreText === "") {
+          alert("Scores must be calculated before adding the round.");
+          isCommittingRound = false;
+          return;
+        }
+
+        const scoreVal = parseInt(scoreText, 10);
+        if (isNaN(scoreVal)) {
+          alert("Invalid score format.");
+          isCommittingRound = false;
+          return;
+        }
+
+        selectedPlayers.push(player);
+        placements.push(placement);
+        scores.push(scoreVal);
+      }
+
+      // --- Apply scores to buckets ---
+      function applyScore(bucket, name, score, isWin) {
+        if (!bucket.players[name]) {
+          bucket.players[name] = { score: 0, games: 0, wins: 0 };
+          bucket.playerList.push(name);
+        }
+        bucket.players[name].score += score;
+        bucket.players[name].games++;
+        if (isWin) bucket.players[name].wins++;
+      }
+
+      for (let i = 0; i < 4; i++) {
+        const p = selectedPlayers[i];
+        const score = scores[i];
+        const isWin = placements[i] === "1st";
+
+        applyScore(allTime, p, score, isWin);
+        applyScore(weekly, p, score, isWin);
+      }
+
+      // --- Clear UI rows ---
+      for (let i = 0; i < rowCount; i++) {
+        clearRow(i);
+      }
+
+      // --- Refresh UI ---
+      refreshTable();
+
+      // --- Save updated state to cloud (conflict‑aware) ---
+      await saveState();
+
+      setSyncStatus("Round committed & synced", "green");
+      isCommittingRound = false;
     }
-
-    // --- Apply scores to buckets ---
-    function applyScore(bucket, name, score, isWin) {
-     if (!bucket.players[name]) {
-       bucket.players[name] = { score: 0, games: 0, wins: 0 };
-       bucket.playerList.push(name);
-     }
-      bucket.players[name].score += score;
-      bucket.players[name].games++;
-      if (isWin) bucket.players[name].wins++;
-    }
-
-   for (let i = 0; i < 4; i++) {
-    const p = selectedPlayers[i];
-    const score = scores[i];
-    const isWin = placements[i] === "1st";
-
-    applyScore(allTime, p, score, isWin);
-    applyScore(weekly, p, score, isWin);
-    }
-
-    // --- Clear UI rows ---
-    for (let i = 0; i < rowCount; i++) {
-     clearRow(i);
-    }
-
-   // --- Refresh UI ---
-    refreshTable();
-
-   // --- Save updated state to cloud ---
-    saveState();
-  }
 
 
     /* ---------------- LEADERBOARD (WEEKLY + ALL-TIME) ---------------- */
