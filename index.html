@@ -1277,7 +1277,9 @@
       const players = bucket.players;
 
       const PROVISIONAL_GAMES = 5;
+      const K = 5; // smoothing weight
 
+      // Build raw player array
       const arr = Object.entries(players).map(([name, data]) => {
         const avg = data.games > 0 ? data.score / data.games : 0;
         return {
@@ -1292,17 +1294,35 @@
         };
       });
 
+      // Compute league baseline (average of all avg scores)
+      const leagueBaseline =
+        arr.length > 0
+          ? arr.reduce((sum, p) => sum + p.avgScore, 0) / arr.length
+          : 0;
+
+      // Add weighted score to each player
+      arr.forEach(p => {
+        p.weightedScore =
+          (p.avgScore * p.games + leagueBaseline * K) / (p.games + K);
+        p.weightedDisplay = p.weightedScore.toFixed(2);
+      });
+
+      // Split ranked vs provisional
       const ranked = arr.filter(p => !p.provisional);
       const provisional = arr.filter(p => p.provisional);
 
+      // Sort ranked players by weighted score
       ranked.sort((a, b) => {
-        if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
-        return b.score - a.score;
+        if (b.weightedScore !== a.weightedScore)
+          return b.weightedScore - a.weightedScore;
+        return b.score - a.score; // tie-breaker
       });
 
+      // Sort provisional alphabetically
       provisional.sort((a, b) => a.name.localeCompare(b.name));
 
       const finalList = [...ranked, ...provisional];
+
 
       const titleEl = document.createElement("h2");
       titleEl.style.textAlign = "center";
