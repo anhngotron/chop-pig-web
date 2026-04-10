@@ -167,15 +167,20 @@
 </head>
 
 <body>
-  <div class="top-bar" style="flex-direction: column; align-items: center;">
-    <h1 style="margin-bottom: 20px;">Chop Pig Score Tracker (V2.0)</h1>
-    <div class="top-right" style="width: 100%; justify-content: center; flex-wrap: wrap;">
-      <button class="btn" onclick="openWeeklyHistory()">History</button>
-      <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
-      <button class="btn" onclick="refreshFromCloud()">Refresh</button>
-      <button class="btn" onclick="openRankedRules()">Ranked Rules</button>
-    </div>
+<div class="top-bar" style="flex-direction: column; align-items: center;">
+  <h1 style="margin-bottom: 20px;">Chop Pig Score Tracker (V2.0)</h1>
+  
+  <div class="top-right" style="width: 100%; justify-content: center; flex-wrap: wrap;">
+    <button class="btn" onclick="openWeeklyHistory()">History</button>
+    <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
+    <button class="btn" onclick="refreshFromCloud()">Refresh</button>
+    <button class="btn" onclick="openRankedRules()">Ranked Rules</button>
   </div>
+
+  <div id="syncStatus" style="text-align:center; margin-top:12px; font-weight: bold; color: #ff3b30;">
+    View-only mode — not synced
+  </div>
+</div>
 
   <div id="modeBanner" style="text-align:center; color:#a00; margin-top:8px;"></div>
 
@@ -369,7 +374,7 @@
 
     function saveState() {
       if (!canSave) {
-        setSyncStatus("View-only mode — not synced", "gray");
+        setSyncStatus("View-only mode — not synced", "#ff3b30");
         return;
       }
 
@@ -1701,7 +1706,7 @@
       init();
       updateWeeklyDropdown();
       refreshTable();
-      setSyncStatus("View-only mode", "gray");
+      setSyncStatus("View-only mode", "#ff3b30");
     };
   </script>
 </body>
