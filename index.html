@@ -308,35 +308,44 @@
 
     /* ---------------- CLOUD LOAD / SAVE ---------------- */
     async function loadStateFromGitHub() {
+      // 1. REMOVE LOCAL DATA: Force a clean slate before fetching
+      allTime = { players: {}, playerList: [] };
+      weekly = { players: {}, playerList: [] };
+      weeklyReset = null;
+      weeklyHistory = [];
+
       try {
         const owner = "anhngotron";
         const repo = "chop-pig-web";
         const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json`;
 
+        // 2. FETCH LATEST: Use no-store to bypass any local browser caching
         const resp = await fetch(url, { cache: "no-store" });
 
         if (!resp.ok) {
-          console.warn("No GitHub state found yet.");
+          console.warn("No GitHub state found yet. Starting with clean state.");
           return;
         }
 
         const data = await resp.json();
 
+        // 3. APPLY CLOUD DATA: Strictly overwrite local variables
         if (data.allTime) {
           allTime = data.allTime;
           weekly = data.weekly || { players: {}, playerList: [] };
           weeklyReset = data.weeklyReset || new Date().toISOString();
           weeklyHistory = data.weeklyHistory || [];
         } else {
+          // Fallback for different JSON structures
           allTime = { players: data.players || {}, playerList: data.playerList || [] };
           weekly = { players: {}, playerList: [] };
           weeklyReset = new Date().toISOString();
           weeklyHistory = [];
         }
 
-        console.log("Loaded state from GitHub:", data);
+        console.log("Successfully loaded latest state from GitHub.");
       } catch (err) {
-        console.error("Failed to load from GitHub:", err);
+        console.error("Failed to load from GitHub. App is currently empty:", err);
       }
     }
 
