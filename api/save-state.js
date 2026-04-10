@@ -13,15 +13,9 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { allTime, weekly, weeklyReset, weeklyHistory, version: incomingVersion } = req.body;
+    const { allTime, weekly, weeklyReset, weeklyHistory } = req.body;
 
-    if (
-      !allTime ||
-      !weekly ||
-      !weeklyReset ||
-      !weeklyHistory ||
-      incomingVersion === undefined
-    ) {
+    if (!allTime || !weekly || !weeklyReset || !weeklyHistory) {
       return res.status(400).json({ error: "Invalid payload" });
     }
 
@@ -30,46 +24,30 @@ export default async function handler(req, res) {
     const token = process.env.GITHUB_TOKEN;
 
     if (!owner || !repo || !token) {
-      return res.status(500).json({ error: "Missing GitHub environment variables" });
+      return res
+        .status(500)
+        .json({ error: "Missing GitHub environment variables" });
     }
 
     const octokit = new Octokit({ auth: token });
+
     const path = "chop_pig_state_latest.json";
 
     let sha = null;
-    let currentVersion = 0;
-
     try {
-      const { data } = await octokit.repos.getContent({ owner, repo, path });
+      const { data } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path
+      });
       sha = data.sha;
-
-      const decoded = Buffer.from(data.content, "base64").toString("utf8");
-      const existing = JSON.parse(decoded);
-
-      currentVersion = existing.version || 0;
     } catch (err) {
       sha = null;
-      currentVersion = 0;
     }
 
-    // --- VERSION CONFLICT CHECK ---
-    if (incomingVersion !== currentVersion + 1) {
-      return res.status(409).json({
-        error: "Version conflict",
-        expected: currentVersion + 1,
-        received: incomingVersion
-      });
-    }
-
-    const newData = {
-      allTime,
-      weekly,
-      weeklyReset,
-      weeklyHistory,
-      version: currentVersion + 1
-    };
-
-    const content = Buffer.from(JSON.stringify(newData, null, 2)).toString("base64");
+    const content = Buffer.from(
+      JSON.stringify({ allTime, weekly, weeklyReset, weeklyHistory }, null, 2)
+    ).toString("base64");
 
     await octokit.repos.createOrUpdateFileContents({
       owner,
@@ -80,7 +58,7 @@ export default async function handler(req, res) {
       sha
     });
 
-    return res.status(200).json({ success: true, version: currentVersion + 1 });
+    return res.status(200).json({ success: true });
   } catch (err) {
     console.error("Save-state error:", err);
     return res.status(500).json({ error: "Internal server error" });
