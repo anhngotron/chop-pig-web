@@ -7,13 +7,13 @@
         "wins": 12
       },
       "Andy": {
-        "score": 64,
-        "games": 42,
+        "score": 65,
+        "games": 41,
         "wins": 17
       },
       "Ana": {
-        "score": -39,
-        "games": 44,
+        "score": -41,
+        "games": 43,
         "wins": 7
       },
       "David": {
@@ -27,9 +27,9 @@
         "wins": 1
       },
       "William": {
-        "score": -6,
-        "games": 39,
-        "wins": 12
+        "score": -10,
+        "games": 38,
+        "wins": 11
       },
       "Robert": {
         "score": -12,
@@ -47,8 +47,8 @@
         "wins": 1
       },
       "Majid": {
-        "score": -12,
-        "games": 22,
+        "score": -7,
+        "games": 21,
         "wins": 3
       },
       "Ian": {
@@ -85,13 +85,13 @@
         "wins": 0
       },
       "Andy": {
-        "score": 13,
-        "games": 14,
+        "score": 14,
+        "games": 13,
         "wins": 5
       },
       "Ana": {
-        "score": -20,
-        "games": 13,
+        "score": -22,
+        "games": 12,
         "wins": 2
       },
       "David": {
@@ -105,9 +105,9 @@
         "wins": 0
       },
       "William": {
-        "score": 3,
-        "games": 10,
-        "wins": 4
+        "score": -1,
+        "games": 9,
+        "wins": 3
       },
       "Robert": {
         "score": -8,
@@ -125,8 +125,8 @@
         "wins": 1
       },
       "Majid": {
-        "score": -11,
-        "games": 10,
+        "score": -6,
+        "games": 9,
         "wins": 2
       },
       "Ian": {
@@ -155,7 +155,7 @@
       "Ted"
     ]
   },
-  "weeklyReset": "2026-04-10T16:20:46.158Z",
+  "weeklyReset": "2026-04-10T20:12:34.431Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
