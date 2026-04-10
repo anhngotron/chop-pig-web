@@ -1,240 +1,72 @@
 {
   "allTime": {
     "players": {
-      "James": {
-        "score": 43,
-        "games": 33,
-        "wins": 12
-      },
-      "Andy": {
-        "score": 65,
-        "games": 41,
-        "wins": 17
-      },
-      "Ana": {
-        "score": -41,
-        "games": 43,
-        "wins": 7
-      },
-      "David": {
-        "score": -20,
-        "games": 27,
-        "wins": 5
-      },
-      "Lawrence": {
-        "score": -8,
-        "games": 11,
-        "wins": 1
-      },
-      "William": {
-        "score": -10,
-        "games": 38,
-        "wins": 11
-      },
-      "Robert": {
-        "score": -12,
-        "games": 18,
-        "wins": 3
-      },
-      "Kevin": {
-        "score": 11,
-        "games": 45,
-        "wins": 12
-      },
-      "Jeanette": {
-        "score": -18,
-        "games": 13,
-        "wins": 1
-      },
-      "Majid": {
-        "score": -7,
-        "games": 21,
-        "wins": 3
-      },
-      "Ian": {
-        "score": -8,
-        "games": 12,
-        "wins": 3
-      },
-      "Ted": {
-        "score": 5,
-        "games": 18,
-        "wins": 6
-      }
+      "James": { "score": 43, "games": 33, "wins": 12 },
+      "Andy": { "score": 56, "games": 35, "wins": 15 },
+      "Ana": { "score": -25, "games": 36, "wins": 6 },
+      "David": { "score": -11, "games": 13, "wins": 1 },
+      "Lawrence": { "score": -8, "games": 11, "wins": 1 },
+      "William": { "score": -16, "games": 35, "wins": 10 },
+      "Robert": { "score": -6, "games": 17, "wins": 3 },
+      "Kevin": { "score": -16, "games": 39, "wins": 10 },
+      "Jeanette": { "score": -9, "games": 8, "wins": 1 },
+      "Majid": { "score": -3, "games": 14, "wins": 1 },
+      "Ian": { "score": -8, "games": 12, "wins": 3 },
+      "Ted": { "score": 3, "games": 7, "wins": 3 }
     },
     "playerList": [
-      "James",
-      "Andy",
-      "Ana",
-      "David",
-      "Lawrence",
-      "William",
-      "Robert",
-      "Kevin",
-      "Jeanette",
-      "Majid",
-      "Ian",
-      "Ted"
+      "James","Andy","Ana","David","Lawrence",
+      "William","Robert","Kevin","Jeanette",
+      "Majid","Ian","Ted"
     ]
   },
+
   "weekly": {
     "players": {
-      "James": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
-      },
-      "Andy": {
-        "score": 14,
-        "games": 13,
-        "wins": 5
-      },
-      "Ana": {
-        "score": -22,
-        "games": 12,
-        "wins": 2
-      },
-      "David": {
-        "score": -12,
-        "games": 19,
-        "wins": 4
-      },
-      "Lawrence": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
-      },
-      "William": {
-        "score": -1,
-        "games": 9,
-        "wins": 3
-      },
-      "Robert": {
-        "score": -8,
-        "games": 4,
-        "wins": 1
-      },
-      "Kevin": {
-        "score": 40,
-        "games": 15,
-        "wins": 4
-      },
-      "Jeanette": {
-        "score": -7,
-        "games": 8,
-        "wins": 1
-      },
-      "Majid": {
-        "score": -6,
-        "games": 9,
-        "wins": 2
-      },
-      "Ian": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
-      },
-      "Ted": {
-        "score": 2,
-        "games": 11,
-        "wins": 3
-      }
+      "James": { "score": 0, "games": 0, "wins": 0 },
+      "Andy": { "score": 5, "games": 7, "wins": 3 },
+      "Ana": { "score": -6, "games": 5, "wins": 1 },
+      "David": { "score": -3, "games": 5, "wins": 0 },
+      "Lawrence": { "score": 0, "games": 0, "wins": 0 },
+      "William": { "score": -7, "games": 6, "wins": 2 },
+      "Robert": { "score": -2, "games": 3, "wins": 1 },
+      "Kevin": { "score": 13, "games": 9, "wins": 2 },
+      "Jeanette": { "score": 2, "games": 3, "wins": 1 },
+      "Majid": { "score": -2, "games": 2, "wins": 0 },
+      "Ian": { "score": 0, "games": 0, "wins": 0 },
+      "Ted": { "score": 0, "games": 0, "wins": 0 }
     },
     "playerList": [
-      "James",
-      "Andy",
-      "Ana",
-      "David",
-      "Lawrence",
-      "William",
-      "Robert",
-      "Kevin",
-      "Jeanette",
-      "Majid",
-      "Ian",
-      "Ted"
+      "James","Andy","Ana","David","Lawrence",
+      "William","Robert","Kevin","Jeanette",
+      "Majid","Ian","Ted"
     ]
   },
-  "weeklyReset": "2026-04-09T22:47:45.766Z",
+
+  "weeklyReset": "2026-04-06T00:00:00.000Z",
+
   "weeklyHistory": [
     {
-      "weekStart": "3/29/2026",
-      "weekEnd": "4/5/2026",
+      "weekStart": "2026-03-30",
+      "weekEnd": "2026-04-06",
       "players": {
-        "James": {
-          "score": 43,
-          "games": 33,
-          "wins": 12
-        },
-        "Andy": {
-          "score": 51,
-          "games": 28,
-          "wins": 12
-        },
-        "Ana": {
-          "score": -19,
-          "games": 31,
-          "wins": 5
-        },
-        "David": {
-          "score": -8,
-          "games": 8,
-          "wins": 1
-        },
-        "Lawrence": {
-          "score": -8,
-          "games": 11,
-          "wins": 1
-        },
-        "William ": {
-          "score": -9,
-          "games": 29,
-          "wins": 8
-        },
-        "Robert": {
-          "score": -4,
-          "games": 14,
-          "wins": 2
-        },
-        "Kevin": {
-          "score": -29,
-          "games": 30,
-          "wins": 8
-        },
-        "Jeanette": {
-          "score": -11,
-          "games": 5,
-          "wins": 0
-        },
-        "Majid": {
-          "score": -1,
-          "games": 12,
-          "wins": 1
-        },
-        "Ian": {
-          "score": -8,
-          "games": 12,
-          "wins": 3
-        },
-        "Ted": {
-          "score": 3,
-          "games": 7,
-          "wins": 3
-        }
+        "James": { "score": 0, "games": 0, "wins": 0 },
+        "Andy": { "score": 5, "games": 7, "wins": 3 },
+        "Ana": { "score": -6, "games": 5, "wins": 1 },
+        "David": { "score": -3, "games": 5, "wins": 0 },
+        "Lawrence": { "score": 0, "games": 0, "wins": 0 },
+        "William": { "score": -7, "games": 6, "wins": 2 },
+        "Robert": { "score": -2, "games": 3, "wins": 1 },
+        "Kevin": { "score": 13, "games": 9, "wins": 2 },
+        "Jeanette": { "score": 2, "games": 3, "wins": 1 },
+        "Majid": { "score": -2, "games": 2, "wins": 0 },
+        "Ian": { "score": 0, "games": 0, "wins": 0 },
+        "Ted": { "score": 0, "games": 0, "wins": 0 }
       },
       "playerList": [
-        "James",
-        "Andy",
-        "Ana",
-        "David",
-        "Lawrence",
-        "William ",
-        "Robert",
-        "Kevin",
-        "Jeanette",
-        "Majid",
-        "Ian",
-        "Ted"
+        "James","Andy","Ana","David","Lawrence",
+        "William","Robert","Kevin","Jeanette",
+        "Majid","Ian","Ted"
       ]
     }
   ]
