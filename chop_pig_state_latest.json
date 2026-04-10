@@ -8,7 +8,7 @@
       },
       "Andy": {
         "score": 61,
-        "games": 53,
+        "games": 48,
         "wins": 21
       },
       "Ana": {
@@ -86,7 +86,7 @@
       },
       "Andy": {
         "score": 10,
-        "games": 25,
+        "games": 20,
         "wins": 9
       },
       "Ana": {
@@ -155,7 +155,7 @@
       "Ted"
     ]
   },
-  "weeklyReset": "2026-04-10T20:21:05.925Z",
+  "weeklyReset": "2026-04-10T21:18:48.540Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
