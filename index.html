@@ -169,10 +169,11 @@
 <body>
   <div class="top-bar" style="flex-direction: column; align-items: center;">
     <h1 style="margin-bottom: 20px;">Chop Pig Score Tracker (V2.0)</h1>
-    <div class="top-right" style="width: 100%; justify-content: center;">
+    <div class="top-right" style="width: 100%; justify-content: center; flex-wrap: wrap;">
       <button class="btn" onclick="openWeeklyHistory()">History</button>
       <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
       <button class="btn" onclick="refreshFromCloud()">Refresh</button>
+      <button class="btn" onclick="openRankedRules()">Ranked Rules</button>
     </div>
   </div>
 
@@ -207,6 +208,7 @@
   </div>
 
   <script>
+    
     /* ---------------- AUTH / STATE ---------------- */
     let canSave = false;
     let appPassword = "";
@@ -1639,28 +1641,47 @@
       input.click();
     }
 
-    /* ---------------- READ ME ---------------- 
-    function openReadMe() {
+    /* ---------------- READ ME ---------------- ---------------- */
+    function openRankedRules() {
       const modal = document.getElementById("modalContent");
 
       modal.innerHTML = `
-        <h2>Chop Pig — Rules & Info</h2>
-        <p>This app tracks scores for Chop Pig with full support for:</p>
-        <ul>
-          <li>Placements (1st, 2nd, 3rd, 4th, Stinky 13)</li>
-          <li>Stinky 2 scoring</li>
-          <li>Chop Pigs (Black, Red, Pairs, 4-of-a-kind, etc.)</li>
-          <li>Automatic score transfers</li>
-          <li>Weekly vs All-time leaderboards</li>
-          <li>Weekly history snapshots</li>
-          <li>Excel import/export</li>
-          <li>Cloud sync to GitHub</li>
-        </ul>
-        <p>All scoring logic is fully automated.</p>
+        <h2>Ranked System Rules</h2>
+        <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+          
+          <p><strong>1. Ranking Eligibility</strong></p>
+          <ul>
+            <li>Players with <strong>less than 5 games</strong> are marked as <strong>(P) Provisional</strong>.</li>
+            <li>Provisional players appear at the bottom of the leaderboard to ensure the top ranks reflect consistent performance.</li>
+          </ul>
+
+          <p><strong>2. The Bayesian Weighted Average</strong></p>
+          <p>To prevent "one-hit wonders" (new players taking #1 after just one lucky game), we use a weighted formula that balances your average against the league benchmark:</p>
+          
+          <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 13px; margin: 10px 0; border-left: 4px solid #007aff;">
+            <strong>Score = (R*v + C*m) / (v + m)</strong>
+          </div>
+
+          <ul style="list-style-type: none; padding-left: 0;">
+            <li><strong>R:</strong> Your personal average score.</li>
+            <li><strong>v:</strong> Total games you have played.</li>
+            <li><strong>C:</strong> The average score of all players in the league.</li>
+            <li><strong>m:</strong> The "Confidence Weight" (fixed at 5 games).</li>
+          </ul>
+
+          <p><em>In short:</em> When you have few games, the system pulls your rank toward the middle. As you play more, your actual performance ($R$) carries more weight, eventually proving your true rank.</p>
+
+          <p><strong>3. Performance Icons</strong></p>
+          <ul>
+            <li>🥇 🥈 🥉: Awarded to the Top 3 ranked players.</li>
+            <li>💀: The "Wooden Spoon" – awarded to the last place ranked player (min. 4 ranked players).</li>
+          </ul>
+        </div>
+        <button class="btn full-width-btn" onclick="closeModal()" style="margin-top: 20px;">Close</button>
       `;
 
       openModal();
-    }*/
+    }
 
     /* ---------------- MODAL HELPERS ---------------- */
     function openModal() {
