@@ -708,6 +708,7 @@
     }
 
     /* ---------------- STINKY 2 ---------------- */
+
     function isStinky2AllowedForRow(idx) {
       const placementsNow = rowState.map(r => r.placeSelect.value);
       const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
@@ -722,7 +723,8 @@
       return false;
     }
 
-    function validStinky2Combo(red, black) {
+    function validStinky2Combo(red, black, p3, k4, p4) {
+      // Category A: allowed red/black combos
       const combos = [
         [1, 0],
         [0, 1],
@@ -732,7 +734,18 @@
         [2, 1],
         [1, 2]
       ];
-      return combos.some(([r, b]) => r === red && b === black);
+
+      // Category A check
+      if (combos.some(([r, b]) => r === red && b === black)) {
+        return true;
+      }
+
+      // Category B: zero pigs + ANY special combination (0–3 specials)
+      if (red === 0 && black === 0) {
+        return true;
+      }
+
+      return false;
     }
 
     function stinky2Total(red, black, p3, k4, p4) {
@@ -836,11 +849,14 @@
         const kk4 = parseInt(k4.input.value || "0");
         const pp4 = parseInt(p4.input.value || "0");
 
-        if (!validStinky2Combo(r, b)) {
+        if (!validStinky2Combo(r, b, pp3, kk4, pp4)) {
           alert(
-            "Allowed Stinky 2 red/black combos:\n" +
-            "1 Red\n1 Black\n1 Red + 1 Black\n" +
-            "2 Red\n2 Black\n2 Red + 1 Black\n1 Red + 2 Black"
+            "Invalid Stinky 2 combination.\n\n" +
+            "Allowed red/black combos:\n" +
+            "- 1 Red\n- 1 Black\n- 1 Red + 1 Black\n" +
+            "- 2 Red\n- 2 Black\n- 2 Red + 1 Black\n- 1 Red + 2 Black\n\n" +
+            "OR\n\n" +
+            "0 Red + 0 Black + ANY special types (0–3)."
           );
           return;
         }
@@ -1284,11 +1300,10 @@
       }
 
       const players = bucket.players;
-
       const PROVISIONAL_GAMES = 5;
       const K = 5; // smoothing weight
 
-      // Build raw player array
+      // 1. Build raw player array
       const arr = Object.entries(players).map(([name, data]) => {
         const avg = data.games > 0 ? data.score / data.games : 0;
         return {
@@ -1298,41 +1313,41 @@
           wins: data.wins,
           winRate: data.games > 0 ? ((data.wins / data.games) * 100).toFixed(1) : "0.0",
           avgScore: avg,
-          avgScoreDisplay: avg.toFixed(2),
           provisional: data.games < PROVISIONAL_GAMES
         };
       });
 
-      // Compute league baseline (average of all avg scores)
+      // 2. Compute league baseline (average of all avg scores)
       const leagueBaseline =
         arr.length > 0
           ? arr.reduce((sum, p) => sum + p.avgScore, 0) / arr.length
           : 0;
 
-      // Add weighted score to each player
+      // 3. Apply Bayesian Weighted Average logic
       arr.forEach(p => {
-        p.weightedScore =
-          (p.avgScore * p.games + leagueBaseline * K) / (p.games + K);
-        p.weightedDisplay = p.weightedScore.toFixed(2);
+        // Weighted Formula: (R*v + C*m) / (v + m)
+        p.weightedScore = (p.avgScore * p.games + leagueBaseline * K) / (p.games + K);
+        // Use the weighted score for the display
+        p.avgScoreDisplay = p.weightedScore.toFixed(2);
       });
 
-      // Split ranked vs provisional
+      // 4. Split ranked vs provisional
       const ranked = arr.filter(p => !p.provisional);
       const provisional = arr.filter(p => p.provisional);
 
-      // Sort ranked players by weighted score
+      // 5. Sort ranked players by weighted score
       ranked.sort((a, b) => {
         if (b.weightedScore !== a.weightedScore)
           return b.weightedScore - a.weightedScore;
         return b.score - a.score; // tie-breaker
       });
 
-      // Sort provisional alphabetically
+      // 6. Sort provisional alphabetically
       provisional.sort((a, b) => a.name.localeCompare(b.name));
 
       const finalList = [...ranked, ...provisional];
 
-
+      // --- RENDERING ---
       const titleEl = document.createElement("h2");
       titleEl.style.textAlign = "center";
       titleEl.style.marginTop = "30px";
@@ -1367,7 +1382,6 @@
 
       finalList.forEach((p) => {
         const tr = document.createElement("tr");
-
         const isRanked = !p.provisional;
         const rankNumber = isRanked ? ranked.indexOf(p) + 1 : null;
 
@@ -1377,7 +1391,7 @@
           if (r === 0) icon = "🥇";
           else if (r === 1) icon = "🥈";
           else if (r === 2) icon = "🥉";
-          else if (r === ranked.length - 1) icon = "💀";
+          else if (r === ranked.length - 1 && ranked.length > 3) icon = "💀";
         }
 
         if (isRanked) {
@@ -1385,7 +1399,7 @@
           if (r === 0) tr.style.background = "#fff7d1";
           else if (r === 1) tr.style.background = "#f2f2f7";
           else if (r === 2) tr.style.background = "#f8e7d1";
-          else if (r === ranked.length - 1) tr.style.background = "#ffe5e5";
+          else if (r === ranked.length - 1 && ranked.length > 3) tr.style.background = "#ffe5e5";
         } else {
           tr.style.opacity = "0.55";
         }
@@ -1412,7 +1426,6 @@
 
       container.appendChild(wrapper);
     }
-
     /* ---------------- WEEKLY HISTORY UI ---------------- */
     function openWeeklyHistory() {
       const modal = document.getElementById("modalContent");
