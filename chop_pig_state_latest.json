@@ -2,18 +2,18 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 47,
-        "games": 34,
+        "score": 43,
+        "games": 33,
         "wins": 12
       },
       "Andy": {
-        "score": 57,
-        "games": 49,
+        "score": 61,
+        "games": 48,
         "wins": 21
       },
       "Ana": {
-        "score": -50,
-        "games": 50,
+        "score": -46,
+        "games": 49,
         "wins": 7
       },
       "David": {
@@ -47,9 +47,9 @@
         "wins": 1
       },
       "Majid": {
-        "score": 21,
-        "games": 29,
-        "wins": 9
+        "score": 17,
+        "games": 28,
+        "wins": 8
       },
       "Ian": {
         "score": -10,
@@ -80,18 +80,18 @@
   "weekly": {
     "players": {
       "James": {
-        "score": 4,
-        "games": 1,
+        "score": 0,
+        "games": 0,
         "wins": 0
       },
       "Andy": {
-        "score": 6,
-        "games": 21,
+        "score": 10,
+        "games": 20,
         "wins": 9
       },
       "Ana": {
-        "score": -31,
-        "games": 19,
+        "score": -27,
+        "games": 18,
         "wins": 2
       },
       "David": {
@@ -125,9 +125,9 @@
         "wins": 1
       },
       "Majid": {
-        "score": 22,
-        "games": 17,
-        "wins": 8
+        "score": 18,
+        "games": 16,
+        "wins": 7
       },
       "Ian": {
         "score": -2,
@@ -155,7 +155,7 @@
       "Ted"
     ]
   },
-  "weeklyReset": "2026-04-10T21:20:05.171Z",
+  "weeklyReset": "2026-04-13T19:48:46.893Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
