@@ -1189,7 +1189,8 @@
           score = stinky13Count === 2 ? 0 : 2;
         else score = baseScores[placement];
 
-        baseScoresRow[i] = score;
+        // Reverse mode flips base placement scores
+        baseScoresRow[i] = reverseMode ? -score : score;
       }
 
       const finalScores = baseScoresRow.slice();
@@ -1204,6 +1205,7 @@
           Stinky2_kind4[i],
           Stinky2_pairs4[i]
         );
+        // total is always negative e.g. -3
 
         const placementsNow = rowState.map(r => r.placeSelect.value);
         const giverPlace = placementsNow[i];
@@ -1217,12 +1219,13 @@
           receiverIdx = findPlayerByPlace(placementsNow, "2nd");
 
         if (reverseMode) {
-          // Reversed: giver gains, receiver loses
+          // Reverse: stinky2 player gains (subtract a negative = add)
+          // receiver loses (add a negative = subtract)
           finalScores[i] -= total;
           if (receiverIdx !== null && receiverIdx !== undefined)
             finalScores[receiverIdx] += total;
         } else {
-          // Normal: giver loses, receiver gains
+          // Normal: stinky2 player loses, receiver gains
           finalScores[i] += total;
           if (receiverIdx !== null && receiverIdx !== undefined)
             finalScores[receiverIdx] -= total;
@@ -1246,7 +1249,7 @@
           }
 
           if (reverseMode) {
-            // Reversed: victim gains, chopper loses
+            // Reverse: victim gains, chopper loses
             finalScores[i] += totalPoints;
             finalScores[chopperIdx] -= totalPoints;
           } else {
@@ -1254,13 +1257,6 @@
             finalScores[i] -= totalPoints;
             finalScores[chopperIdx] += totalPoints;
           }
-        }
-      }
-
-      // Flip base placement scores if reverse mode is on
-      if (reverseMode) {
-        for (let i = 0; i < rowCount; i++) {
-          finalScores[i] = -finalScores[i];
         }
       }
 
