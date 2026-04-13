@@ -62,24 +62,24 @@
         "wins": 8
       },
       "a": {
-        "score": 0,
-        "games": 0,
+        "score": -4,
+        "games": 1,
         "wins": 0
       },
       "b": {
-        "score": 0,
-        "games": 0,
+        "score": -2,
+        "games": 1,
         "wins": 0
       },
       "c": {
-        "score": 0,
-        "games": 0,
+        "score": 2,
+        "games": 1,
         "wins": 0
       },
       "d": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
+        "score": 4,
+        "games": 1,
+        "wins": 1
       }
     },
     "playerList": [
@@ -164,24 +164,24 @@
         "wins": 5
       },
       "a": {
-        "score": 0,
-        "games": 0,
+        "score": -4,
+        "games": 1,
         "wins": 0
       },
       "b": {
-        "score": 0,
-        "games": 0,
+        "score": -2,
+        "games": 1,
         "wins": 0
       },
       "c": {
-        "score": 0,
-        "games": 0,
+        "score": 2,
+        "games": 1,
         "wins": 0
       },
       "d": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
+        "score": 4,
+        "games": 1,
+        "wins": 1
       }
     },
     "playerList": [
