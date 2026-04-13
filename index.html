@@ -161,12 +161,61 @@
         margin: 16px auto;
       }
     }
+
+    body.reverse-mode {
+      background: #1a1a2e;
+      color: #e0e0e0;
+    }
+    body.reverse-mode .top-bar,
+    body.reverse-mode .player-card,
+    body.reverse-mode .leaderboard-card,
+    body.reverse-mode .modal {
+      background: #16213e;
+      color: #e0e0e0;
+    }
+    body.reverse-mode .btn {
+      background: #e94560;
+    }
+    body.reverse-mode .card-row select,
+    body.reverse-mode .card-row input {
+      background: #0f3460;
+      color: #e0e0e0;
+      border-color: #444;
+    }
+    body.reverse-mode table {
+      background: #16213e !important;
+      color: #e0e0e0;
+    }
+    body.reverse-mode thead tr {
+      background: #0f3460 !important;
+    }
+    body.reverse-mode #reverseBanner {
+      display: block !important;
+    }
+    #reverseBanner {
+      display: none;
+      text-align: center;
+      background: #e94560;
+      color: white;
+      font-weight: 500;
+      padding: 6px;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+
+
+
+
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
+
+<div id="reverseBanner">⚠ REVERSE MODE ACTIVE — scoring is flipped</div>
+
 <div class="top-bar" style="flex-direction: column; align-items: center;">
   <h1 style="margin-bottom: 20px;">Chop Pig Score Tracker (V2.0)</h1>
   
@@ -175,6 +224,7 @@
     <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
     <button class="btn" onclick="refreshFromCloud()">Refresh</button>
     <button class="btn" onclick="openRankedRules()">Ranked Rules</button>
+    <button class="btn" id="reverseModeBtn" onclick="toggleReverseMode()">Reverse Mode</button>
   </div>
 
   <div id="syncStatus" style="text-align:center; margin-top:12px; font-weight: bold; color: #ff3b30;">
@@ -240,6 +290,7 @@
     let Stinky2_pairs4 = [0, 0, 0, 0];
 
     let chopData = [[], [], [], []];
+    let reverseMode = false;
 
     const rowCount = 4;
     const rowState = [];
@@ -312,6 +363,18 @@
         setSyncStatus("View-only mode", "gray");
       }
     }
+
+
+      function toggleReverseMode() {
+        reverseMode = !reverseMode;
+        document.body.classList.toggle("reverse-mode", reverseMode);
+        document.getElementById("reverseModeBtn").textContent =
+          reverseMode ? "Normal Mode" : "Reverse Mode";
+        autoFillAllScores();
+}
+
+
+
 
     /* ---------------- CLOUD LOAD / SAVE ---------------- */
     async function loadStateFromGitHub() {
@@ -1177,6 +1240,13 @@
 
           finalScores[i] -= totalPoints;
           finalScores[chopperIdx] += totalPoints;
+        }
+      }
+
+      // Flip all scores if reverse mode is on
+      if (reverseMode) {
+        for (let i = 0; i < rowCount; i++) {
+          finalScores[i] = -finalScores[i];
         }
       }
 
