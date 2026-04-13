@@ -1205,8 +1205,6 @@
           Stinky2_pairs4[i]
         );
 
-        finalScores[i] += total;
-
         const placementsNow = rowState.map(r => r.placeSelect.value);
         const giverPlace = placementsNow[i];
         let receiverIdx = null;
@@ -1218,8 +1216,17 @@
         else if (giverPlace === "3rd")
           receiverIdx = findPlayerByPlace(placementsNow, "2nd");
 
-        if (receiverIdx !== null && receiverIdx !== undefined)
-          finalScores[receiverIdx] -= total;
+        if (reverseMode) {
+          // Reversed: giver gains, receiver gains too (penalty becomes reward)
+          finalScores[i] -= total;
+          if (receiverIdx !== null && receiverIdx !== undefined)
+            finalScores[receiverIdx] += total;
+        } else {
+          // Normal: giver loses, receiver also loses
+          finalScores[i] += total;
+          if (receiverIdx !== null && receiverIdx !== undefined)
+            finalScores[receiverIdx] -= total;
+        }
       }
 
       for (let i = 0; i < rowCount; i++) {
@@ -1238,12 +1245,19 @@
             totalPoints += chopPoints(t) * amt;
           }
 
-          finalScores[i] -= totalPoints;
-          finalScores[chopperIdx] += totalPoints;
+          if (reverseMode) {
+            // Reversed: victim gains, chopper loses
+            finalScores[i] += totalPoints;
+            finalScores[chopperIdx] -= totalPoints;
+          } else {
+            // Normal: victim loses, chopper gains
+            finalScores[i] -= totalPoints;
+            finalScores[chopperIdx] += totalPoints;
+          }
         }
       }
 
-      // Flip all scores if reverse mode is on
+      // Flip base placement scores if reverse mode is on
       if (reverseMode) {
         for (let i = 0; i < rowCount; i++) {
           finalScores[i] = -finalScores[i];
@@ -1270,7 +1284,6 @@
 
       refreshTable();
     }
-
     /* ---------------- ROUND COMMIT ---------------- */
     function addRoundScores() {
       const selectedPlayers = [];
