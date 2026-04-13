@@ -2,24 +2,24 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 43,
-        "games": 33,
+        "score": 38,
+        "games": 34,
         "wins": 12
       },
       "Andy": {
-        "score": 61,
-        "games": 48,
+        "score": 63,
+        "games": 49,
         "wins": 21
       },
       "Ana": {
-        "score": -46,
-        "games": 49,
+        "score": -48,
+        "games": 50,
         "wins": 7
       },
       "David": {
-        "score": -25,
-        "games": 31,
-        "wins": 5
+        "score": -20,
+        "games": 32,
+        "wins": 6
       },
       "Lawrence": {
         "score": -8,
@@ -80,24 +80,24 @@
   "weekly": {
     "players": {
       "James": {
-        "score": 0,
-        "games": 0,
+        "score": -5,
+        "games": 1,
         "wins": 0
       },
       "Andy": {
-        "score": 10,
-        "games": 20,
+        "score": 12,
+        "games": 21,
         "wins": 9
       },
       "Ana": {
-        "score": -27,
-        "games": 18,
+        "score": -29,
+        "games": 19,
         "wins": 2
       },
       "David": {
-        "score": -17,
-        "games": 23,
-        "wins": 4
+        "score": -12,
+        "games": 24,
+        "wins": 5
       },
       "Lawrence": {
         "score": 0,
