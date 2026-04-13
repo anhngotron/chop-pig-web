@@ -60,21 +60,27 @@
         "score": 5,
         "games": 24,
         "wins": 8
+      },
+      "a": {
+        "score": 0,
+        "games": 0,
+        "wins": 0
       }
     },
     "playerList": [
-      "James",
-      "Andy",
       "Ana",
+      "Andy",
       "David",
-      "Lawrence",
-      "William",
-      "Robert",
-      "Kevin",
-      "Jeanette",
-      "Majid",
       "Ian",
-      "Ted"
+      "James",
+      "Jeanette",
+      "Kevin",
+      "Lawrence",
+      "Majid",
+      "Robert",
+      "Ted",
+      "William",
+      "a"
     ]
   },
   "weekly": {
@@ -138,21 +144,27 @@
         "score": 2,
         "games": 17,
         "wins": 5
+      },
+      "a": {
+        "score": 0,
+        "games": 0,
+        "wins": 0
       }
     },
     "playerList": [
-      "James",
-      "Andy",
       "Ana",
+      "Andy",
       "David",
-      "Lawrence",
-      "William",
-      "Robert",
-      "Kevin",
-      "Jeanette",
-      "Majid",
       "Ian",
-      "Ted"
+      "James",
+      "Jeanette",
+      "Kevin",
+      "Lawrence",
+      "Majid",
+      "Robert",
+      "Ted",
+      "William",
+      "a"
     ]
   },
   "weeklyReset": "2026-04-13T19:48:46.893Z",
