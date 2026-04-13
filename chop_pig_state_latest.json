@@ -80,24 +80,24 @@
   "weekly": {
     "players": {
       "James": {
-        "score": -5,
-        "games": 1,
+        "score": 0,
+        "games": 0,
         "wins": 0
       },
       "Andy": {
-        "score": 12,
-        "games": 21,
-        "wins": 9
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Ana": {
-        "score": -29,
-        "games": 19,
-        "wins": 2
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "David": {
-        "score": -12,
-        "games": 24,
-        "wins": 5
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Lawrence": {
         "score": 0,
@@ -105,39 +105,39 @@
         "wins": 0
       },
       "William": {
-        "score": -1,
-        "games": 15,
-        "wins": 4
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Robert": {
-        "score": -16,
-        "games": 6,
-        "wins": 1
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Kevin": {
-        "score": 40,
-        "games": 15,
-        "wins": 4
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Jeanette": {
-        "score": -7,
-        "games": 8,
-        "wins": 1
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Majid": {
-        "score": 18,
-        "games": 16,
-        "wins": 7
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Ian": {
-        "score": -2,
-        "games": 9,
-        "wins": 1
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Ted": {
-        "score": 2,
-        "games": 17,
-        "wins": 5
+        "score": 0,
+        "games": 0,
+        "wins": 0
       }
     },
     "playerList": [
@@ -155,7 +155,7 @@
       "Ted"
     ]
   },
-  "weeklyReset": "2026-04-13T20:41:33.979Z",
+  "weeklyReset": "2026-04-13T20:47:29.182Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
@@ -229,6 +229,86 @@
         "David",
         "Lawrence",
         "William ",
+        "Robert",
+        "Kevin",
+        "Jeanette",
+        "Majid",
+        "Ian",
+        "Ted"
+      ]
+    },
+    {
+      "weekStart": "2026-04-13T20:41:33.979Z",
+      "weekEnd": "2026-04-13T20:47:29.182Z",
+      "players": {
+        "James": {
+          "score": -5,
+          "games": 1,
+          "wins": 0
+        },
+        "Andy": {
+          "score": 12,
+          "games": 21,
+          "wins": 9
+        },
+        "Ana": {
+          "score": -29,
+          "games": 19,
+          "wins": 2
+        },
+        "David": {
+          "score": -12,
+          "games": 24,
+          "wins": 5
+        },
+        "Lawrence": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "William": {
+          "score": -1,
+          "games": 15,
+          "wins": 4
+        },
+        "Robert": {
+          "score": -16,
+          "games": 6,
+          "wins": 1
+        },
+        "Kevin": {
+          "score": 40,
+          "games": 15,
+          "wins": 4
+        },
+        "Jeanette": {
+          "score": -7,
+          "games": 8,
+          "wins": 1
+        },
+        "Majid": {
+          "score": 18,
+          "games": 16,
+          "wins": 7
+        },
+        "Ian": {
+          "score": -2,
+          "games": 9,
+          "wins": 1
+        },
+        "Ted": {
+          "score": 2,
+          "games": 17,
+          "wins": 5
+        }
+      },
+      "playerList": [
+        "James",
+        "Andy",
+        "Ana",
+        "David",
+        "Lawrence",
+        "William",
         "Robert",
         "Kevin",
         "Jeanette",
