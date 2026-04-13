@@ -324,7 +324,7 @@
       try {
         const owner = "anhngotron";
         const repo = "chop-pig-web";
-        const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json`;
+        const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json?t=${Date.now()}`;
 
         // 2. FETCH LATEST: Use no-store to bypass any local browser caching
         const resp = await fetch(url, { cache: "no-store" });
