@@ -1217,12 +1217,12 @@
           receiverIdx = findPlayerByPlace(placementsNow, "2nd");
 
         if (reverseMode) {
-          // Reversed: giver gains, receiver gains too (penalty becomes reward)
+          // Reversed: giver gains, receiver loses
           finalScores[i] -= total;
           if (receiverIdx !== null && receiverIdx !== undefined)
             finalScores[receiverIdx] += total;
         } else {
-          // Normal: giver loses, receiver also loses
+          // Normal: giver loses, receiver gains
           finalScores[i] += total;
           if (receiverIdx !== null && receiverIdx !== undefined)
             finalScores[receiverIdx] -= total;
