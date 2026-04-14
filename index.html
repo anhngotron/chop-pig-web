@@ -244,10 +244,12 @@
 
   <div id="roundRows"></div>
 
-  <button class="btn full-width-btn" id="addRoundBtn" onclick="addRoundScores()">Add Round</button>
-  <button class="btn full-width-btn" id="exportBtn" onclick="exportToExcel()">Export to Excel</button>
-  <button class="btn full-width-btn" id="importBtn" onclick="importFromExcel()">Import from Excel</button>
-  <button class="btn full-width-btn" id="syncNowBtn" onclick="manualSync()">Sync Now</button>
+  <input type="text" id="newPlayerName" disabled />
+  <button class="btn full-width-btn" id="addPlayerBtn" onclick="addPlayer()" disabled>Add Player</button>
+  <button class="btn full-width-btn" id="addRoundBtn" onclick="addRoundScores()" disabled>Add Round</button>
+  <button class="btn full-width-btn" id="exportBtn" onclick="exportToExcel()" disabled>Export to Excel</button>
+  <button class="btn full-width-btn" id="importBtn" onclick="importFromExcel()" disabled>Import from Excel</button>
+  <button class="btn full-width-btn" id="syncNowBtn" onclick="manualSync()" disabled>Sync Now</button>
 
   <div id="syncStatus" style="text-align:center; margin-top:10px; color:#555;"></div>
 
@@ -300,6 +302,8 @@
       const loginBtn = document.getElementById("loginBtn");
       const disabled = !canSave;
 
+      
+      document.getElementById("newPlayerName").disabled = disabled;
       document.getElementById("addPlayerBtn").disabled = disabled;
       document.getElementById("addRoundBtn").disabled = disabled;
       document.getElementById("exportBtn").disabled = disabled;
@@ -677,6 +681,7 @@
         } else if (!allowed.includes(oldVal)) {
           sel.value = "";
         }
+        sel.disabled = !canSave;
       }
     }
 
@@ -752,6 +757,7 @@
           rowState[i].chopCheckbox.checked = false;
           rowState[i].choppedBySpan.textContent = "";
         }
+        sel.disabled = !canSave;
       }
     }
 
