@@ -237,17 +237,17 @@
   <div class="player-card" style="margin-top:20px;">
     <div class="card-row">
       <label>New Player Name</label>
-      <input type="text" id="newPlayerName" disabled />
+      <input type="text" id="newPlayerName" />
     </div>
-    <button class="btn full-width-btn" id="addPlayerBtn" onclick="addPlayer()" disabled>Add Player</button>
+    <button class="btn full-width-btn" id="addPlayerBtn" onclick="addPlayer()">Add Player</button>
   </div>
 
   <div id="roundRows"></div>
 
-  <button class="btn full-width-btn" id="addRoundBtn" onclick="addRoundScores()" disabled>Add Round</button>
-  <button class="btn full-width-btn" id="exportBtn" onclick="exportToExcel()" disabled>Export to Excel</button>
-  <button class="btn full-width-btn" id="importBtn" onclick="importFromExcel()" disabled>Import from Excel</button>
-  <button class="btn full-width-btn" id="syncNowBtn" onclick="manualSync()" disabled>Sync Now</button>
+  <button class="btn full-width-btn" id="addRoundBtn" onclick="addRoundScores()">Add Round</button>
+  <button class="btn full-width-btn" id="exportBtn" onclick="exportToExcel()">Export to Excel</button>
+  <button class="btn full-width-btn" id="importBtn" onclick="importFromExcel()">Import from Excel</button>
+  <button class="btn full-width-btn" id="syncNowBtn" onclick="manualSync()">Sync Now</button>
 
   <div id="syncStatus" style="text-align:center; margin-top:10px; color:#555;"></div>
 
@@ -300,7 +300,6 @@
       const loginBtn = document.getElementById("loginBtn");
       const disabled = !canSave;
 
-      document.getElementById("newPlayerName").disabled = disabled;
       document.getElementById("addPlayerBtn").disabled = disabled;
       document.getElementById("addRoundBtn").disabled = disabled;
       document.getElementById("exportBtn").disabled = disabled;
@@ -312,7 +311,6 @@
         r.placeSelect.disabled = disabled;
         r.stinky2Checkbox.disabled = disabled;
         r.chopCheckbox.disabled = disabled;
-        r.clearBtn.disabled = disabled; 
       }
 
       if (canSave) {
@@ -539,7 +537,6 @@
         lblPlayer.textContent = "Player";
         const selPlayer = document.createElement("select");
         selPlayer.innerHTML = `<option value="">--</option>`;
-        selPlace.disabled = !canSave;
         selPlayer.onchange = () => { onPlayerSelected(i); saveState(); };
         rowPlayer.appendChild(lblPlayer);
         rowPlayer.appendChild(selPlayer);
@@ -550,9 +547,9 @@
         const lblPlace = document.createElement("label");
         lblPlace.textContent = "Placement";
         const selPlace = document.createElement("select");
-        selPlace.innerHTML = `<option value="">--</option>` +
-        basePlacements.map(p => `<option value="${p}">${p}</option>`).join("");
-        selPlace.disabled = !canSave;
+        selPlace.innerHTML =
+          `<option value="">--</option>` +
+          basePlacements.map(p => `<option value="${p}">${p}</option>`).join("");
         selPlace.onchange = () => { onPlacementChanged(); saveState(); };
         rowPlace.appendChild(lblPlace);
         rowPlace.appendChild(selPlace);
@@ -620,8 +617,7 @@
           scoreInput: inpScore,
           stinky2Checkbox: chkStinky,
           chopCheckbox: chkChop,
-          choppedBySpan: spanChoppedBy,
-          clearBtn: btnClear
+          choppedBySpan: spanChoppedBy
         });
       }
 
