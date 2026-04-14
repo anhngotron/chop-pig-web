@@ -1397,7 +1397,7 @@
       const K = 5; // smoothing weight
 
       // 1. Build raw player array
-      const arr = Object.entries(players).map(([name, data]) => {
+      const arr = Object.entries(players).filter(([, data]) => data.games > 0).map(([name, data]) => {
         const avg = data.games > 0 ? data.score / data.games : 0;
         return {
           name,
