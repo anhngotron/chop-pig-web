@@ -2,9 +2,9 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 51,
-        "games": 39,
-        "wins": 13
+        "score": 72,
+        "games": 40,
+        "wins": 14
       },
       "Andy": {
         "score": 69,
@@ -17,8 +17,8 @@
         "wins": 9
       },
       "David": {
-        "score": -26,
-        "games": 36,
+        "score": -33,
+        "games": 37,
         "wins": 6
       },
       "Lawrence": {
@@ -37,8 +37,8 @@
         "wins": 3
       },
       "Kevin": {
-        "score": -4,
-        "games": 49,
+        "score": -11,
+        "games": 50,
         "wins": 12
       },
       "Jeanette": {
@@ -57,8 +57,8 @@
         "wins": 4
       },
       "Ted": {
-        "score": 1,
-        "games": 25,
+        "score": -6,
+        "games": 26,
         "wins": 8
       }
     },
@@ -80,9 +80,9 @@
   "weekly": {
     "players": {
       "James": {
-        "score": 8,
-        "games": 6,
-        "wins": 1
+        "score": 29,
+        "games": 7,
+        "wins": 2
       },
       "Andy": {
         "score": 8,
@@ -95,8 +95,8 @@
         "wins": 2
       },
       "David": {
-        "score": -1,
-        "games": 5,
+        "score": -8,
+        "games": 6,
         "wins": 1
       },
       "Lawrence": {
@@ -115,8 +115,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -15,
-        "games": 4,
+        "score": -22,
+        "games": 5,
         "wins": 0
       },
       "Jeanette": {
@@ -135,8 +135,8 @@
         "wins": 0
       },
       "Ted": {
-        "score": -4,
-        "games": 1,
+        "score": -11,
+        "games": 2,
         "wins": 0
       }
     },
