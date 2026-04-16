@@ -7,8 +7,8 @@
         "wins": 18
       },
       "Andy": {
-        "score": 87,
-        "games": 72,
+        "score": 83,
+        "games": 73,
         "wins": 30
       },
       "Ana": {
@@ -22,13 +22,13 @@
         "wins": 8
       },
       "Lawrence": {
-        "score": -10,
-        "games": 14,
-        "wins": 1
+        "score": -6,
+        "games": 15,
+        "wins": 2
       },
       "William": {
-        "score": -18,
-        "games": 48,
+        "score": -16,
+        "games": 49,
         "wins": 13
       },
       "Robert": {
@@ -47,8 +47,8 @@
         "wins": 1
       },
       "Majid": {
-        "score": 16,
-        "games": 31,
+        "score": 14,
+        "games": 32,
         "wins": 8
       },
       "Ian": {
@@ -85,8 +85,8 @@
         "wins": 6
       },
       "Andy": {
-        "score": 26,
-        "games": 24,
+        "score": 22,
+        "games": 25,
         "wins": 9
       },
       "Ana": {
@@ -100,13 +100,13 @@
         "wins": 3
       },
       "Lawrence": {
-        "score": -2,
-        "games": 3,
-        "wins": 0
+        "score": 2,
+        "games": 4,
+        "wins": 1
       },
       "William": {
-        "score": -8,
-        "games": 4,
+        "score": -6,
+        "games": 5,
         "wins": 1
       },
       "Robert": {
@@ -125,8 +125,8 @@
         "wins": 0
       },
       "Majid": {
-        "score": -1,
-        "games": 3,
+        "score": -3,
+        "games": 4,
         "wins": 0
       },
       "Ian": {
