@@ -62,21 +62,21 @@
         "wins": 14
       },
       "A": {
-        "score": -7,
-        "games": 3,
+        "score": -4,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
-        "timesChopper": 0,
+        "timesChopper": 1,
         "stinky13Lose": 1,
         "stinky13Win": 0,
         "stinky2Lose": 1,
         "stinky2Win": 0
       },
       "Aa": {
-        "score": -3,
-        "games": 3,
-        "wins": 0,
-        "timesChopped": 0,
+        "score": 0,
+        "games": 4,
+        "wins": 1,
+        "timesChopped": 1,
         "timesChopper": 0,
         "stinky13Lose": 1,
         "stinky13Win": 0,
@@ -84,8 +84,8 @@
         "stinky2Win": 1
       },
       "Aaa": {
-        "score": 10,
-        "games": 3,
+        "score": 8,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -95,8 +95,8 @@
         "stinky2Win": 0
       },
       "Aaaa": {
-        "score": 0,
-        "games": 3,
+        "score": -4,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -188,21 +188,21 @@
         "wins": 6
       },
       "A": {
-        "score": -7,
-        "games": 3,
+        "score": -4,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
-        "timesChopper": 0,
+        "timesChopper": 1,
         "stinky13Lose": 1,
         "stinky13Win": 0,
         "stinky2Lose": 1,
         "stinky2Win": 0
       },
       "Aa": {
-        "score": -3,
-        "games": 3,
-        "wins": 0,
-        "timesChopped": 0,
+        "score": 0,
+        "games": 4,
+        "wins": 1,
+        "timesChopped": 1,
         "timesChopper": 0,
         "stinky13Lose": 1,
         "stinky13Win": 0,
@@ -210,8 +210,8 @@
         "stinky2Win": 1
       },
       "Aaa": {
-        "score": 10,
-        "games": 3,
+        "score": 8,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -221,8 +221,8 @@
         "stinky2Win": 0
       },
       "Aaaa": {
-        "score": 0,
-        "games": 3,
+        "score": -4,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
