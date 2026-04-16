@@ -82,6 +82,17 @@
         "stinky13Win": 0,
         "stinky2Lose": 0,
         "stinky2Win": 0
+      },
+      "C": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       }
     },
     "playerList": [
@@ -89,6 +100,7 @@
       "Ana",
       "Andy",
       "B",
+      "C",
       "David",
       "Ian",
       "James",
@@ -184,6 +196,17 @@
         "stinky13Win": 0,
         "stinky2Lose": 0,
         "stinky2Win": 0
+      },
+      "C": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       }
     },
     "playerList": [
@@ -191,6 +214,7 @@
       "Ana",
       "Andy",
       "B",
+      "C",
       "David",
       "Ian",
       "James",
