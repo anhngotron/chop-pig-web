@@ -7,13 +7,13 @@
         "wins": 18
       },
       "Andy": {
-        "score": 74,
-        "games": 77,
-        "wins": 30
+        "score": 78,
+        "games": 78,
+        "wins": 31
       },
       "Ana": {
-        "score": -23,
-        "games": 57,
+        "score": -25,
+        "games": 58,
         "wins": 11
       },
       "David": {
@@ -47,8 +47,8 @@
         "wins": 1
       },
       "Majid": {
-        "score": 21,
-        "games": 36,
+        "score": 17,
+        "games": 37,
         "wins": 9
       },
       "Ian": {
@@ -57,8 +57,8 @@
         "wins": 6
       },
       "Ted": {
-        "score": -6,
-        "games": 43,
+        "score": -4,
+        "games": 44,
         "wins": 12
       }
     },
@@ -85,13 +85,13 @@
         "wins": 6
       },
       "Andy": {
-        "score": 13,
-        "games": 29,
-        "wins": 9
+        "score": 17,
+        "games": 30,
+        "wins": 10
       },
       "Ana": {
-        "score": 23,
-        "games": 8,
+        "score": 21,
+        "games": 9,
         "wins": 4
       },
       "David": {
@@ -125,8 +125,8 @@
         "wins": 0
       },
       "Majid": {
-        "score": 4,
-        "games": 8,
+        "score": 0,
+        "games": 9,
         "wins": 1
       },
       "Ian": {
@@ -135,8 +135,8 @@
         "wins": 2
       },
       "Ted": {
-        "score": -11,
-        "games": 19,
+        "score": -9,
+        "games": 20,
         "wins": 4
       }
     },
