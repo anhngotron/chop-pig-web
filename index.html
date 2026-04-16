@@ -271,15 +271,17 @@
 <div id="reverseBanner">⚠ REVERSE MODE ACTIVE — scoring is flipped</div>
 
 <div class="top-bar" style="flex-direction: column; align-items: center;">
-  <h1 style="margin-bottom: 20px;">Chop Pig Score Tracker (V2.0)</h1>
+  <h1 style="margin-bottom: 20px;">Chop Pig Score Tracker (V2.1</h1>
   
   <div class="top-right" style="width: 100%; justify-content: center; flex-wrap: wrap;">
-    <button class="btn" onclick="openWeeklyHistory()">History</button>
-    <button class="btn" onclick="openGameLogs()">Game Logs</button>
+  
     <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
     <button class="btn" onclick="refreshFromCloud()">Refresh</button>
-    <button class="btn" onclick="openRankedRules()">Ranked Rules</button>
     <button class="btn" id="reverseModeBtn" onclick="toggleReverseMode()">Reverse Mode</button>
+    <button class="btn" onclick="openWeeklyHistory()">History</button>
+    <button class="btn" onclick="openGameLogs()">Game Logs</button>
+    <button class="btn" onclick="openRankedRules()">Ranking Rules</button>
+
   </div>
 
   <div id="syncStatus" style="text-align:center; margin-top:12px; font-weight: bold; color: #ff3b30;">
