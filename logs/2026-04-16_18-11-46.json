@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-04-16T18:11:46.645Z",
+  "players": [
+    {
+      "name": "A",
+      "placement": "1st",
+      "score": 4
+    },
+    {
+      "name": "B",
+      "placement": "2nd",
+      "score": 2
+    },
+    {
+      "name": "C",
+      "placement": "3rd",
+      "score": 2
+    },
+    {
+      "name": "D",
+      "placement": "4th",
+      "score": -8,
+      "stinky2": {
+        "redPigs": 2,
+        "blackPigs": 0,
+        "consecutivePairs3": 0,
+        "fourOfAKind": 0,
+        "consecutivePairs4": 0,
+        "pointsLost": -4
+      }
+    }
+  ]
+}
