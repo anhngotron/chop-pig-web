@@ -82,11 +82,23 @@
         "stinky13Win": 0,
         "stinky2Lose": 0,
         "stinky2Win": 0
+      },
+      "Aaa": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       }
     },
     "playerList": [
       "A",
       "Aa",
+      "Aaa",
       "Ana",
       "Andy",
       "David",
@@ -184,11 +196,23 @@
         "stinky13Win": 0,
         "stinky2Lose": 0,
         "stinky2Win": 0
+      },
+      "Aaa": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       }
     },
     "playerList": [
       "A",
       "Aa",
+      "Aaa",
       "Ana",
       "Andy",
       "David",
