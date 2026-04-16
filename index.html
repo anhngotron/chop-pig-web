@@ -217,17 +217,14 @@
 <div id="reverseBanner">⚠ REVERSE MODE ACTIVE — scoring is flipped</div>
 
 <div class="top-bar" style="flex-direction: column; align-items: center;">
-  <h1 style="margin-bottom: 20px;">Chop Pig Score Tracker (V2.1)</h1>
+  <h1 style="margin-bottom: 20px;">Chop Pig Score Tracker (V2.0)</h1>
   
   <div class="top-right" style="width: 100%; justify-content: center; flex-wrap: wrap;">
-    
-    <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
-    <button class="btn" id="reverseModeBtn" onclick="toggleReverseMode()">Reverse Mode</button>
-    <button class="btn" onclick="refreshFromCloud()">Refresh</button>
-    <button class="btn" onclick="openRankedRules()">Ranking Rules</button>
     <button class="btn" onclick="openWeeklyHistory()">History</button>
-    <button class="btn" onclick="openGameLogs()">Game Logs</button>
-   
+    <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
+    <button class="btn" onclick="refreshFromCloud()">Refresh</button>
+    <button class="btn" onclick="openRankedRules()">Ranked Rules</button>
+    <button class="btn" id="reverseModeBtn" onclick="toggleReverseMode()">Reverse Mode</button>
   </div>
 
   <div id="syncStatus" style="text-align:center; margin-top:12px; font-weight: bold; color: #ff3b30;">
@@ -645,10 +642,7 @@
       const buckets = [allTime, weekly];
       for (const bucket of buckets) {
         if (!bucket.players[name]) {
-          bucket.players[name] = { score: 0, games: 0, wins: 0,
-            timesChopped: 0, timesChopper: 0,
-            stinky13Lose: 0, stinky13Win: 0,
-            stinky2Lose: 0, stinky2Win: 0 };
+          bucket.players[name] = { score: 0, games: 0, wins: 0 };
           bucket.playerList.push(name);
           bucket.playerList.sort();
         }
@@ -1328,23 +1322,14 @@
         scores.push(scoreVal);
       }
 
-      function ensureNotorietyFields(p) {
-        const fields = ["timesChopped","timesChopper",
-                        "stinky13Lose","stinky13Win",
-                        "stinky2Lose","stinky2Win"];
-        for (const f of fields) if (p[f] === undefined) p[f] = 0;
-      }
-
       function applyScore(bucket, name, score, isWin) {
         if (!bucket.players[name]) {
           bucket.players[name] = { score: 0, games: 0, wins: 0 };
           bucket.playerList.push(name);
         }
-        const p = bucket.players[name];
-        p.score += score;
-        p.games++;
-        if (isWin) p.wins++;
-        ensureNotorietyFields(p);
+        bucket.players[name].score += score;
+        bucket.players[name].games++;
+        if (isWin) bucket.players[name].wins++;
       }
 
       for (let i = 0; i < 4; i++) {
@@ -1356,223 +1341,12 @@
         applyScore(weekly, p, score, isWin);
       }
 
-      // Tally notoriety stats
-      const firstIdx = placements.indexOf("1st");
-      const firstName = firstIdx >= 0 ? selectedPlayers[firstIdx] : null;
-
-      for (let i = 0; i < 4; i++) {
-        const playerName = selectedPlayers[i];
-
-        if (placements[i] === "Stinky 13") {
-          for (const bucket of [allTime, weekly]) {
-            ensureNotorietyFields(bucket.players[playerName]);
-            bucket.players[playerName].stinky13Lose++;
-            if (firstName && bucket.players[firstName]) {
-              ensureNotorietyFields(bucket.players[firstName]);
-              bucket.players[firstName].stinky13Win++;
-            }
-          }
-        }
-
-        if (stinky2Enabled[i]) {
-          let receiverName = null;
-          if (placements[i] === "4th") {
-            const ri = placements.indexOf("3rd");
-            if (ri >= 0) receiverName = selectedPlayers[ri];
-          } else if (placements[i] === "3rd") {
-            const ri = placements.indexOf("2nd");
-            if (ri >= 0) receiverName = selectedPlayers[ri];
-          } else if (placements[i] === "Stinky 13") {
-            receiverName = firstName;
-          }
-
-          for (const bucket of [allTime, weekly]) {
-            ensureNotorietyFields(bucket.players[playerName]);
-            bucket.players[playerName].stinky2Lose++;
-            if (receiverName && bucket.players[receiverName]) {
-              ensureNotorietyFields(bucket.players[receiverName]);
-              bucket.players[receiverName].stinky2Win++;
-            }
-          }
-        }
-
-        for (const entry of chopData[i]) {
-          const chopperName = entry.chopper;
-          for (const bucket of [allTime, weekly]) {
-            if (bucket.players[playerName]) {
-              ensureNotorietyFields(bucket.players[playerName]);
-              bucket.players[playerName].timesChopped++;
-            }
-            if (bucket.players[chopperName]) {
-              ensureNotorietyFields(bucket.players[chopperName]);
-              bucket.players[chopperName].timesChopper++;
-            }
-          }
-        }
-      }
-      // Build game log snapshot BEFORE clearing rows (all data still live)
-      const gameLogPlayers = [];
-      for (let i = 0; i < 4; i++) {
-        const entry = {
-          name:      selectedPlayers[i],
-          placement: placements[i],
-          score:     scores[i]
-        };
-
-        if (placements[i] === "Stinky 13") {
-          entry.stinky13 = true;
-        }
-
-        if (stinky2Enabled[i]) {
-          entry.stinky2 = {
-            redPigs:           Stinky2_red[i],
-            blackPigs:         Stinky2_black[i],
-            consecutivePairs3: Stinky2_pairs3[i],
-            fourOfAKind:       Stinky2_kind4[i],
-            consecutivePairs4: Stinky2_pairs4[i],
-            pointsLost: stinky2Total(
-              Stinky2_red[i], Stinky2_black[i],
-              Stinky2_pairs3[i], Stinky2_kind4[i], Stinky2_pairs4[i]
-            )
-          };
-        }
-
-        if (chopData[i] && chopData[i].length > 0) {
-          entry.choppedBy = chopData[i].map(c => ({
-            chopper: c.chopper,
-            types:   c.types
-          }));
-        }
-
-        gameLogPlayers.push(entry);
-      }
-
-      logGame(gameLogPlayers);
-
       for (let i = 0; i < rowCount; i++) {
         clearRow(i);
       }
 
       refreshTable();
       saveState();
-    }
-
-    /* ---------------- GAME LOGGING ---------------- */
-    async function logGame(players) {
-      if (!canSave) return;
-      const timestamp = new Date().toISOString();
-      try {
-        await fetch("/api/log-game", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-App-Password": appPassword
-          },
-          body: JSON.stringify({ timestamp, players })
-        });
-        console.log("Game logged:", timestamp);
-      } catch (err) {
-        console.warn("Game log failed:", err);
-      }
-    }
-
-    async function openGameLogs() {
-      const modal = document.getElementById("modalContent");
-      modal.innerHTML = `<h2>Game Log</h2><p style="color:#888; text-align:center; margin-top:20px;">Loading…</p>`;
-      openModal();
-
-      let logs = [];
-      try {
-        const resp = await fetch("/api/get-logs");
-        if (resp.ok) {
-          const data = await resp.json();
-          logs = data.logs || [];
-        }
-      } catch (err) {
-        modal.innerHTML = `<h2>Game Log</h2><p style="color:red;">Failed to load logs.</p>`;
-        return;
-      }
-
-      if (logs.length === 0) {
-        modal.innerHTML = `<h2>Game Log</h2><p style="color:#888; text-align:center;">No games logged yet.</p><button class="btn full-width-btn" onclick="closeModal()" style="margin-top:10px;">Close</button>`;
-        return;
-      }
-
-      const placementEmoji = {
-        "1st": "🥇", "2nd": "🥈", "3rd": "🥉",
-        "4th": "😬", "Stinky 13": "💩"
-      };
-
-      let html = `<h2>Game Log</h2>`;
-
-      logs.forEach((log, idx) => {
-        const dt = new Date(log.timestamp);
-        const dateStr = dt.toLocaleDateString();
-        const timeStr = dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        const sorted = [...log.players].sort((a, b) => b.score - a.score);
-
-        html += `
-          <div style="background:#f9f9fb; border-radius:12px; margin-bottom:14px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <strong style="font-size:15px;">Game #${logs.length - idx}</strong>
-              <span style="font-size:13px; color:#888;">${dateStr} &nbsp;${timeStr}</span>
-            </div>
-            <table style="width:100%; border-collapse:collapse; font-size:13px;">
-              <thead>
-                <tr style="background:#e8e8f0; text-align:left;">
-                  <th style="padding:6px 8px;">Place</th>
-                  <th style="padding:6px 8px;">Player</th>
-                  <th style="padding:6px 8px;">Score</th>
-                  <th style="padding:6px 8px;">Extras</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-
-        sorted.forEach(p => {
-          const emoji = placementEmoji[p.placement] || "";
-          const extras = [];
-
-          if (p.stinky13) extras.push(`<span style="color:#b5451b;">💩 Stinky 13</span>`);
-
-          if (p.stinky2) {
-            const s2 = p.stinky2;
-            const parts = [];
-            if (s2.redPigs > 0)           parts.push(`🔥🐷 ×${s2.redPigs}`);
-            if (s2.blackPigs > 0)         parts.push(`🐷 ×${s2.blackPigs}`);
-            if (s2.consecutivePairs3 > 0) parts.push(`3-Pairs ×${s2.consecutivePairs3}`);
-            if (s2.fourOfAKind > 0)       parts.push(`4-Kind ×${s2.fourOfAKind}`);
-            if (s2.consecutivePairs4 > 0) parts.push(`4-Pairs ×${s2.consecutivePairs4}`);
-            extras.push(`<span style="color:#555;">🐷 Stinky 2 — ${parts.join(", ")} &nbsp;<strong>(${s2.pointsLost} pts)</strong></span>`);
-          }
-
-          if (p.choppedBy && p.choppedBy.length > 0) {
-            p.choppedBy.forEach(c => {
-              const chopParts = Object.entries(c.types)
-                .filter(([, v]) => v > 0)
-                .map(([k, v]) => `${k} ×${v}`);
-              extras.push(`<span style="color:#555;">🪓 Chopped by <strong>${c.chopper}</strong> — ${chopParts.join(", ")}</span>`);
-            });
-          }
-
-          const scoreColor = p.score > 0 ? "#1a7f37" : p.score < 0 ? "#e94560" : "#555";
-          const scoreStr = p.score > 0 ? `+${p.score}` : `${p.score}`;
-
-          html += `
-            <tr style="border-top:1px solid #eee;">
-              <td style="padding:7px 8px; white-space:nowrap;">${emoji} ${p.placement}</td>
-              <td style="padding:7px 8px; font-weight:600;">${p.name}</td>
-              <td style="padding:7px 8px; font-weight:700; color:${scoreColor};">${scoreStr}</td>
-              <td style="padding:7px 8px; font-size:12px; line-height:1.6;">${extras.length > 0 ? extras.join("<br>") : "<span style='color:#bbb;'>—</span>"}</td>
-            </tr>
-          `;
-        });
-
-        html += `</tbody></table></div>`;
-      });
-
-      html += `<button class="btn full-width-btn" onclick="closeModal()" style="margin-top:10px;">Close</button>`;
-      modal.innerHTML = html;
     }
 
     /* ---------------- LEADERBOARD (WEEKLY + ALL-TIME) ---------------- */
@@ -1600,9 +1374,7 @@
       }
 
       renderLeaderboardSection(title, weeklyBucket, container);
-      renderNotorietySection(title.replace("Leaderboard", "Notoriety"), weeklyBucket, container);
       renderLeaderboardSection("All‑Time Leaderboard", allTime, container);
-      renderNotorietySection("All‑Time Notoriety", allTime, container);
     }
 
     function renderLeaderboardSection(title, bucket, container) {
@@ -1747,105 +1519,6 @@
 
       container.appendChild(wrapper);
     }
-    /* ---------------- NOTORIETY TABLE ---------------- */
-    function renderNotorietySection(title, bucket, container) {
-      if (!bucket || !bucket.players) return;
-
-      const players = bucket.players;
-
-      const arr = Object.entries(players)
-        .filter(([, d]) => d.games > 0)
-        .map(([name, d]) => ({
-          name,
-          timesChopped:  d.timesChopped  || 0,
-          timesChopper:  d.timesChopper  || 0,
-          stinky13Lose:  d.stinky13Lose  || 0,
-          stinky13Win:   d.stinky13Win   || 0,
-          stinky2Lose:   d.stinky2Lose   || 0,
-          stinky2Win:    d.stinky2Win    || 0,
-        }));
-
-      if (arr.length === 0) return;
-
-      arr.sort((a, b) => b.timesChopped - a.timesChopped || a.name.localeCompare(b.name));
-
-      // Leaders per column (for red highlight)
-      const maxOf = key => Math.max(...arr.map(p => p[key]));
-      const maxChopped     = maxOf("timesChopped");
-      const maxChopper     = maxOf("timesChopper");
-      const maxS13Lose     = maxOf("stinky13Lose");
-      const maxS13Win      = maxOf("stinky13Win");
-      const maxS2Lose      = maxOf("stinky2Lose");
-      const maxS2Win       = maxOf("stinky2Win");
-
-      const titleEl = document.createElement("h2");
-      titleEl.style.textAlign = "center";
-      titleEl.style.marginTop = "30px";
-      titleEl.textContent = title;
-      container.appendChild(titleEl);
-
-      const table = document.createElement("table");
-      table.style.width = "100%";
-      table.style.minWidth = "720px";
-      table.style.borderCollapse = "collapse";
-      table.style.background = "white";
-      table.style.borderRadius = "12px";
-      table.style.overflow = "hidden";
-      table.style.margin = "16px auto";
-      table.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
-
-      // Two-row header: group row + column row
-      const thead = document.createElement("thead");
-      thead.innerHTML = `
-        <tr style="background:#e8e8f0; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">
-          <th style="padding:8px 10px; text-align:left;" rowspan="2">Player</th>
-          <th style="padding:8px 6px;" colspan="2">🪓 Chop Pigs</th>
-          <th style="padding:8px 6px;" colspan="2">💩 Stinky 13</th>
-          <th style="padding:8px 6px;" colspan="2">🐷 Stinky 2</th>
-        </tr>
-        <tr style="background:#f2f2f7; font-size:12px;">
-          <th style="padding:6px 8px;" title="Times this player was chopped by others">Got Chopped</th>
-          <th style="padding:6px 8px;" title="Times this player chopped others">Chopped Others</th>
-          <th style="padding:6px 8px;" title="Times this player got Stinky 13 (lost points)">Lose 💀</th>
-          <th style="padding:6px 8px;" title="Times this player benefited from someone else's Stinky 13 (gained bonus)">Win 🎉</th>
-          <th style="padding:6px 8px;" title="Times this player triggered Stinky 2 (lost points)">Lose 💀</th>
-          <th style="padding:6px 8px;" title="Times this player received Stinky 2 bonus points">Win 🎉</th>
-        </tr>
-      `;
-      table.appendChild(thead);
-
-      const tbody = document.createElement("tbody");
-
-      arr.forEach((p, idx) => {
-        const tr = document.createElement("tr");
-        tr.style.background = idx % 2 === 0 ? "#ffffff" : "#fafafa";
-
-        function cell(val, max) {
-          const hi = val > 0 && val === max;
-          return `<td style="padding:9px 8px; text-align:center; ${hi ? "font-weight:700; color:#e94560;" : "color:#555;"}">${val}</td>`;
-        }
-
-        tr.innerHTML = `
-          <td style="padding:9px 10px; font-weight:500;">${p.name}</td>
-          ${cell(p.timesChopped, maxChopped)}
-          ${cell(p.timesChopper, maxChopper)}
-          ${cell(p.stinky13Lose, maxS13Lose)}
-          ${cell(p.stinky13Win,  maxS13Win)}
-          ${cell(p.stinky2Lose,  maxS2Lose)}
-          ${cell(p.stinky2Win,   maxS2Win)}
-        `;
-        tbody.appendChild(tr);
-      });
-
-      table.appendChild(tbody);
-
-      const wrapper = document.createElement("div");
-      wrapper.style.overflowX = "auto";
-      wrapper.style.webkitOverflowScrolling = "touch";
-      wrapper.appendChild(table);
-      container.appendChild(wrapper);
-    }
-
     /* ---------------- WEEKLY HISTORY UI ---------------- */
     function openWeeklyHistory() {
       const modal = document.getElementById("modalContent");
