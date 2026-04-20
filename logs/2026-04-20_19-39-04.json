@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-04-20T19:39:04.177Z",
+  "players": [
+    {
+      "name": "James",
+      "placement": "1st",
+      "score": -4
+    },
+    {
+      "name": "Ana",
+      "placement": "3rd",
+      "score": 3,
+      "choppedBy": [
+        {
+          "chopper": "Ted",
+          "types": {
+            "Black Pigs": 1,
+            "Red Pigs": 0,
+            "3 Consecutive Pairs": 0,
+            "4 of a Kind": 0,
+            "4 Consecutive Pairs": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Kevin",
+      "placement": "4th",
+      "score": 4
+    },
+    {
+      "name": "Ted",
+      "placement": "2nd",
+      "score": -3
+    }
+  ]
+}
