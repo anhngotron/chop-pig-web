@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-04-20T19:48:49.197Z",
+  "players": [
+    {
+      "name": "Andy",
+      "placement": "4th",
+      "score": -4
+    },
+    {
+      "name": "David",
+      "placement": "3rd",
+      "score": -2
+    },
+    {
+      "name": "Kevin",
+      "placement": "2nd",
+      "score": 2
+    },
+    {
+      "name": "Ted",
+      "placement": "1st",
+      "score": 4
+    }
+  ]
+}
