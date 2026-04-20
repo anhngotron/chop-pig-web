@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 93,
-        "games": 60,
+        "score": 95,
+        "games": 61,
         "wins": 18,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -24,8 +24,8 @@
         "stinky2Win": 0
       },
       "Ana": {
-        "score": -25,
-        "games": 61,
+        "score": -27,
+        "games": 62,
         "wins": 12,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -67,8 +67,8 @@
         "wins": 4
       },
       "Kevin": {
-        "score": 0,
-        "games": 54,
+        "score": -4,
+        "games": 55,
         "wins": 13,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -93,9 +93,15 @@
         "wins": 6
       },
       "Ted": {
-        "score": 17,
-        "games": 48,
-        "wins": 14
+        "score": 21,
+        "games": 49,
+        "wins": 15,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       }
     },
     "playerList": [
@@ -116,8 +122,8 @@
   "weekly": {
     "players": {
       "James": {
-        "score": 5,
-        "games": 3,
+        "score": 7,
+        "games": 4,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -138,8 +144,8 @@
         "stinky2Win": 0
       },
       "Ana": {
-        "score": -2,
-        "games": 1,
+        "score": -4,
+        "games": 2,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -181,8 +187,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": 11,
-        "games": 4,
+        "score": 7,
+        "games": 5,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -207,9 +213,15 @@
         "wins": 0
       },
       "Ted": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
+        "score": 4,
+        "games": 1,
+        "wins": 1,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       }
     },
     "playerList": [
