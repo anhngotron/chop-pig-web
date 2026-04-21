@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-04-21T19:22:01.197Z",
+  "players": [
+    {
+      "name": "Andy",
+      "placement": "Stinky 13",
+      "score": -6,
+      "stinky13": true,
+      "stinky2": {
+        "redPigs": 0,
+        "blackPigs": 1,
+        "consecutivePairs3": 0,
+        "fourOfAKind": 0,
+        "consecutivePairs4": 0,
+        "pointsLost": -1
+      }
+    },
+    {
+      "name": "Majid",
+      "placement": "1st",
+      "score": 6
+    },
+    {
+      "name": "Ian",
+      "placement": "2nd",
+      "score": 4
+    },
+    {
+      "name": "Ted",
+      "placement": "3rd",
+      "score": -4,
+      "stinky2": {
+        "redPigs": 1,
+        "blackPigs": 0,
+        "consecutivePairs3": 0,
+        "fourOfAKind": 0,
+        "consecutivePairs4": 0,
+        "pointsLost": -2
+      }
+    }
+  ]
+}
