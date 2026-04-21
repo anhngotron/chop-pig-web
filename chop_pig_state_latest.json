@@ -24,8 +24,8 @@
         "stinky2Win": 1
       },
       "Ana": {
-        "score": -35,
-        "games": 67,
+        "score": -37,
+        "games": 68,
         "wins": 13,
         "timesChopped": 2,
         "timesChopper": 0,
@@ -35,8 +35,8 @@
         "stinky2Win": 0
       },
       "David": {
-        "score": -77,
-        "games": 57,
+        "score": -75,
+        "games": 58,
         "wins": 8,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -51,8 +51,8 @@
         "wins": 3
       },
       "William": {
-        "score": -13,
-        "games": 59,
+        "score": -17,
+        "games": 60,
         "wins": 17,
         "timesChopped": 2,
         "timesChopper": 1,
@@ -88,9 +88,9 @@
         "wins": 9
       },
       "Ian": {
-        "score": -13,
-        "games": 33,
-        "wins": 7,
+        "score": -9,
+        "games": 34,
+        "wins": 8,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -150,8 +150,8 @@
         "stinky2Win": 1
       },
       "Ana": {
-        "score": -12,
-        "games": 7,
+        "score": -14,
+        "games": 8,
         "wins": 1,
         "timesChopped": 2,
         "timesChopper": 0,
@@ -161,8 +161,8 @@
         "stinky2Win": 0
       },
       "David": {
-        "score": -10,
-        "games": 6,
+        "score": -8,
+        "games": 7,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -177,8 +177,8 @@
         "wins": 0
       },
       "William": {
-        "score": -5,
-        "games": 8,
+        "score": -9,
+        "games": 9,
         "wins": 2,
         "timesChopped": 2,
         "timesChopper": 1,
@@ -214,9 +214,9 @@
         "wins": 0
       },
       "Ian": {
-        "score": 2,
-        "games": 5,
-        "wins": 1,
+        "score": 6,
+        "games": 6,
+        "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
