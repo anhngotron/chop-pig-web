@@ -2,11 +2,11 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 112,
-        "games": 70,
+        "score": 118,
+        "games": 71,
         "wins": 21,
         "timesChopped": 1,
-        "timesChopper": 0,
+        "timesChopper": 1,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 2,
@@ -35,14 +35,14 @@
         "stinky2Win": 0
       },
       "David": {
-        "score": -71,
-        "games": 56,
+        "score": -77,
+        "games": 57,
         "wins": 8,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0
       },
       "Lawrence": {
@@ -51,15 +51,15 @@
         "wins": 3
       },
       "William": {
-        "score": -9,
-        "games": 58,
+        "score": -13,
+        "games": 59,
         "wins": 17,
-        "timesChopped": 1,
+        "timesChopped": 2,
         "timesChopper": 1,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 1,
-        "stinky2Win": 0
+        "stinky2Win": 1
       },
       "Robert": {
         "score": -30,
@@ -88,9 +88,9 @@
         "wins": 9
       },
       "Ian": {
-        "score": -17,
-        "games": 32,
-        "wins": 6,
+        "score": -13,
+        "games": 33,
+        "wins": 7,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -128,11 +128,11 @@
   "weekly": {
     "players": {
       "James": {
-        "score": 24,
-        "games": 13,
+        "score": 30,
+        "games": 14,
         "wins": 3,
         "timesChopped": 1,
-        "timesChopper": 0,
+        "timesChopper": 1,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 2,
@@ -161,14 +161,14 @@
         "stinky2Win": 0
       },
       "David": {
-        "score": -4,
-        "games": 5,
+        "score": -10,
+        "games": 6,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0
       },
       "Lawrence": {
@@ -177,15 +177,15 @@
         "wins": 0
       },
       "William": {
-        "score": -1,
-        "games": 7,
+        "score": -5,
+        "games": 8,
         "wins": 2,
-        "timesChopped": 1,
+        "timesChopped": 2,
         "timesChopper": 1,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 1,
-        "stinky2Win": 0
+        "stinky2Win": 1
       },
       "Robert": {
         "score": 0,
@@ -214,9 +214,9 @@
         "wins": 0
       },
       "Ian": {
-        "score": -2,
-        "games": 4,
-        "wins": 0,
+        "score": 2,
+        "games": 5,
+        "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
