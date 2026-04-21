@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 104,
-        "games": 66,
+        "score": 106,
+        "games": 67,
         "wins": 20,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -13,9 +13,9 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 57,
-        "games": 89,
-        "wins": 34,
+        "score": 53,
+        "games": 90,
+        "wins": 35,
         "timesChopped": 0,
         "timesChopper": 1,
         "stinky13Lose": 0,
@@ -24,8 +24,8 @@
         "stinky2Win": 0
       },
       "Ana": {
-        "score": -28,
-        "games": 64,
+        "score": -30,
+        "games": 65,
         "wins": 13,
         "timesChopped": 1,
         "timesChopper": 0,
@@ -88,9 +88,15 @@
         "wins": 9
       },
       "Ian": {
-        "score": -15,
-        "games": 28,
-        "wins": 6
+        "score": -11,
+        "games": 29,
+        "wins": 6,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       },
       "Ted": {
         "score": 35,
@@ -122,8 +128,8 @@
   "weekly": {
     "players": {
       "James": {
-        "score": 16,
-        "games": 9,
+        "score": 18,
+        "games": 10,
         "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -133,9 +139,9 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": -21,
-        "games": 9,
-        "wins": 2,
+        "score": -25,
+        "games": 10,
+        "wins": 3,
         "timesChopped": 0,
         "timesChopper": 1,
         "stinky13Lose": 0,
@@ -144,8 +150,8 @@
         "stinky2Win": 0
       },
       "Ana": {
-        "score": -5,
-        "games": 4,
+        "score": -7,
+        "games": 5,
         "wins": 1,
         "timesChopped": 1,
         "timesChopper": 0,
@@ -208,9 +214,15 @@
         "wins": 0
       },
       "Ian": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
+        "score": 4,
+        "games": 1,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       },
       "Ted": {
         "score": 18,
