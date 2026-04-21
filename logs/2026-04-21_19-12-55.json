@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-04-21T19:12:55.367Z",
+  "players": [
+    {
+      "name": "Ian",
+      "placement": "1st",
+      "score": 4
+    },
+    {
+      "name": "James",
+      "placement": "2nd",
+      "score": 6
+    },
+    {
+      "name": "David",
+      "placement": "4th",
+      "score": -6,
+      "stinky2": {
+        "redPigs": 1,
+        "blackPigs": 0,
+        "consecutivePairs3": 0,
+        "fourOfAKind": 0,
+        "consecutivePairs4": 0,
+        "pointsLost": -2
+      }
+    },
+    {
+      "name": "William",
+      "placement": "3rd",
+      "score": -4,
+      "choppedBy": [
+        {
+          "chopper": "James",
+          "types": {
+            "Black Pigs": 2,
+            "Red Pigs": 1,
+            "3 Consecutive Pairs": 0,
+            "4 of a Kind": 0,
+            "4 Consecutive Pairs": 0
+          }
+        }
+      ]
+    }
+  ]
+}
