@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 118,
-        "games": 71,
+        "score": 120,
+        "games": 72,
         "wins": 21,
         "timesChopped": 1,
         "timesChopper": 1,
@@ -13,8 +13,8 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 46,
-        "games": 94,
+        "score": 42,
+        "games": 95,
         "wins": 37,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -94,8 +94,8 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -5,
-        "games": 35,
+        "score": -7,
+        "games": 36,
         "wins": 8,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -105,9 +105,9 @@
         "stinky2Win": 1
       },
       "Ted": {
-        "score": 31,
-        "games": 58,
-        "wins": 19,
+        "score": 35,
+        "games": 59,
+        "wins": 20,
         "timesChopped": 0,
         "timesChopper": 1,
         "stinky13Lose": 0,
@@ -134,8 +134,8 @@
   "weekly": {
     "players": {
       "James": {
-        "score": 30,
-        "games": 14,
+        "score": 32,
+        "games": 15,
         "wins": 3,
         "timesChopped": 1,
         "timesChopper": 1,
@@ -145,8 +145,8 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": -32,
-        "games": 14,
+        "score": -36,
+        "games": 15,
         "wins": 5,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -226,8 +226,8 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": 10,
-        "games": 7,
+        "score": 8,
+        "games": 8,
         "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -237,9 +237,9 @@
         "stinky2Win": 1
       },
       "Ted": {
-        "score": 14,
-        "games": 10,
-        "wins": 5,
+        "score": 18,
+        "games": 11,
+        "wins": 6,
         "timesChopped": 0,
         "timesChopper": 1,
         "stinky13Lose": 0,
