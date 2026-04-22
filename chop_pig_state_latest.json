@@ -114,21 +114,33 @@
         "stinky13Win": 0,
         "stinky2Lose": 1,
         "stinky2Win": 1
+      },
+      "Aris": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       }
     },
     "playerList": [
-      "James",
-      "Andy",
       "Ana",
+      "Andy",
+      "Aris",
       "David",
-      "Lawrence",
-      "William",
-      "Robert",
-      "Kevin",
-      "Jeanette",
-      "Majid",
       "Ian",
-      "Ted"
+      "James",
+      "Jeanette",
+      "Kevin",
+      "Lawrence",
+      "Majid",
+      "Robert",
+      "Ted",
+      "William"
     ]
   },
   "weekly": {
@@ -246,21 +258,33 @@
         "stinky13Win": 0,
         "stinky2Lose": 1,
         "stinky2Win": 1
+      },
+      "Aris": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       }
     },
     "playerList": [
-      "James",
-      "Andy",
       "Ana",
+      "Andy",
+      "Aris",
       "David",
-      "Lawrence",
-      "William",
-      "Robert",
-      "Kevin",
-      "Jeanette",
-      "Majid",
       "Ian",
-      "Ted"
+      "James",
+      "Jeanette",
+      "Kevin",
+      "Lawrence",
+      "Majid",
+      "Robert",
+      "Ted",
+      "William"
     ]
   },
   "weeklyReset": "2026-04-20T00:51:34.318Z",
