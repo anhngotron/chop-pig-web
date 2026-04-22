@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-04-22T19:44:49.634Z",
+  "players": [
+    {
+      "name": "Kevin",
+      "placement": "Stinky 13",
+      "score": -5,
+      "stinky13": true
+    },
+    {
+      "name": "Aris",
+      "placement": "Stinky 13",
+      "score": -5,
+      "stinky13": true
+    },
+    {
+      "name": "Majid",
+      "placement": "1st",
+      "score": 15
+    },
+    {
+      "name": "Ted",
+      "placement": "Stinky 13",
+      "score": -5,
+      "stinky13": true
+    }
+  ]
+}
