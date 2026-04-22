@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 118,
-        "games": 75,
+        "score": 116,
+        "games": 76,
         "wins": 22,
         "timesChopped": 1,
         "timesChopper": 1,
@@ -35,8 +35,8 @@
         "stinky2Win": 0
       },
       "David": {
-        "score": -80,
-        "games": 59,
+        "score": -78,
+        "games": 60,
         "wins": 8,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -111,8 +111,8 @@
         "stinky2Win": 1
       },
       "Ted": {
-        "score": 44,
-        "games": 63,
+        "score": 40,
+        "games": 64,
         "wins": 22,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -122,9 +122,9 @@
         "stinky2Win": 1
       },
       "Aris": {
-        "score": -5,
-        "games": 2,
-        "wins": 0,
+        "score": -1,
+        "games": 3,
+        "wins": 1,
         "timesChopped": 2,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -152,8 +152,8 @@
   "weekly": {
     "players": {
       "James": {
-        "score": 30,
-        "games": 18,
+        "score": 28,
+        "games": 19,
         "wins": 4,
         "timesChopped": 1,
         "timesChopper": 1,
@@ -185,8 +185,8 @@
         "stinky2Win": 0
       },
       "David": {
-        "score": -13,
-        "games": 8,
+        "score": -11,
+        "games": 9,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -261,8 +261,8 @@
         "stinky2Win": 1
       },
       "Ted": {
-        "score": 27,
-        "games": 15,
+        "score": 23,
+        "games": 16,
         "wins": 8,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -272,9 +272,9 @@
         "stinky2Win": 1
       },
       "Aris": {
-        "score": -5,
-        "games": 2,
-        "wins": 0,
+        "score": -1,
+        "games": 3,
+        "wins": 1,
         "timesChopped": 2,
         "timesChopper": 0,
         "stinky13Lose": 0,
