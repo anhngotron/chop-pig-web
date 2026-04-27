@@ -2,19 +2,19 @@
   "allTime": {
     "players": {
       "James": {
-        "score": 131,
-        "games": 86,
+        "score": 126,
+        "games": 87,
         "wins": 27,
         "timesChopped": 1,
         "timesChopper": 1,
         "stinky13Lose": 0,
         "stinky13Win": 1,
-        "stinky2Lose": 3,
+        "stinky2Lose": 4,
         "stinky2Win": 2
       },
       "Andy": {
-        "score": 31,
-        "games": 109,
+        "score": 33,
+        "games": 110,
         "wins": 39,
         "timesChopped": 0,
         "timesChopper": 3,
@@ -35,15 +35,15 @@
         "stinky2Win": 0
       },
       "David": {
-        "score": -70,
-        "games": 74,
+        "score": -71,
+        "games": 75,
         "wins": 11,
         "timesChopped": 1,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 2,
-        "stinky2Win": 1
+        "stinky2Win": 2
       },
       "Lawrence": {
         "score": -13,
@@ -62,9 +62,9 @@
         "stinky2Win": 1
       },
       "Robert": {
-        "score": -28,
-        "games": 28,
-        "wins": 4,
+        "score": -24,
+        "games": 29,
+        "wins": 5,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -163,8 +163,8 @@
         "stinky2Win": 0
       },
       "Andy": {
-        "score": -10,
-        "games": 5,
+        "score": -8,
+        "games": 6,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -179,15 +179,15 @@
         "wins": 0
       },
       "David": {
-        "score": 14,
-        "games": 4,
+        "score": 13,
+        "games": 5,
         "wins": 3,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 0,
-        "stinky2Win": 0
+        "stinky2Win": 1
       },
       "Ian": {
         "score": 0,
@@ -195,14 +195,14 @@
         "wins": 0
       },
       "James": {
-        "score": 2,
-        "games": 3,
+        "score": -3,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0
       },
       "Jeanette": {
@@ -226,9 +226,15 @@
         "wins": 0
       },
       "Robert": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
+        "score": 4,
+        "games": 1,
+        "wins": 1,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       },
       "Ted": {
         "score": 0,
