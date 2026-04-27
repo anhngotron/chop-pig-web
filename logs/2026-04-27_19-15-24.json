@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-04-27T19:15:24.194Z",
+  "players": [
+    {
+      "name": "James",
+      "placement": "Stinky 13",
+      "score": -9,
+      "stinky13": true,
+      "stinky2": {
+        "redPigs": 1,
+        "blackPigs": 2,
+        "consecutivePairs3": 0,
+        "fourOfAKind": 0,
+        "consecutivePairs4": 0,
+        "pointsLost": -4
+      }
+    },
+    {
+      "name": "Ana",
+      "placement": "Stinky 13",
+      "score": -7,
+      "stinky13": true,
+      "stinky2": {
+        "redPigs": 1,
+        "blackPigs": 0,
+        "consecutivePairs3": 0,
+        "fourOfAKind": 0,
+        "consecutivePairs4": 0,
+        "pointsLost": -2
+      }
+    },
+    {
+      "name": "Robert",
+      "placement": "Stinky 13",
+      "score": -5,
+      "stinky13": true
+    },
+    {
+      "name": "Ted",
+      "placement": "1st",
+      "score": 21
+    }
+  ]
+}
