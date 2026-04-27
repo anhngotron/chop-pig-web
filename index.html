@@ -324,9 +324,6 @@
     /* ---------------- AUTH / STATE ---------------- */
     let canSave = false;
     let appPassword = "";
-    let stateVersion = null;   // SHA / version token from last successful load
-    let saveInFlight = false;  // prevent overlapping save calls
-    let pendingSave  = false;  // coalesce rapid saves into one
 
     let allTime = { players: {}, playerList: [] };
     let weekly = { players: {}, playerList: [] };
@@ -440,41 +437,45 @@
 
     /* ---------------- CLOUD LOAD / SAVE ---------------- */
     async function loadStateFromGitHub() {
+      // 1. REMOVE LOCAL DATA: Force a clean slate before fetching
       allTime = { players: {}, playerList: [] };
-      weekly  = { players: {}, playerList: [] };
-      weeklyReset  = null;
+      weekly = { players: {}, playerList: [] };
+      weeklyReset = null;
       weeklyHistory = [];
 
       try {
-        // cache:"no-store" ensures we always get the freshest copy
-        const resp = await fetch("/api/get-state", { cache: "no-store" });
+        const owner = "anhngotron";
+        const repo = "chop-pig-web";
+        const resp = await fetch("/api/get-state");
+        //const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json?t=${Date.now()}`;
+
+        // 2. FETCH LATEST: Use no-store to bypass any local browser caching
+        //const resp = await fetch(url, { cache: "no-store" });
+
         if (!resp.ok) {
-          console.warn("No state found yet. Starting clean.");
-          stateVersion = null;
+          console.warn("No GitHub state found yet. Starting with clean state.");
           return;
         }
 
         const data = await resp.json();
 
-        // Capture the version token returned by the server so we can
-        // send it back on save and detect stale-write conflicts.
-        stateVersion = data._version || null;
-
+        // 3. APPLY CLOUD DATA: Strictly overwrite local variables
         if (data.allTime) {
-          allTime       = data.allTime;
-          weekly        = data.weekly       || { players: {}, playerList: [] };
-          weeklyReset   = data.weeklyReset  || new Date().toISOString();
+          allTime = data.allTime;
+          weekly = data.weekly || { players: {}, playerList: [] };
+          weeklyReset = data.weeklyReset || new Date().toISOString();
           weeklyHistory = data.weeklyHistory || [];
         } else {
-          allTime       = { players: data.players || {}, playerList: data.playerList || [] };
-          weekly        = { players: {}, playerList: [] };
-          weeklyReset   = new Date().toISOString();
+          // Fallback for different JSON structures
+          allTime = { players: data.players || {}, playerList: data.playerList || [] };
+          weekly = { players: {}, playerList: [] };
+          weeklyReset = new Date().toISOString();
           weeklyHistory = [];
         }
 
-        console.log("Loaded state. version =", stateVersion);
+        console.log("Successfully loaded latest state from GitHub.");
       } catch (err) {
-        console.error("Failed to load from GitHub:", err);
+        console.error("Failed to load from GitHub. App is currently empty:", err);
       }
     }
 
@@ -488,102 +489,48 @@
     }
 
     function setSyncStatus(text, color = "#555") {
-      document.querySelectorAll("#syncStatus").forEach(el => {
-        el.textContent = text;
-        el.style.color  = color;
-      });
+      const el = document.getElementById("syncStatus");
+      if (!el) return;
+      el.textContent = text;
+      el.style.color = color;
     }
 
-    // Debounced save: if a save is already in-flight, queue one more.
-    // Multiple rapid calls collapse into a single trailing save.
     function saveState() {
       if (!canSave) {
         setSyncStatus("View-only mode — not synced", "#ff3b30");
         return;
       }
-      if (saveInFlight) {
-        pendingSave = true;   // will be dispatched once current save finishes
-        return;
-      }
-      _doSave();
-    }
-
-    async function _doSave() {
-      saveInFlight = true;
-      pendingSave  = false;
-      setSyncStatus("Syncing…", "#888");
 
       const payload = {
-        allTime, weekly, weeklyReset, weeklyHistory,
-        _version: stateVersion    // send our known version to the server
+        allTime,
+        weekly,
+        weeklyReset,
+        weeklyHistory
       };
 
-      try {
-        const res = await fetch("/api/save-state", {
-          method:  "POST",
-          headers: {
-            "Content-Type":  "application/json",
-            "X-App-Password": appPassword
-          },
-          body: JSON.stringify(payload)
+      setSyncStatus("Syncing…", "#888");
+
+      fetch("/api/save-state", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-App-Password": appPassword
+        },
+        body: JSON.stringify(payload)
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("GitHub sync failed");
+          setSyncStatus("Saved ✓", "green");
+        })
+        .catch(err => {
+          console.warn("GitHub autosave failed:", err);
+          setSyncStatus("Sync failed ⚠", "red");
         });
-
-        if (res.status === 409) {
-          // ── CONFLICT: someone else saved while we were editing ──
-          setSyncStatus("⚠ Conflict — reloading latest…", "orange");
-          saveInFlight = false;
-
-          const doRefresh = confirm(
-            "Another device saved newer data while you were editing.\n\n" +
-            "Click OK to reload the latest scores (your unsaved changes will be lost).\n" +
-            "Click Cancel to force-overwrite with your version (use only if you're sure)."
-          );
-
-          if (doRefresh) {
-            await refreshFromCloud();
-          } else {
-            // Force-save: clear our stale version so server allows overwrite
-            stateVersion = null;
-            payload._version = null;
-            const forced = await fetch("/api/save-state", {
-              method:  "POST",
-              headers: {
-                "Content-Type":  "application/json",
-                "X-App-Password": appPassword
-              },
-              body: JSON.stringify(payload)
-            });
-            if (forced.ok) {
-              const d = await forced.json().catch(() => ({}));
-              stateVersion = d._version || stateVersion;
-              setSyncStatus("Force-saved ✓ (overwritten)", "green");
-            } else {
-              setSyncStatus("Force-save failed ⚠", "red");
-            }
-          }
-          return;
-        }
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        // Server echoes back the new version token after a successful save
-        const result = await res.json().catch(() => ({}));
-        if (result._version) stateVersion = result._version;
-
-        setSyncStatus("Saved ✓", "green");
-      } catch (err) {
-        console.warn("Save failed:", err);
-        setSyncStatus("Sync failed ⚠ — tap Refresh", "red");
-      } finally {
-        saveInFlight = false;
-        if (pendingSave) {
-          // flush the queued save
-          setTimeout(_doSave, 300);
-        }
-      }
     }
 
-    function manualSync() { saveState(); }
+    function manualSync() {
+      saveState();
+    }
 
     /* ---------------- WEEKLY FRESHNESS + HISTORY ---------------- */
     function ensureWeeklyFreshness() {
@@ -2066,33 +2013,60 @@
 
       const wb = XLSX.utils.book_new();
 
-      function sheetFrom(bucket, name) {
-        const rows = [["Player", "Score", "Games", "Wins"]];
+      // All notoriety columns included so nothing is lost on round-trip
+      const HEADERS = [
+        "Player", "Score", "Games", "Wins",
+        "TimesChopped", "TimesChopper",
+        "Stinky13Lose", "Stinky13Win",
+        "Stinky2Lose",  "Stinky2Win"
+      ];
+
+      function sheetFrom(bucket, sheetName) {
+        const rows = [HEADERS];
         for (const p of bucket.playerList) {
           const d = bucket.players[p];
-          rows.push([p, d.score, d.games, d.wins]);
+          rows.push([
+            p,
+            d.score          || 0,
+            d.games          || 0,
+            d.wins           || 0,
+            d.timesChopped   || 0,
+            d.timesChopper   || 0,
+            d.stinky13Lose   || 0,
+            d.stinky13Win    || 0,
+            d.stinky2Lose    || 0,
+            d.stinky2Win     || 0
+          ]);
         }
         const ws = XLSX.utils.aoa_to_sheet(rows);
-        XLSX.utils.book_append_sheet(wb, ws, name);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
       }
 
       sheetFrom(allTime, "AllTime");
-      sheetFrom(weekly, "Weekly");
+      sheetFrom(weekly,  "Weekly");
 
-      const historyRows = [["Start", "End", "Player", "Score", "Games", "Wins"]];
+      const historyRows = [[
+        "Start", "End", "Player", "Score", "Games", "Wins",
+        "TimesChopped", "TimesChopper",
+        "Stinky13Lose", "Stinky13Win",
+        "Stinky2Lose",  "Stinky2Win"
+      ]];
       weeklyHistory.forEach((week) => {
         const start = new Date(week.weekStart).toLocaleDateString();
-        const end = new Date(week.weekEnd).toLocaleDateString();
-
+        const end   = new Date(week.weekEnd).toLocaleDateString();
         week.playerList.forEach(name => {
           const p = week.players[name];
           historyRows.push([
-            start,
-            end,
-            name,
-            p.score,
-            p.games,
-            p.wins
+            start, end, name,
+            p.score          || 0,
+            p.games          || 0,
+            p.wins           || 0,
+            p.timesChopped   || 0,
+            p.timesChopper   || 0,
+            p.stinky13Lose   || 0,
+            p.stinky13Win    || 0,
+            p.stinky2Lose    || 0,
+            p.stinky2Win     || 0
           ]);
         });
       });
@@ -2122,67 +2096,86 @@
         reader.onload = (evt) => {
           const wb = XLSX.read(evt.target.result, { type: "binary" });
 
-          function loadSheet(name) {
-            const ws = wb.Sheets[name];
+          // Parse a player row using column headers so the file is
+          // forward-compatible even if column order ever changes.
+          function parsePlayerRow(headers, row) {
+            const get = (key) => {
+              const idx = headers.indexOf(key);
+              return idx >= 0 ? row[idx] : undefined;
+            };
+            const name = get("Player");
+            if (!name) return null;
+            return {
+              name,
+              score:        Number(get("Score"))        || 0,
+              games:        Number(get("Games"))        || 0,
+              wins:         Number(get("Wins"))         || 0,
+              timesChopped: Number(get("TimesChopped")) || 0,
+              timesChopper: Number(get("TimesChopper")) || 0,
+              stinky13Lose: Number(get("Stinky13Lose")) || 0,
+              stinky13Win:  Number(get("Stinky13Win"))  || 0,
+              stinky2Lose:  Number(get("Stinky2Lose"))  || 0,
+              stinky2Win:   Number(get("Stinky2Win"))   || 0
+            };
+          }
+
+          function loadSheet(sheetName) {
+            const ws = wb.Sheets[sheetName];
             if (!ws) return { players: {}, playerList: [] };
 
-            const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
-            const bucket = { players: {}, playerList: [] };
+            const rows    = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            const headers = (rows[0] || []).map(String);
+            const bucket  = { players: {}, playerList: [] };
 
             for (let i = 1; i < rows.length; i++) {
-              const [name, score, games, wins] = rows[i];
-              if (!name) continue;
-              bucket.players[name] = {
-                score: Number(score) || 0,
-                games: Number(games) || 0,
-                wins: Number(wins) || 0
-              };
+              const parsed = parsePlayerRow(headers, rows[i]);
+              if (!parsed) continue;
+              const { name, ...stats } = parsed;
+              bucket.players[name] = stats;
               bucket.playerList.push(name);
             }
             return bucket;
           }
 
-          function loadHistorySheet(name) {
-            const ws = wb.Sheets[name];
+          function loadHistorySheet(sheetName) {
+            const ws = wb.Sheets[sheetName];
             if (!ws) return [];
 
-            const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            const rows    = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            const headers = (rows[0] || []).map(String);
             const history = [];
 
+            const startIdx  = headers.indexOf("Start");
+            const endIdx    = headers.indexOf("End");
+
             for (let i = 1; i < rows.length; i++) {
-              const [start, end, player, score, games, wins] = rows[i];
-              if (!start || !end || !player) continue;
+              const row   = rows[i];
+              const start = row[startIdx];
+              const end   = row[endIdx];
+              if (!start || !end) continue;
+
+              const parsed = parsePlayerRow(headers, row);
+              if (!parsed) continue;
 
               let week = history.find(
                 w => w.weekStart === start && w.weekEnd === end
               );
-
               if (!week) {
-                week = {
-                  weekStart: start,
-                  weekEnd: end,
-                  players: {},
-                  playerList: []
-                };
+                week = { weekStart: start, weekEnd: end, players: {}, playerList: [] };
                 history.push(week);
               }
 
-              week.players[player] = {
-                score: Number(score) || 0,
-                games: Number(games) || 0,
-                wins: Number(wins) || 0
-              };
-
-              week.playerList.push(player);
+              const { name, ...stats } = parsed;
+              week.players[name] = stats;
+              week.playerList.push(name);
             }
-
             return history;
           }
 
-          allTime = loadSheet("AllTime");
-          weekly = loadSheet("Weekly");
+          allTime       = loadSheet("AllTime");
+          weekly        = loadSheet("Weekly");
           weeklyHistory = loadHistorySheet("WeeklyHistory");
-          weeklyReset = new Date().toISOString();
+          weeklyReset   = new Date().toISOString();
 
           updatePlayerDropdowns();
           updateWeeklyDropdown();
@@ -2258,24 +2251,6 @@
       refreshTable();
       setSyncStatus("View-only mode", "#ff3b30");
     };
-
-    // Auto-refresh when the user returns to this tab after being away.
-    // This ensures device B always sees device A's latest saves before
-    // making any edits of its own.
-    document.addEventListener("visibilitychange", async () => {
-      if (document.visibilityState === "visible") {
-        const prevVersion = stateVersion;
-        await loadStateFromGitHub();
-        if (stateVersion !== prevVersion) {
-          // State changed while away — update the UI silently
-          updatePlayerDropdowns();
-          updateWeeklyDropdown();
-          refreshTable();
-          setSyncStatus("Auto-refreshed ✓", "green");
-          setTimeout(() => setSyncStatus(canSave ? "Logged in — saving enabled" : "View-only mode", canSave ? "green" : "#ff3b30"), 2000);
-        }
-      }
-    });
   </script>
 </body>
 </html>
