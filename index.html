@@ -324,6 +324,9 @@
     /* ---------------- AUTH / STATE ---------------- */
     let canSave = false;
     let appPassword = "";
+    let stateVersion = null;   // SHA / version token from last successful load
+    let saveInFlight = false;  // prevent overlapping save calls
+    let pendingSave  = false;  // coalesce rapid saves into one
 
     let allTime = { players: {}, playerList: [] };
     let weekly = { players: {}, playerList: [] };
@@ -437,45 +440,41 @@
 
     /* ---------------- CLOUD LOAD / SAVE ---------------- */
     async function loadStateFromGitHub() {
-      // 1. REMOVE LOCAL DATA: Force a clean slate before fetching
       allTime = { players: {}, playerList: [] };
-      weekly = { players: {}, playerList: [] };
-      weeklyReset = null;
+      weekly  = { players: {}, playerList: [] };
+      weeklyReset  = null;
       weeklyHistory = [];
 
       try {
-        const owner = "anhngotron";
-        const repo = "chop-pig-web";
-        const resp = await fetch("/api/get-state");
-        //const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/chop_pig_state_latest.json?t=${Date.now()}`;
-
-        // 2. FETCH LATEST: Use no-store to bypass any local browser caching
-        //const resp = await fetch(url, { cache: "no-store" });
-
+        // cache:"no-store" ensures we always get the freshest copy
+        const resp = await fetch("/api/get-state", { cache: "no-store" });
         if (!resp.ok) {
-          console.warn("No GitHub state found yet. Starting with clean state.");
+          console.warn("No state found yet. Starting clean.");
+          stateVersion = null;
           return;
         }
 
         const data = await resp.json();
 
-        // 3. APPLY CLOUD DATA: Strictly overwrite local variables
+        // Capture the version token returned by the server so we can
+        // send it back on save and detect stale-write conflicts.
+        stateVersion = data._version || null;
+
         if (data.allTime) {
-          allTime = data.allTime;
-          weekly = data.weekly || { players: {}, playerList: [] };
-          weeklyReset = data.weeklyReset || new Date().toISOString();
+          allTime       = data.allTime;
+          weekly        = data.weekly       || { players: {}, playerList: [] };
+          weeklyReset   = data.weeklyReset  || new Date().toISOString();
           weeklyHistory = data.weeklyHistory || [];
         } else {
-          // Fallback for different JSON structures
-          allTime = { players: data.players || {}, playerList: data.playerList || [] };
-          weekly = { players: {}, playerList: [] };
-          weeklyReset = new Date().toISOString();
+          allTime       = { players: data.players || {}, playerList: data.playerList || [] };
+          weekly        = { players: {}, playerList: [] };
+          weeklyReset   = new Date().toISOString();
           weeklyHistory = [];
         }
 
-        console.log("Successfully loaded latest state from GitHub.");
+        console.log("Loaded state. version =", stateVersion);
       } catch (err) {
-        console.error("Failed to load from GitHub. App is currently empty:", err);
+        console.error("Failed to load from GitHub:", err);
       }
     }
 
@@ -489,48 +488,102 @@
     }
 
     function setSyncStatus(text, color = "#555") {
-      const el = document.getElementById("syncStatus");
-      if (!el) return;
-      el.textContent = text;
-      el.style.color = color;
+      document.querySelectorAll("#syncStatus").forEach(el => {
+        el.textContent = text;
+        el.style.color  = color;
+      });
     }
 
+    // Debounced save: if a save is already in-flight, queue one more.
+    // Multiple rapid calls collapse into a single trailing save.
     function saveState() {
       if (!canSave) {
         setSyncStatus("View-only mode — not synced", "#ff3b30");
         return;
       }
+      if (saveInFlight) {
+        pendingSave = true;   // will be dispatched once current save finishes
+        return;
+      }
+      _doSave();
+    }
 
-      const payload = {
-        allTime,
-        weekly,
-        weeklyReset,
-        weeklyHistory
-      };
-
+    async function _doSave() {
+      saveInFlight = true;
+      pendingSave  = false;
       setSyncStatus("Syncing…", "#888");
 
-      fetch("/api/save-state", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-App-Password": appPassword
-        },
-        body: JSON.stringify(payload)
-      })
-        .then(res => {
-          if (!res.ok) throw new Error("GitHub sync failed");
-          setSyncStatus("Saved ✓", "green");
-        })
-        .catch(err => {
-          console.warn("GitHub autosave failed:", err);
-          setSyncStatus("Sync failed ⚠", "red");
+      const payload = {
+        allTime, weekly, weeklyReset, weeklyHistory,
+        _version: stateVersion    // send our known version to the server
+      };
+
+      try {
+        const res = await fetch("/api/save-state", {
+          method:  "POST",
+          headers: {
+            "Content-Type":  "application/json",
+            "X-App-Password": appPassword
+          },
+          body: JSON.stringify(payload)
         });
+
+        if (res.status === 409) {
+          // ── CONFLICT: someone else saved while we were editing ──
+          setSyncStatus("⚠ Conflict — reloading latest…", "orange");
+          saveInFlight = false;
+
+          const doRefresh = confirm(
+            "Another device saved newer data while you were editing.\n\n" +
+            "Click OK to reload the latest scores (your unsaved changes will be lost).\n" +
+            "Click Cancel to force-overwrite with your version (use only if you're sure)."
+          );
+
+          if (doRefresh) {
+            await refreshFromCloud();
+          } else {
+            // Force-save: clear our stale version so server allows overwrite
+            stateVersion = null;
+            payload._version = null;
+            const forced = await fetch("/api/save-state", {
+              method:  "POST",
+              headers: {
+                "Content-Type":  "application/json",
+                "X-App-Password": appPassword
+              },
+              body: JSON.stringify(payload)
+            });
+            if (forced.ok) {
+              const d = await forced.json().catch(() => ({}));
+              stateVersion = d._version || stateVersion;
+              setSyncStatus("Force-saved ✓ (overwritten)", "green");
+            } else {
+              setSyncStatus("Force-save failed ⚠", "red");
+            }
+          }
+          return;
+        }
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        // Server echoes back the new version token after a successful save
+        const result = await res.json().catch(() => ({}));
+        if (result._version) stateVersion = result._version;
+
+        setSyncStatus("Saved ✓", "green");
+      } catch (err) {
+        console.warn("Save failed:", err);
+        setSyncStatus("Sync failed ⚠ — tap Refresh", "red");
+      } finally {
+        saveInFlight = false;
+        if (pendingSave) {
+          // flush the queued save
+          setTimeout(_doSave, 300);
+        }
+      }
     }
 
-    function manualSync() {
-      saveState();
-    }
+    function manualSync() { saveState(); }
 
     /* ---------------- WEEKLY FRESHNESS + HISTORY ---------------- */
     function ensureWeeklyFreshness() {
@@ -2205,6 +2258,24 @@
       refreshTable();
       setSyncStatus("View-only mode", "#ff3b30");
     };
+
+    // Auto-refresh when the user returns to this tab after being away.
+    // This ensures device B always sees device A's latest saves before
+    // making any edits of its own.
+    document.addEventListener("visibilitychange", async () => {
+      if (document.visibilityState === "visible") {
+        const prevVersion = stateVersion;
+        await loadStateFromGitHub();
+        if (stateVersion !== prevVersion) {
+          // State changed while away — update the UI silently
+          updatePlayerDropdowns();
+          updateWeeklyDropdown();
+          refreshTable();
+          setSyncStatus("Auto-refreshed ✓", "green");
+          setTimeout(() => setSyncStatus(canSave ? "Logged in — saving enabled" : "View-only mode", canSave ? "green" : "#ff3b30"), 2000);
+        }
+      }
+    });
   </script>
 </body>
 </html>
