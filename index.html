@@ -2013,60 +2013,33 @@
 
       const wb = XLSX.utils.book_new();
 
-      // All notoriety columns included so nothing is lost on round-trip
-      const HEADERS = [
-        "Player", "Score", "Games", "Wins",
-        "TimesChopped", "TimesChopper",
-        "Stinky13Lose", "Stinky13Win",
-        "Stinky2Lose",  "Stinky2Win"
-      ];
-
-      function sheetFrom(bucket, sheetName) {
-        const rows = [HEADERS];
+      function sheetFrom(bucket, name) {
+        const rows = [["Player", "Score", "Games", "Wins"]];
         for (const p of bucket.playerList) {
           const d = bucket.players[p];
-          rows.push([
-            p,
-            d.score          || 0,
-            d.games          || 0,
-            d.wins           || 0,
-            d.timesChopped   || 0,
-            d.timesChopper   || 0,
-            d.stinky13Lose   || 0,
-            d.stinky13Win    || 0,
-            d.stinky2Lose    || 0,
-            d.stinky2Win     || 0
-          ]);
+          rows.push([p, d.score, d.games, d.wins]);
         }
         const ws = XLSX.utils.aoa_to_sheet(rows);
-        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        XLSX.utils.book_append_sheet(wb, ws, name);
       }
 
       sheetFrom(allTime, "AllTime");
-      sheetFrom(weekly,  "Weekly");
+      sheetFrom(weekly, "Weekly");
 
-      const historyRows = [[
-        "Start", "End", "Player", "Score", "Games", "Wins",
-        "TimesChopped", "TimesChopper",
-        "Stinky13Lose", "Stinky13Win",
-        "Stinky2Lose",  "Stinky2Win"
-      ]];
+      const historyRows = [["Start", "End", "Player", "Score", "Games", "Wins"]];
       weeklyHistory.forEach((week) => {
         const start = new Date(week.weekStart).toLocaleDateString();
-        const end   = new Date(week.weekEnd).toLocaleDateString();
+        const end = new Date(week.weekEnd).toLocaleDateString();
+
         week.playerList.forEach(name => {
           const p = week.players[name];
           historyRows.push([
-            start, end, name,
-            p.score          || 0,
-            p.games          || 0,
-            p.wins           || 0,
-            p.timesChopped   || 0,
-            p.timesChopper   || 0,
-            p.stinky13Lose   || 0,
-            p.stinky13Win    || 0,
-            p.stinky2Lose    || 0,
-            p.stinky2Win     || 0
+            start,
+            end,
+            name,
+            p.score,
+            p.games,
+            p.wins
           ]);
         });
       });
@@ -2096,86 +2069,67 @@
         reader.onload = (evt) => {
           const wb = XLSX.read(evt.target.result, { type: "binary" });
 
-          // Parse a player row using column headers so the file is
-          // forward-compatible even if column order ever changes.
-          function parsePlayerRow(headers, row) {
-            const get = (key) => {
-              const idx = headers.indexOf(key);
-              return idx >= 0 ? row[idx] : undefined;
-            };
-            const name = get("Player");
-            if (!name) return null;
-            return {
-              name,
-              score:        Number(get("Score"))        || 0,
-              games:        Number(get("Games"))        || 0,
-              wins:         Number(get("Wins"))         || 0,
-              timesChopped: Number(get("TimesChopped")) || 0,
-              timesChopper: Number(get("TimesChopper")) || 0,
-              stinky13Lose: Number(get("Stinky13Lose")) || 0,
-              stinky13Win:  Number(get("Stinky13Win"))  || 0,
-              stinky2Lose:  Number(get("Stinky2Lose"))  || 0,
-              stinky2Win:   Number(get("Stinky2Win"))   || 0
-            };
-          }
-
-          function loadSheet(sheetName) {
-            const ws = wb.Sheets[sheetName];
+          function loadSheet(name) {
+            const ws = wb.Sheets[name];
             if (!ws) return { players: {}, playerList: [] };
 
-            const rows    = XLSX.utils.sheet_to_json(ws, { header: 1 });
-            const headers = (rows[0] || []).map(String);
-            const bucket  = { players: {}, playerList: [] };
+            const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            const bucket = { players: {}, playerList: [] };
 
             for (let i = 1; i < rows.length; i++) {
-              const parsed = parsePlayerRow(headers, rows[i]);
-              if (!parsed) continue;
-              const { name, ...stats } = parsed;
-              bucket.players[name] = stats;
+              const [name, score, games, wins] = rows[i];
+              if (!name) continue;
+              bucket.players[name] = {
+                score: Number(score) || 0,
+                games: Number(games) || 0,
+                wins: Number(wins) || 0
+              };
               bucket.playerList.push(name);
             }
             return bucket;
           }
 
-          function loadHistorySheet(sheetName) {
-            const ws = wb.Sheets[sheetName];
+          function loadHistorySheet(name) {
+            const ws = wb.Sheets[name];
             if (!ws) return [];
 
-            const rows    = XLSX.utils.sheet_to_json(ws, { header: 1 });
-            const headers = (rows[0] || []).map(String);
+            const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
             const history = [];
 
-            const startIdx  = headers.indexOf("Start");
-            const endIdx    = headers.indexOf("End");
-
             for (let i = 1; i < rows.length; i++) {
-              const row   = rows[i];
-              const start = row[startIdx];
-              const end   = row[endIdx];
-              if (!start || !end) continue;
-
-              const parsed = parsePlayerRow(headers, row);
-              if (!parsed) continue;
+              const [start, end, player, score, games, wins] = rows[i];
+              if (!start || !end || !player) continue;
 
               let week = history.find(
                 w => w.weekStart === start && w.weekEnd === end
               );
+
               if (!week) {
-                week = { weekStart: start, weekEnd: end, players: {}, playerList: [] };
+                week = {
+                  weekStart: start,
+                  weekEnd: end,
+                  players: {},
+                  playerList: []
+                };
                 history.push(week);
               }
 
-              const { name, ...stats } = parsed;
-              week.players[name] = stats;
-              week.playerList.push(name);
+              week.players[player] = {
+                score: Number(score) || 0,
+                games: Number(games) || 0,
+                wins: Number(wins) || 0
+              };
+
+              week.playerList.push(player);
             }
+
             return history;
           }
 
-          allTime       = loadSheet("AllTime");
-          weekly        = loadSheet("Weekly");
+          allTime = loadSheet("AllTime");
+          weekly = loadSheet("Weekly");
           weeklyHistory = loadHistorySheet("WeeklyHistory");
-          weeklyReset   = new Date().toISOString();
+          weeklyReset = new Date().toISOString();
 
           updatePlayerDropdowns();
           updateWeeklyDropdown();

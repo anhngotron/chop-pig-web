@@ -1,76 +1,66 @@
-// api/save-state.js
-// Vercel serverless function — saves state to GitHub with optimistic
-// concurrency control.  Returns 409 if the client's _version is stale.
-
 import { Octokit } from "@octokit/rest";
 
-const OWNER = process.env.GITHUB_OWNER;   // e.g. "anhngotron"
-const REPO  = process.env.GITHUB_REPO;    // e.g. "chop-pig-web"
-const PATH  = "chop_pig_state_latest.json";
-
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
-
-  const password = req.headers["x-app-password"];
-  if (password !== process.env.APP_PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
-
-  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-  const body    = req.body;
-
-  // ── 1. Fetch the current file from GitHub to get its real SHA ──
-  let currentSha    = null;
-  let currentVersion = null;
 
   try {
-    const { data } = await octokit.repos.getContent({
-      owner: OWNER, repo: REPO, path: PATH
-    });
-    currentSha = data.sha;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const provided = req.headers["x-app-password"];
 
-    // Decode and extract _version stored inside the JSON
-    const existing = JSON.parse(
-      Buffer.from(data.content, "base64").toString("utf8")
-    );
-    currentVersion = existing._version || null;
+    if (!provided || provided !== adminPassword) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { allTime, weekly, weeklyReset, weeklyHistory } = req.body;
+
+    if (!allTime || !weekly || !weeklyReset || !weeklyHistory) {
+      return res.status(400).json({ error: "Invalid payload" });
+    }
+
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const token = process.env.GITHUB_TOKEN;
+
+    if (!owner || !repo || !token) {
+      return res
+        .status(500)
+        .json({ error: "Missing GitHub environment variables" });
+    }
+
+    const octokit = new Octokit({ auth: token });
+
+    const path = "chop_pig_state_latest.json";
+
+    let sha = null;
+    try {
+      const { data } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path
+      });
+      sha = data.sha;
+    } catch (err) {
+      sha = null;
+    }
+
+    const content = Buffer.from(
+      JSON.stringify({ allTime, weekly, weeklyReset, weeklyHistory }, null, 2)
+    ).toString("base64");
+
+    await octokit.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path,
+      message: "Update Chop Pig state",
+      content,
+      sha
+    });
+
+    return res.status(200).json({ success: true });
   } catch (err) {
-    if (err.status !== 404) throw err;
-    // File doesn't exist yet — first save, allow it
+    console.error("Save-state error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
-
-  // ── 2. Conflict check ──
-  // If the file exists AND the client sent a version AND it doesn't
-  // match what's on GitHub → reject with 409 Conflict.
-  const clientVersion = body._version ?? null;
-
-  if (currentSha && currentVersion && clientVersion &&
-      clientVersion !== currentVersion) {
-    return res.status(409).json({
-      error:          "conflict",
-      serverVersion:  currentVersion,
-      clientVersion
-    });
-  }
-
-  // ── 3. Build new payload with a fresh version token ──
-  const newVersion = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const { _version: _stripped, ...stateData } = body;   // remove old _version
-  const newPayload = { ...stateData, _version: newVersion };
-
-  const content = Buffer
-    .from(JSON.stringify(newPayload, null, 2))
-    .toString("base64");
-
-  // ── 4. Commit to GitHub ──
-  await octokit.repos.createOrUpdateFileContents({
-    owner:   OWNER,
-    repo:    REPO,
-    path:    PATH,
-    message: `chore: update game state [${new Date().toISOString()}]`,
-    content,
-    ...(currentSha ? { sha: currentSha } : {})
-  });
-
-  return res.status(200).json({ ok: true, _version: newVersion });
 }
