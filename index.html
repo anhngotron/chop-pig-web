@@ -284,9 +284,6 @@
   
   </div>
 
-  <div id="syncStatus" style="text-align:center; margin-top:12px; font-weight: bold; color: #ff3b30;">
-    View-only mode — not synced
-  </div>
 </div>
 
   <div id="modeBanner" style="text-align:center; color:#a00; margin-top:8px;"></div>
@@ -301,14 +298,12 @@
 
   <div id="roundRows"></div>
 
-  <input type="text" id="newPlayerName" disabled />
-  <button class="btn full-width-btn" id="addPlayerBtn" onclick="addPlayer()" disabled>Add Player</button>
   <button class="btn full-width-btn" id="addRoundBtn" onclick="addRoundScores()" disabled>Add Round</button>
   <button class="btn full-width-btn" id="exportBtn" onclick="exportToExcel()" disabled>Export to Excel</button>
   <button class="btn full-width-btn" id="importBtn" onclick="importFromExcel()" disabled>Import from Excel</button>
   <button class="btn full-width-btn" id="syncNowBtn" onclick="manualSync()" disabled>Sync Now</button>
 
-  <div id="syncStatus" style="text-align:center; margin-top:10px; color:#555;"></div>
+  <div id="syncStatus" style="text-align:center; margin-top:10px; font-weight:bold; color:#ff3b30;">View-only mode — not synced</div>
 
   <div style="text-align:center; margin-top:20px;">
     <label style="font-size:14px; margin-right:6px;">Select Week:</label>
@@ -591,6 +586,11 @@
       for (let i = 0; i < rowCount; i++) {
         const card = document.createElement("div");
         card.className = "player-card";
+
+        const cardHeader = document.createElement("div");
+        cardHeader.textContent = `Player ${i + 1}`;
+        cardHeader.style.cssText = "font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#007aff; margin-bottom:10px;";
+        card.appendChild(cardHeader);
 
         const rowPlayer = document.createElement("div");
         rowPlayer.className = "card-row";
