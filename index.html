@@ -335,7 +335,8 @@
     
     /* ---------------- AUTH / STATE ---------------- */
     let canSave = false;
-    let appPassword = "";
+    let appPassword = sessionStorage.getItem("appPassword") || "";
+    let canSaveInit = !!appPassword;
     let currentVersion = null;  // optimistic concurrency token from server
 
     let allTime = { players: {}, playerList: [] };
@@ -398,6 +399,7 @@
       if (canSave) {
         canSave = false;
         appPassword = "";
+        sessionStorage.removeItem("appPassword");
         setSyncStatus("Logged out — view-only mode", "gray");
         updateModeBanner();
         return;
@@ -427,6 +429,7 @@
 
         canSave = true;
         appPassword = pwd;
+        sessionStorage.setItem("appPassword", pwd);
         setSyncStatus("Logged in — saving enabled", "green");
         updateModeBanner();
       } catch (err) {
@@ -2288,7 +2291,13 @@
       init();
       updateWeeklyDropdown();
       refreshTable();
-      setSyncStatus("View-only mode", "#ff3b30");
+      if (appPassword) {
+        canSave = true;
+        setSyncStatus("Logged in — saving enabled", "green");
+        updateModeBanner();
+      } else {
+        setSyncStatus("View-only mode", "#ff3b30");
+      }
     };
   </script>
 </body>
