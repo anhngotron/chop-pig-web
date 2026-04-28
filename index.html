@@ -336,6 +336,7 @@
     /* ---------------- AUTH / STATE ---------------- */
     let canSave = false;
     let appPassword = "";
+    let currentVersion = null;  // optimistic concurrency token from server
 
     let allTime = { players: {}, playerList: [] };
     let weekly = { players: {}, playerList: [] };
@@ -471,6 +472,9 @@
 
         const data = await resp.json();
 
+        // Store version token for conflict detection on next save
+        if (data._version) currentVersion = data._version;
+
         // 3. APPLY CLOUD DATA: Strictly overwrite local variables
         if (data.allTime) {
           allTime = data.allTime;
@@ -517,7 +521,8 @@
         allTime,
         weekly,
         weeklyReset,
-        weeklyHistory
+        weeklyHistory,
+        _version: currentVersion   // send version token for conflict check
       };
 
       setSyncStatus("Syncing…", "#888");
@@ -530,13 +535,30 @@
         },
         body: JSON.stringify(payload)
       })
-        .then(res => {
-          if (!res.ok) throw new Error("GitHub sync failed");
+        .then(async res => {
+          const json = await res.json().catch(() => ({}));
+          if (res.status === 409) {
+            // Server has a newer version — reload then retry
+            console.warn("Conflict detected, refreshing from cloud…");
+            setSyncStatus("Conflict — refreshing…", "orange");
+            await loadStateFromGitHub();
+            updatePlayerDropdowns();
+            updateWeeklyDropdown();
+            refreshTable();
+            setSyncStatus("Refreshed (conflict resolved) ✓", "green");
+            return;
+          }
+          if (!res.ok) {
+            const msg = json.error || res.statusText || res.status;
+            throw new Error(msg);
+          }
+          // Store the new version token the server returned
+          if (json._version) currentVersion = json._version;
           setSyncStatus("Saved ✓", "green");
         })
         .catch(err => {
           console.warn("GitHub autosave failed:", err);
-          setSyncStatus("Sync failed ⚠", "red");
+          setSyncStatus("Sync failed ⚠ — " + err.message, "red");
         });
     }
 
