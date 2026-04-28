@@ -13,8 +13,8 @@
         "stinky2Win": 0
       },
       "Andy": {
-        "score": 47,
-        "games": 117,
+        "score": 43,
+        "games": 118,
         "wins": 41,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -24,8 +24,8 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 26,
-        "games": 83,
+        "score": 24,
+        "games": 84,
         "wins": 28,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -35,8 +35,8 @@
         "stinky2Win": 1
       },
       "Majid": {
-        "score": 14,
-        "games": 53,
+        "score": 16,
+        "games": 54,
         "wins": 12,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -110,9 +110,9 @@
         "stinky2Win": 0
       },
       "David": {
-        "score": -50,
-        "games": 84,
-        "wins": 14,
+        "score": -46,
+        "games": 85,
+        "wins": 15,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -151,8 +151,8 @@
         "stinky2Win": 0
       },
       "Andy": {
-        "score": 6,
-        "games": 13,
+        "score": 2,
+        "games": 14,
         "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -167,9 +167,9 @@
         "wins": 0
       },
       "David": {
-        "score": 34,
-        "games": 14,
-        "wins": 6,
+        "score": 38,
+        "games": 15,
+        "wins": 7,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -221,8 +221,8 @@
         "stinky2Win": 1
       },
       "Majid": {
-        "score": -2,
-        "games": 5,
+        "score": 0,
+        "games": 6,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -243,8 +243,8 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": -4,
-        "games": 9,
+        "score": -6,
+        "games": 10,
         "wins": 4,
         "timesChopped": 0,
         "timesChopper": 0,
