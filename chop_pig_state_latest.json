@@ -13,9 +13,9 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 37,
-        "games": 125,
-        "wins": 42,
+        "score": 41,
+        "games": 126,
+        "wins": 43,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -78,8 +78,8 @@
         "stinky2Win": 0
       },
       "Lawrence": {
-        "score": -8,
-        "games": 26,
+        "score": -12,
+        "games": 27,
         "wins": 4,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -89,8 +89,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": 8,
-        "games": 56,
+        "score": 6,
+        "games": 57,
         "wins": 12,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -111,8 +111,8 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 30,
-        "games": 91,
+        "score": 32,
+        "games": 92,
         "wins": 31,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -157,9 +157,9 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": -4,
-        "games": 21,
-        "wins": 3,
+        "score": 0,
+        "games": 22,
+        "wins": 4,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -222,8 +222,8 @@
         "stinky2Win": 0
       },
       "Lawrence": {
-        "score": 5,
-        "games": 5,
+        "score": 1,
+        "games": 6,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -233,8 +233,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": -8,
-        "games": 8,
+        "score": -10,
+        "games": 9,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -255,8 +255,8 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 0,
-        "games": 17,
+        "score": 2,
+        "games": 18,
         "wins": 7,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -616,5 +616,5 @@
       ]
     }
   ],
-  "_version": "mokgvdjdqlw4"
+  "_version": "mokgvh45tcf5"
 }
