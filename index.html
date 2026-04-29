@@ -334,9 +334,8 @@
   <script>
     
     /* ---------------- AUTH / STATE ---------------- */
-    let canSave = false;
     let appPassword = sessionStorage.getItem("appPassword") || "";
-    let canSaveInit = !!appPassword;
+    let canSave = !!appPassword;   // restored immediately — no refresh needed
     let currentVersion = null;  // optimistic concurrency token from server
 
     let allTime = { players: {}, playerList: [] };
@@ -2334,13 +2333,8 @@
       init();
       updateWeeklyDropdown();
       refreshTable();
-      if (appPassword) {
-        canSave = true;
-        setSyncStatus("Logged in — saving enabled", "green");
-        updateModeBanner();
-      } else {
-        setSyncStatus("View-only mode", "#ff3b30");
-      }
+      updateModeBanner();
+      setSyncStatus(canSave ? "Logged in — saving enabled" : "View-only mode", canSave ? "green" : "#ff3b30");
     };
   </script>
 </body>
