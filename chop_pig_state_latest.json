@@ -68,10 +68,6 @@
       }
     },
     "playerList": [
-      "1",
-      "2",
-      "3",
-      "4",
       "Ana",
       "Andy",
       "Aris",
@@ -89,50 +85,6 @@
   },
   "weekly": {
     "players": {
-      "1": {
-        "score": 4,
-        "games": 1,
-        "wins": 1,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0
-      },
-      "2": {
-        "score": 2,
-        "games": 1,
-        "wins": 0,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0
-      },
-      "3": {
-        "score": -2,
-        "games": 1,
-        "wins": 0,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0
-      },
-      "4": {
-        "score": -4,
-        "games": 1,
-        "wins": 0,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0
-      },
       "Ana": {
         "score": -2,
         "games": 15,
@@ -200,10 +152,6 @@
       }
     },
     "playerList": [
-      "1",
-      "2",
-      "3",
-      "4",
       "Ana",
       "Andy",
       "Aris",
