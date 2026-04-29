@@ -13,8 +13,8 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 47,
-        "games": 121,
+        "score": 43,
+        "games": 122,
         "wins": 42,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -40,9 +40,9 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -16,
-        "games": 50,
-        "wins": 11,
+        "score": -12,
+        "games": 51,
+        "wins": 12,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -51,8 +51,8 @@
         "stinky2Win": 0
       },
       "James": {
-        "score": 117,
-        "games": 103,
+        "score": 119,
+        "games": 104,
         "wins": 31,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -99,8 +99,8 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 30,
-        "games": 87,
+        "score": 28,
+        "games": 88,
         "wins": 30,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -145,8 +145,8 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 6,
-        "games": 17,
+        "score": 2,
+        "games": 18,
         "wins": 3,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -172,9 +172,9 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -12,
-        "games": 12,
-        "wins": 2,
+        "score": -8,
+        "games": 13,
+        "wins": 3,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -183,8 +183,8 @@
         "stinky2Win": 0
       },
       "James": {
-        "score": -12,
-        "games": 20,
+        "score": -10,
+        "games": 21,
         "wins": 5,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -231,8 +231,8 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 0,
-        "games": 13,
+        "score": -2,
+        "games": 14,
         "wins": 6,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -592,5 +592,5 @@
       ]
     }
   ],
-  "_version": "mokg5phltriq"
+  "_version": "mokg5tdqdimz"
 }
