@@ -23,6 +23,17 @@
         "stinky2Lose": 0,
         "stinky2Win": 0
       },
+      "3": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
+      },
       "Ana": {
         "score": -39,
         "games": 83,
@@ -92,6 +103,7 @@
     "playerList": [
       "1",
       "2",
+      "3",
       "Ana",
       "Andy",
       "Aris",
@@ -121,6 +133,17 @@
         "stinky2Win": 0
       },
       "2": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
+      },
+      "3": {
         "score": 0,
         "games": 0,
         "wins": 0,
@@ -200,6 +223,7 @@
     "playerList": [
       "1",
       "2",
+      "3",
       "Ana",
       "Andy",
       "Aris",
@@ -544,5 +568,5 @@
       ]
     }
   ],
-  "_version": "mok87yik6nez"
+  "_version": "mok87zuyfqdt"
 }
