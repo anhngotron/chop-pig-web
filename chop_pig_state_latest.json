@@ -1,6 +1,17 @@
 {
   "allTime": {
     "players": {
+      "1": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
+      },
       "Ana": {
         "score": -39,
         "games": 83,
@@ -68,6 +79,7 @@
       }
     },
     "playerList": [
+      "1",
       "Ana",
       "Andy",
       "Aris",
@@ -85,6 +97,17 @@
   },
   "weekly": {
     "players": {
+      "1": {
+        "score": 0,
+        "games": 0,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
+      },
       "Ana": {
         "score": -2,
         "games": 15,
@@ -152,6 +175,7 @@
       }
     },
     "playerList": [
+      "1",
       "Ana",
       "Andy",
       "Aris",
@@ -495,5 +519,6 @@
         "William"
       ]
     }
-  ]
+  ],
+  "_version": "mok87x2mwpwf"
 }
