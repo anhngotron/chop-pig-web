@@ -13,8 +13,8 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 49,
-        "games": 120,
+        "score": 47,
+        "games": 121,
         "wins": 42,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -29,8 +29,8 @@
         "wins": 2
       },
       "David": {
-        "score": -50,
-        "games": 88,
+        "score": -54,
+        "games": 89,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 1,
@@ -40,9 +40,9 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -20,
-        "games": 49,
-        "wins": 10,
+        "score": -16,
+        "games": 50,
+        "wins": 11,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -51,9 +51,15 @@
         "stinky2Win": 0
       },
       "James": {
-        "score": 115,
-        "games": 102,
-        "wins": 31
+        "score": 117,
+        "games": 103,
+        "wins": 31,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       },
       "Jeanette": {
         "score": -22,
@@ -139,8 +145,8 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 8,
-        "games": 16,
+        "score": 6,
+        "games": 17,
         "wins": 3,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -155,8 +161,8 @@
         "wins": 0
       },
       "David": {
-        "score": 34,
-        "games": 18,
+        "score": 30,
+        "games": 19,
         "wins": 7,
         "timesChopped": 0,
         "timesChopper": 1,
@@ -166,9 +172,9 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -16,
-        "games": 11,
-        "wins": 1,
+        "score": -12,
+        "games": 12,
+        "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -177,9 +183,15 @@
         "stinky2Win": 0
       },
       "James": {
-        "score": -14,
-        "games": 19,
-        "wins": 5
+        "score": -12,
+        "games": 20,
+        "wins": 5,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       },
       "Jeanette": {
         "score": 0,
@@ -580,5 +592,5 @@
       ]
     }
   ],
-  "_version": "mokfzoz0a0le"
+  "_version": "mokfzt2ugczk"
 }
