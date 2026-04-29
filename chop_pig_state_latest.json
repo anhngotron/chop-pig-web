@@ -7,9 +7,9 @@
         "wins": 15
       },
       "Andy": {
-        "score": 45,
-        "games": 119,
-        "wins": 41,
+        "score": 49,
+        "games": 120,
+        "wins": 42,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -49,8 +49,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -11,
-        "games": 71,
+        "score": -15,
+        "games": 72,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -70,8 +70,8 @@
         "wins": 12
       },
       "Robert": {
-        "score": -9,
-        "games": 37,
+        "score": -7,
+        "games": 38,
         "wins": 6,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -81,9 +81,15 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 24,
-        "games": 84,
-        "wins": 28
+        "score": 22,
+        "games": 85,
+        "wins": 28,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       },
       "William": {
         "score": -30,
@@ -115,9 +121,9 @@
         "wins": 2
       },
       "Andy": {
-        "score": 4,
-        "games": 15,
-        "wins": 2,
+        "score": 8,
+        "games": 16,
+        "wins": 3,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -157,8 +163,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -2,
-        "games": 1,
+        "score": -6,
+        "games": 2,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -178,8 +184,8 @@
         "wins": 0
       },
       "Robert": {
-        "score": 19,
-        "games": 9,
+        "score": 21,
+        "games": 10,
         "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -189,9 +195,15 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": -6,
-        "games": 10,
-        "wins": 4
+        "score": -8,
+        "games": 11,
+        "wins": 4,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0
       },
       "William": {
         "score": -17,
@@ -544,5 +556,5 @@
       ]
     }
   ],
-  "_version": "mokeznma334b"
+  "_version": "mokezrxr7wzx"
 }
