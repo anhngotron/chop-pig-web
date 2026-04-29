@@ -1604,76 +1604,119 @@
         "4th": "😬", "Stinky 13": "💩"
       };
 
-      let html = `<h2>Game Log</h2>`;
-
+      // Group logs by calendar date
+      const groups = {};
+      const groupOrder = [];
       logs.forEach((log, idx) => {
         const dt = new Date(log.timestamp);
-        const dateStr = dt.toLocaleDateString();
-        const timeStr = dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        const sorted = [...log.players].sort((a, b) => b.score - a.score);
-
-        html += `
-          <div style="background:#f9f9fb; border-radius:12px; margin-bottom:14px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <strong style="font-size:15px;">Game #${logs.length - idx}</strong>
-              <span style="font-size:13px; color:#888;">${dateStr} &nbsp;${timeStr}</span>
-            </div>
-            <table style="width:100%; border-collapse:collapse; font-size:13px;">
-              <thead>
-                <tr style="background:#e8e8f0; text-align:left;">
-                  <th style="padding:6px 8px;">Place</th>
-                  <th style="padding:6px 8px;">Player</th>
-                  <th style="padding:6px 8px;">Score</th>
-                  <th style="padding:6px 8px;">Extras</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-
-        sorted.forEach(p => {
-          const emoji = placementEmoji[p.placement] || "";
-          const extras = [];
-
-          if (p.stinky13) extras.push(`<span style="color:#b5451b;">💩 Stinky 13</span>`);
-
-          if (p.stinky2) {
-            const s2 = p.stinky2;
-            const parts = [];
-            if (s2.redPigs > 0)           parts.push(`🔥🐷 ×${s2.redPigs}`);
-            if (s2.blackPigs > 0)         parts.push(`🐷 ×${s2.blackPigs}`);
-            if (s2.consecutivePairs3 > 0) parts.push(`3-Pairs ×${s2.consecutivePairs3}`);
-            if (s2.fourOfAKind > 0)       parts.push(`4-Kind ×${s2.fourOfAKind}`);
-            if (s2.consecutivePairs4 > 0) parts.push(`4-Pairs ×${s2.consecutivePairs4}`);
-            extras.push(`<span style="color:#555;">🐷 Stinky 2 — ${parts.join(", ")} &nbsp;<strong>(${s2.pointsLost} pts)</strong></span>`);
-          }
-
-          if (p.choppedBy && p.choppedBy.length > 0) {
-            p.choppedBy.forEach(c => {
-              const chopParts = Object.entries(c.types)
-                .filter(([, v]) => v > 0)
-                .map(([k, v]) => `${k} ×${v}`);
-              extras.push(`<span style="color:#555;">🪓 Chopped by <strong>${c.chopper}</strong> — ${chopParts.join(", ")}</span>`);
-            });
-          }
-
-          const scoreColor = p.score > 0 ? "#1a7f37" : p.score < 0 ? "#e94560" : "#555";
-          const scoreStr = p.score > 0 ? `+${p.score}` : `${p.score}`;
-
-          html += `
-            <tr style="border-top:1px solid #eee;">
-              <td style="padding:7px 8px; white-space:nowrap;">${emoji} ${p.placement}</td>
-              <td style="padding:7px 8px; font-weight:600;">${p.name}</td>
-              <td style="padding:7px 8px; font-weight:700; color:${scoreColor};">${scoreStr}</td>
-              <td style="padding:7px 8px; font-size:12px; line-height:1.6;">${extras.length > 0 ? extras.join("<br>") : "<span style='color:#bbb;'>—</span>"}</td>
-            </tr>
-          `;
-        });
-
-        html += `</tbody></table></div>`;
+        const dateKey = dt.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        if (!groups[dateKey]) { groups[dateKey] = []; groupOrder.push(dateKey); }
+        groups[dateKey].push({ log, globalIdx: idx });
       });
 
-      html += `<button class="btn full-width-btn" onclick="closeModal()" style="margin-top:10px;">Close</button>`;
-      modal.innerHTML = html;
+      // Build dropdown options
+      const dropdownOptions = groupOrder.map(d =>
+        `<option value="${d}">${d} (${groups[d].length} game${groups[d].length > 1 ? "s" : ""})</option>`
+      ).join("");
+
+      modal.innerHTML = `
+        <h2>Game Log</h2>
+        <select id="logDateSelect" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid #ddd; font-size:15px; margin-bottom:16px; background:white; color:#333;">
+          <option value="__all__">📅 All Dates</option>
+          ${dropdownOptions}
+        </select>
+        <div id="logEntries"></div>
+        <button class="btn full-width-btn" onclick="closeModal()" style="margin-top:10px;">Close</button>
+      `;
+
+      function renderLogEntries(filterDate) {
+        const container = document.getElementById("logEntries");
+        const datesToShow = filterDate === "__all__" ? groupOrder : [filterDate];
+        let html = "";
+        let gameNum = logs.length;
+
+        // pre-count game numbers: always count from full logs top to bottom
+        // build a map of log index → game number
+        const gameNumMap = {};
+        logs.forEach((log, idx) => { gameNumMap[idx] = logs.length - idx; });
+
+        datesToShow.forEach(dateKey => {
+          if (!groups[dateKey]) return;
+          if (filterDate === "__all__") {
+            html += `<div style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#007aff; margin:18px 0 8px; padding-bottom:6px; border-bottom:2px solid #e0e8ff;">${dateKey}</div>`;
+          }
+
+          groups[dateKey].forEach(({ log, globalIdx }) => {
+            const dt = new Date(log.timestamp);
+            const timeStr = dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            const sorted = [...log.players].sort((a, b) => b.score - a.score);
+            const gNum = gameNumMap[globalIdx];
+
+            let rowsHtml = "";
+            sorted.forEach(p => {
+              const emoji = placementEmoji[p.placement] || "";
+              const extras = [];
+              if (p.stinky13) extras.push(`<span style="color:#b5451b;">💩 Stinky 13</span>`);
+              if (p.stinky2) {
+                const s2 = p.stinky2;
+                const parts = [];
+                if (s2.redPigs > 0)           parts.push(`🔥🐷 ×${s2.redPigs}`);
+                if (s2.blackPigs > 0)         parts.push(`🐷 ×${s2.blackPigs}`);
+                if (s2.consecutivePairs3 > 0) parts.push(`3-Pairs ×${s2.consecutivePairs3}`);
+                if (s2.fourOfAKind > 0)       parts.push(`4-Kind ×${s2.fourOfAKind}`);
+                if (s2.consecutivePairs4 > 0) parts.push(`4-Pairs ×${s2.consecutivePairs4}`);
+                extras.push(`<span style="color:#555;">🐷 Stinky 2 — ${parts.join(", ")} &nbsp;<strong>(${s2.pointsLost} pts)</strong></span>`);
+              }
+              if (p.choppedBy && p.choppedBy.length > 0) {
+                p.choppedBy.forEach(c => {
+                  const chopParts = Object.entries(c.types)
+                    .filter(([, v]) => v > 0)
+                    .map(([k, v]) => `${k} ×${v}`);
+                  extras.push(`<span style="color:#555;">🪓 Chopped by <strong>${c.chopper}</strong> — ${chopParts.join(", ")}</span>`);
+                });
+              }
+              const scoreColor = p.score > 0 ? "#1a7f37" : p.score < 0 ? "#e94560" : "#555";
+              const scoreStr = p.score > 0 ? `+${p.score}` : `${p.score}`;
+              rowsHtml += `
+                <tr style="border-top:1px solid #eee;">
+                  <td style="padding:7px 8px; white-space:nowrap;">${emoji} ${p.placement}</td>
+                  <td style="padding:7px 8px; font-weight:600;">${p.name}</td>
+                  <td style="padding:7px 8px; font-weight:700; color:${scoreColor};">${scoreStr}</td>
+                  <td style="padding:7px 8px; font-size:12px; line-height:1.6;">${extras.length > 0 ? extras.join("<br>") : "<span style='color:#bbb;'>—</span>"}</td>
+                </tr>`;
+            });
+
+            html += `
+              <div style="background:#f9f9fb; border-radius:12px; margin-bottom:14px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <strong style="font-size:15px;">Game #${gNum}</strong>
+                  <span style="font-size:13px; color:#888;">${timeStr}</span>
+                </div>
+                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                  <thead>
+                    <tr style="background:#e8e8f0; text-align:left;">
+                      <th style="padding:6px 8px;">Place</th>
+                      <th style="padding:6px 8px;">Player</th>
+                      <th style="padding:6px 8px;">Score</th>
+                      <th style="padding:6px 8px;">Extras</th>
+                    </tr>
+                  </thead>
+                  <tbody>${rowsHtml}</tbody>
+                </table>
+              </div>`;
+          });
+        });
+
+        container.innerHTML = html || `<p style="color:#888; text-align:center;">No games on this date.</p>`;
+      }
+
+      // Render all dates by default
+      renderLogEntries("__all__");
+
+      // Wire up dropdown
+      document.getElementById("logDateSelect").addEventListener("change", function() {
+        renderLogEntries(this.value);
+      });
     }
 
     /* ---------------- LEADERBOARD (WEEKLY + ALL-TIME) ---------------- */
