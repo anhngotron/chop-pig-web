@@ -3,14 +3,14 @@
     "players": {
       "Ana": {
         "score": -43,
-        "games": 84,
+        "games": 85,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 0,
-        "stinky2Win": 0
+        "stinky2Win": 1
       },
       "Andy": {
         "score": 49,
@@ -40,14 +40,14 @@
         "stinky2Win": 0
       },
       "Ian": {
-        "score": -16,
-        "games": 47,
+        "score": -22,
+        "games": 48,
         "wins": 10,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0
       },
       "James": {
@@ -61,8 +61,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -13,
-        "games": 73,
+        "score": -11,
+        "games": 74,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -93,9 +93,9 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 26,
-        "games": 86,
-        "wins": 29,
+        "score": 30,
+        "games": 87,
+        "wins": 30,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -129,14 +129,14 @@
     "players": {
       "Ana": {
         "score": -6,
-        "games": 16,
+        "games": 17,
         "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 0,
-        "stinky2Win": 0
+        "stinky2Win": 1
       },
       "Andy": {
         "score": 8,
@@ -166,14 +166,14 @@
         "stinky2Win": 0
       },
       "Ian": {
-        "score": -12,
-        "games": 9,
+        "score": -18,
+        "games": 10,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0
       },
       "James": {
@@ -187,8 +187,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -4,
-        "games": 3,
+        "score": -2,
+        "games": 4,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -219,9 +219,9 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": -4,
-        "games": 12,
-        "wins": 5,
+        "score": 0,
+        "games": 13,
+        "wins": 6,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -580,5 +580,5 @@
       ]
     }
   ],
-  "_version": "mokfjtpmn6ez"
+  "_version": "mokfk7u1oj61"
 }
