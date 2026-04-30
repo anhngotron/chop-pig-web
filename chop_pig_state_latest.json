@@ -40,8 +40,8 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -15,
-        "games": 58,
+        "score": -13,
+        "games": 59,
         "wins": 14,
         "timesChopped": 1,
         "timesChopper": 1,
@@ -67,8 +67,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -11,
-        "games": 80,
+        "score": -15,
+        "games": 81,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -89,8 +89,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": 14,
-        "games": 63,
+        "score": 12,
+        "games": 64,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -111,9 +111,9 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 36,
-        "games": 103,
-        "wins": 34,
+        "score": 40,
+        "games": 104,
+        "wins": 35,
         "timesChopped": 0,
         "timesChopper": 2,
         "stinky13Lose": 1,
@@ -190,8 +190,8 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -11,
-        "games": 20,
+        "score": -9,
+        "games": 21,
         "wins": 5,
         "timesChopped": 1,
         "timesChopper": 1,
@@ -217,8 +217,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -2,
-        "games": 10,
+        "score": -6,
+        "games": 11,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -239,8 +239,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": -2,
-        "games": 15,
+        "score": -4,
+        "games": 16,
         "wins": 4,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -261,9 +261,9 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 6,
-        "games": 29,
-        "wins": 10,
+        "score": 10,
+        "games": 30,
+        "wins": 11,
         "timesChopped": 0,
         "timesChopper": 2,
         "stinky13Lose": 1,
@@ -628,5 +628,5 @@
       ]
     }
   ],
-  "_version": "molxbl6mhxx0"
+  "_version": "molxbpw4dchw"
 }
