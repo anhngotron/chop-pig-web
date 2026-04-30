@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "Ana": {
-        "score": -45,
-        "games": 86,
+        "score": -43,
+        "games": 87,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -40,8 +40,8 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -14,
-        "games": 56,
+        "score": -16,
+        "games": 57,
         "wins": 14,
         "timesChopped": 1,
         "timesChopper": 0,
@@ -89,9 +89,9 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": 14,
-        "games": 61,
-        "wins": 14,
+        "score": 18,
+        "games": 62,
+        "wins": 15,
         "timesChopped": 0,
         "timesChopper": 2,
         "stinky13Lose": 0,
@@ -111,8 +111,8 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 37,
-        "games": 101,
+        "score": 33,
+        "games": 102,
         "wins": 34,
         "timesChopped": 0,
         "timesChopper": 1,
@@ -152,8 +152,8 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": -8,
-        "games": 18,
+        "score": -6,
+        "games": 19,
         "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -190,8 +190,8 @@
         "stinky2Win": 1
       },
       "Ian": {
-        "score": -10,
-        "games": 18,
+        "score": -12,
+        "games": 19,
         "wins": 5,
         "timesChopped": 1,
         "timesChopper": 0,
@@ -239,9 +239,9 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": -2,
-        "games": 13,
-        "wins": 2,
+        "score": 2,
+        "games": 14,
+        "wins": 3,
         "timesChopped": 0,
         "timesChopper": 2,
         "stinky13Lose": 0,
@@ -261,8 +261,8 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 7,
-        "games": 27,
+        "score": 3,
+        "games": 28,
         "wins": 10,
         "timesChopped": 0,
         "timesChopper": 1,
@@ -628,5 +628,5 @@
       ]
     }
   ],
-  "_version": "molvwl9qseyw"
+  "_version": "molvx6px5ehp"
 }
