@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "Ana": {
-        "score": -43,
-        "games": 85,
+        "score": -45,
+        "games": 86,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -67,8 +67,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -13,
-        "games": 79,
+        "score": -11,
+        "games": 80,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -111,9 +111,9 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 41,
-        "games": 100,
-        "wins": 33,
+        "score": 37,
+        "games": 101,
+        "wins": 34,
         "timesChopped": 0,
         "timesChopper": 1,
         "stinky13Lose": 1,
@@ -122,8 +122,8 @@
         "stinky2Win": 2
       },
       "William": {
-        "score": -30,
-        "games": 73,
+        "score": -26,
+        "games": 74,
         "wins": 19,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -152,8 +152,8 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": -6,
-        "games": 17,
+        "score": -8,
+        "games": 18,
         "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -217,8 +217,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -4,
-        "games": 9,
+        "score": -2,
+        "games": 10,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -261,9 +261,9 @@
         "stinky2Win": 0
       },
       "Ted": {
-        "score": 11,
-        "games": 26,
-        "wins": 9,
+        "score": 7,
+        "games": 27,
+        "wins": 10,
         "timesChopped": 0,
         "timesChopper": 1,
         "stinky13Lose": 1,
@@ -272,8 +272,8 @@
         "stinky2Win": 2
       },
       "William": {
-        "score": -17,
-        "games": 12,
+        "score": -13,
+        "games": 13,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -628,5 +628,5 @@
       ]
     }
   ],
-  "_version": "molvouuvkt2a"
+  "_version": "molvp08yw6vx"
 }
