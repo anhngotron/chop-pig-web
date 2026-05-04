@@ -2,9 +2,9 @@
   "allTime": {
     "players": {
       "Ana": {
-        "score": -33,
-        "games": 91,
-        "wins": 17,
+        "score": -29,
+        "games": 92,
+        "wins": 18,
         "timesChopped": 2,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -67,8 +67,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -11,
-        "games": 86,
+        "score": -9,
+        "games": 87,
         "wins": 18,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -89,8 +89,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": 12,
-        "games": 67,
+        "score": 10,
+        "games": 68,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -122,8 +122,8 @@
         "stinky2Win": 2
       },
       "William": {
-        "score": -30,
-        "games": 76,
+        "score": -34,
+        "games": 77,
         "wins": 19,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -152,9 +152,9 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": 10,
-        "games": 3,
-        "wins": 2,
+        "score": 14,
+        "games": 4,
+        "wins": 3,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -199,8 +199,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -2,
-        "games": 3,
+        "score": 0,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -215,8 +215,8 @@
         "wins": 0
       },
       "Majid": {
-        "score": 0,
-        "games": 3,
+        "score": -2,
+        "games": 4,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -236,8 +236,8 @@
         "wins": 0
       },
       "William": {
-        "score": -4,
-        "games": 2,
+        "score": -8,
+        "games": 3,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -744,5 +744,5 @@
       ]
     }
   ],
-  "_version": "morlmx8b0jii"
+  "_version": "morln27kwja3"
 }
