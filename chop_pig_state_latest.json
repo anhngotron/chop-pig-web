@@ -13,8 +13,8 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 47,
-        "games": 131,
+        "score": 49,
+        "games": 132,
         "wins": 45,
         "timesChopped": 1,
         "timesChopper": 0,
@@ -67,8 +67,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -9,
-        "games": 87,
+        "score": -13,
+        "games": 88,
         "wins": 18,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -89,8 +89,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": 10,
-        "games": 68,
+        "score": 8,
+        "games": 69,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -122,9 +122,9 @@
         "stinky2Win": 2
       },
       "William": {
-        "score": -34,
-        "games": 77,
-        "wins": 19,
+        "score": -30,
+        "games": 78,
+        "wins": 20,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -163,8 +163,8 @@
         "stinky2Win": 0
       },
       "Andy": {
-        "score": -4,
-        "games": 1,
+        "score": -2,
+        "games": 2,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -199,8 +199,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": 0,
-        "games": 4,
+        "score": -4,
+        "games": 5,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -215,8 +215,8 @@
         "wins": 0
       },
       "Majid": {
-        "score": -2,
-        "games": 4,
+        "score": -4,
+        "games": 5,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -236,9 +236,9 @@
         "wins": 0
       },
       "William": {
-        "score": -8,
-        "games": 3,
-        "wins": 0,
+        "score": -4,
+        "games": 4,
+        "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -744,5 +744,5 @@
       ]
     }
   ],
-  "_version": "morluz64btg7"
+  "_version": "morlvo6qjbz2"
 }
