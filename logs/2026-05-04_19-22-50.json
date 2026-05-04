@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-05-04T19:22:50.492Z",
+  "players": [
+    {
+      "name": "Ana",
+      "placement": "2nd",
+      "score": 2
+    },
+    {
+      "name": "Kevin",
+      "placement": "1st",
+      "score": 4
+    },
+    {
+      "name": "Majid",
+      "placement": "3rd",
+      "score": 0
+    },
+    {
+      "name": "William",
+      "placement": "4th",
+      "score": -6,
+      "stinky2": {
+        "redPigs": 1,
+        "blackPigs": 0,
+        "consecutivePairs3": 0,
+        "fourOfAKind": 0,
+        "consecutivePairs4": 0,
+        "pointsLost": -2
+      }
+    }
+  ]
+}
