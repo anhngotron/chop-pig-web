@@ -2,9 +2,9 @@
   "allTime": {
     "players": {
       "Ana": {
-        "score": -37,
-        "games": 90,
-        "wins": 16,
+        "score": -33,
+        "games": 91,
+        "wins": 17,
         "timesChopped": 2,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -67,8 +67,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -7,
-        "games": 85,
+        "score": -11,
+        "games": 86,
         "wins": 18,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -89,8 +89,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": 14,
-        "games": 66,
+        "score": 12,
+        "games": 67,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -122,8 +122,8 @@
         "stinky2Win": 2
       },
       "William": {
-        "score": -32,
-        "games": 75,
+        "score": -30,
+        "games": 76,
         "wins": 19,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -152,9 +152,9 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": 6,
-        "games": 2,
-        "wins": 1,
+        "score": 10,
+        "games": 3,
+        "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -199,8 +199,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": 2,
-        "games": 2,
+        "score": -2,
+        "games": 3,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -215,8 +215,8 @@
         "wins": 0
       },
       "Majid": {
-        "score": 2,
-        "games": 2,
+        "score": 0,
+        "games": 3,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -236,8 +236,8 @@
         "wins": 0
       },
       "William": {
-        "score": -6,
-        "games": 1,
+        "score": -4,
+        "games": 2,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -744,5 +744,5 @@
       ]
     }
   ],
-  "_version": "morlf4i8m2qg"
+  "_version": "morlf7zullcv"
 }
