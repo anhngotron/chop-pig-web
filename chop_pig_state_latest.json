@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "Ana": {
-        "score": -27,
-        "games": 93,
+        "score": -29,
+        "games": 94,
         "wins": 18,
         "timesChopped": 2,
         "timesChopper": 0,
@@ -13,8 +13,8 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 53,
-        "games": 133,
+        "score": 49,
+        "games": 134,
         "wins": 46,
         "timesChopped": 1,
         "timesChopper": 0,
@@ -67,9 +67,9 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -17,
-        "games": 89,
-        "wins": 18,
+        "score": -13,
+        "games": 90,
+        "wins": 19,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 1,
@@ -89,8 +89,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": 6,
-        "games": 70,
+        "score": 8,
+        "games": 71,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -152,8 +152,8 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": 16,
-        "games": 5,
+        "score": 14,
+        "games": 6,
         "wins": 3,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -163,8 +163,8 @@
         "stinky2Win": 0
       },
       "Andy": {
-        "score": 2,
-        "games": 3,
+        "score": -2,
+        "games": 4,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -199,9 +199,9 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -8,
-        "games": 6,
-        "wins": 1,
+        "score": -4,
+        "games": 7,
+        "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -215,8 +215,8 @@
         "wins": 0
       },
       "Majid": {
-        "score": -6,
-        "games": 6,
+        "score": -4,
+        "games": 7,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -744,5 +744,5 @@
       ]
     }
   ],
-  "_version": "morm8h2b3cyv"
+  "_version": "morm8pje3192"
 }
