@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "Ana": {
-        "score": -39,
-        "games": 89,
+        "score": -37,
+        "games": 90,
         "wins": 16,
         "timesChopped": 2,
         "timesChopper": 0,
@@ -67,9 +67,9 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -11,
-        "games": 84,
-        "wins": 17,
+        "score": -7,
+        "games": 85,
+        "wins": 18,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 1,
@@ -90,14 +90,14 @@
       },
       "Majid": {
         "score": 14,
-        "games": 65,
+        "games": 66,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 2,
         "stinky13Lose": 0,
         "stinky13Win": 1,
         "stinky2Lose": 1,
-        "stinky2Win": 0
+        "stinky2Win": 1
       },
       "Robert": {
         "score": -15,
@@ -122,14 +122,14 @@
         "stinky2Win": 2
       },
       "William": {
-        "score": -26,
-        "games": 74,
+        "score": -32,
+        "games": 75,
         "wins": 19,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0
       }
     },
@@ -152,8 +152,8 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": 4,
-        "games": 1,
+        "score": 6,
+        "games": 2,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -199,9 +199,9 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -2,
-        "games": 1,
-        "wins": 0,
+        "score": 2,
+        "games": 2,
+        "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -216,14 +216,14 @@
       },
       "Majid": {
         "score": 2,
-        "games": 1,
+        "games": 2,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 0,
-        "stinky2Win": 0
+        "stinky2Win": 1
       },
       "Robert": {
         "score": 0,
@@ -236,9 +236,15 @@
         "wins": 0
       },
       "William": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
+        "score": -6,
+        "games": 1,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 1,
+        "stinky2Win": 0
       }
     },
     "playerList": [
@@ -738,5 +744,5 @@
       ]
     }
   ],
-  "_version": "morl6upxr205"
+  "_version": "morl70m5hj78"
 }
