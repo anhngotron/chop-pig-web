@@ -2,8 +2,8 @@
   "allTime": {
     "players": {
       "Ana": {
-        "score": -29,
-        "games": 92,
+        "score": -27,
+        "games": 93,
         "wins": 18,
         "timesChopped": 2,
         "timesChopper": 0,
@@ -13,9 +13,9 @@
         "stinky2Win": 1
       },
       "Andy": {
-        "score": 49,
-        "games": 132,
-        "wins": 45,
+        "score": 53,
+        "games": 133,
+        "wins": 46,
         "timesChopped": 1,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -67,8 +67,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -13,
-        "games": 88,
+        "score": -17,
+        "games": 89,
         "wins": 18,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -89,8 +89,8 @@
         "stinky2Win": 0
       },
       "Majid": {
-        "score": 8,
-        "games": 69,
+        "score": 6,
+        "games": 70,
         "wins": 16,
         "timesChopped": 0,
         "timesChopper": 2,
@@ -152,8 +152,8 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": 14,
-        "games": 4,
+        "score": 16,
+        "games": 5,
         "wins": 3,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -163,9 +163,9 @@
         "stinky2Win": 0
       },
       "Andy": {
-        "score": -2,
-        "games": 2,
-        "wins": 0,
+        "score": 2,
+        "games": 3,
+        "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -199,8 +199,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -4,
-        "games": 5,
+        "score": -8,
+        "games": 6,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -215,8 +215,8 @@
         "wins": 0
       },
       "Majid": {
-        "score": -4,
-        "games": 5,
+        "score": -6,
+        "games": 6,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -744,5 +744,5 @@
       ]
     }
   ],
-  "_version": "morm1pgyn6eu"
+  "_version": "morm1s1heqkf"
 }
