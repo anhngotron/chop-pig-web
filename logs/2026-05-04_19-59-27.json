@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-05-04T19:59:27.304Z",
+  "players": [
+    {
+      "name": "Ana",
+      "placement": "4th",
+      "score": -3
+    },
+    {
+      "name": "Andy",
+      "placement": "1st",
+      "score": 4
+    },
+    {
+      "name": "Majid",
+      "placement": "2nd",
+      "score": 2
+    },
+    {
+      "name": "Kevin",
+      "placement": "3rd",
+      "score": -3,
+      "choppedBy": [
+        {
+          "chopper": "Ana",
+          "types": {
+            "Black Pigs": 1,
+            "Red Pigs": 0,
+            "3 Consecutive Pairs": 0,
+            "4 of a Kind": 0,
+            "4 Consecutive Pairs": 0
+          }
+        }
+      ]
+    }
+  ]
+}
