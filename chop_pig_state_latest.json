@@ -15,8 +15,8 @@
         "reversePtsWon": 0
       },
       "Andy": {
-        "score": 43,
-        "games": 118,
+        "score": 45,
+        "games": 119,
         "wins": 41,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -41,9 +41,9 @@
         "reversePtsWon": 0
       },
       "David": {
-        "score": -41,
-        "games": 87,
-        "wins": 15,
+        "score": -37,
+        "games": 88,
+        "wins": 16,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 1,
@@ -67,8 +67,8 @@
         "reversePtsWon": 0
       },
       "James": {
-        "score": 113,
-        "games": 105,
+        "score": 111,
+        "games": 106,
         "wins": 32,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -132,8 +132,8 @@
         "reversePtsWon": 16
       },
       "Robert": {
-        "score": -13,
-        "games": 36,
+        "score": -17,
+        "games": 37,
         "wins": 5,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -203,8 +203,8 @@
         "reversePtsWon": 0
       },
       "Andy": {
-        "score": 2,
-        "games": 14,
+        "score": 4,
+        "games": 15,
         "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -229,9 +229,9 @@
         "reversePtsWon": 0
       },
       "David": {
-        "score": 43,
-        "games": 17,
-        "wins": 7,
+        "score": 47,
+        "games": 18,
+        "wins": 8,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 1,
@@ -255,8 +255,8 @@
         "reversePtsWon": 0
       },
       "James": {
-        "score": -16,
-        "games": 22,
+        "score": -18,
+        "games": 23,
         "wins": 6,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -320,8 +320,8 @@
         "reversePtsWon": 16
       },
       "Robert": {
-        "score": 15,
-        "games": 8,
+        "score": 11,
+        "games": 9,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -1096,5 +1096,5 @@
       ]
     }
   ],
-  "_version": "mot5dluqq71n"
+  "_version": "mot5dnz4nkba"
 }
