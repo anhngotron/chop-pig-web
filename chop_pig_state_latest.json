@@ -93,17 +93,17 @@
         "reversePtsWon": 0
       },
       "Kevin": {
-        "score": -9,
-        "games": 70,
+        "score": -1,
+        "games": 71,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 0,
-        "stinky13Lose": 0,
+        "stinky13Lose": 1,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "reversePtsWon": 13
       },
       "Lawrence": {
         "score": -10,
@@ -119,16 +119,16 @@
         "reversePtsWon": 0
       },
       "Majid": {
-        "score": 16,
-        "games": 54,
-        "wins": 12,
+        "score": -5,
+        "games": 55,
+        "wins": 13,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
-        "stinky13Win": 0,
+        "stinky13Win": 3,
         "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
+        "stinky2Win": 2,
+        "reversePtsLost": 36,
         "reversePtsWon": 0
       },
       "Robert": {
@@ -145,30 +145,30 @@
         "reversePtsWon": 0
       },
       "Ted": {
-        "score": 24,
-        "games": 84,
+        "score": 32,
+        "games": 85,
         "wins": 28,
         "timesChopped": 0,
         "timesChopper": 0,
-        "stinky13Lose": 0,
+        "stinky13Lose": 1,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "reversePtsWon": 13
       },
       "William": {
-        "score": -30,
-        "games": 69,
+        "score": -25,
+        "games": 70,
         "wins": 18,
         "timesChopped": 0,
         "timesChopper": 0,
-        "stinky13Lose": 0,
+        "stinky13Lose": 1,
         "stinky13Win": 0,
         "stinky2Lose": 0,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "reversePtsWon": 10
       }
     },
     "playerList": [
@@ -281,17 +281,17 @@
         "reversePtsWon": 0
       },
       "Kevin": {
-        "score": 0,
-        "games": 0,
+        "score": 8,
+        "games": 1,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
-        "stinky13Lose": 0,
+        "stinky13Lose": 1,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "reversePtsWon": 13
       },
       "Lawrence": {
         "score": 3,
@@ -307,16 +307,16 @@
         "reversePtsWon": 0
       },
       "Majid": {
-        "score": 0,
-        "games": 6,
-        "wins": 0,
+        "score": -21,
+        "games": 7,
+        "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
-        "stinky13Win": 0,
+        "stinky13Win": 3,
         "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
+        "stinky2Win": 2,
+        "reversePtsLost": 36,
         "reversePtsWon": 0
       },
       "Robert": {
@@ -333,30 +333,30 @@
         "reversePtsWon": 0
       },
       "Ted": {
-        "score": -6,
-        "games": 10,
+        "score": 2,
+        "games": 11,
         "wins": 4,
         "timesChopped": 0,
         "timesChopper": 0,
-        "stinky13Lose": 0,
+        "stinky13Lose": 1,
         "stinky13Win": 0,
-        "stinky2Lose": 0,
+        "stinky2Lose": 1,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "reversePtsWon": 13
       },
       "William": {
-        "score": -17,
-        "games": 8,
+        "score": -12,
+        "games": 9,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
-        "stinky13Lose": 0,
+        "stinky13Lose": 1,
         "stinky13Win": 0,
         "stinky2Lose": 0,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "reversePtsWon": 10
       }
     },
     "playerList": [
@@ -1096,5 +1096,5 @@
       ]
     }
   ],
-  "_version": "mot1u3e3f5g7"
+  "_version": "mot1u7x8yk2q"
 }
