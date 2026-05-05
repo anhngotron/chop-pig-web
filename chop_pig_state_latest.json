@@ -1,13 +1,181 @@
 {
   "allTime": {
-    "players": {},
-    "playerList": []
-  },
-  "weekly": {
-    "players": {},
-    "playerList": []
-  },
-  "weeklyReset": null,
-  "weeklyHistory": [],
+    "players": {
+      "Ana": {
+        "score": -28,
+        "games": 98,
+        "wins": 20,
+        "timesChopped": 2,
+        "timesChopper": 1,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 1,
+        "reversePtsLost": 8,
+        "reversePtsWon": 6
+      },
+      "Andy": {
+        "score": 47,
+        "games": 138,
+        "score": 51,
+        "games": 139,
+        "wins": 49,
+        "timesChopped": 1,
+        "timesChopper": 0,
+@@ -25,16 +25,16 @@
+        "stinky2Lose": 0,
+        "stinky2Win": 0,
+        "reversePtsLost": 16,
+        "reversePtsWon": 2
+        "reversePtsWon": 8
+      },
+      "Aris": {
+        "score": -6,
+        "games": 6,
+        "wins": 2
+      },
+      "David": {
+        "score": -58,
+        "games": 90,
+        "score": -56,
+        "games": 91,
+        "wins": 15,
+        "timesChopped": 0,
+        "timesChopper": 1,
+@@ -43,7 +43,7 @@
+        "stinky2Lose": 0,
+        "stinky2Win": 1,
+        "reversePtsLost": 0,
+        "reversePtsWon": 0
+        "reversePtsWon": 2
+      },
+      "Ian": {
+        "score": -19,
+@@ -57,16 +57,16 @@
+        "stinky2Win": 0
+      },
+      "James": {
+        "score": 131,
+        "games": 110,
+        "wins": 32,
+        "score": 127,
+        "games": 111,
+        "wins": 33,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0,
+        "reversePtsLost": 4,
+        "reversePtsLost": 12,
+        "reversePtsWon": 8
+      },
+      "Jeanette": {
+@@ -75,16 +75,16 @@
+        "wins": 1
+      },
+      "Kevin": {
+        "score": -18,
+        "games": 95,
+        "score": -20,
+        "games": 96,
+        "wins": 19,
+        "timesChopped": 1,
+        "timesChopper": 0,
+        "stinky13Lose": 1,
+        "stinky13Win": 0,
+        "stinky2Lose": 1,
+        "stinky2Win": 0,
+        "reversePtsLost": 8,
+        "reversePtsLost": 12,
+        "reversePtsWon": 6
+      },
+      "Lawrence": {
+@@ -177,8 +177,8 @@
+        "reversePtsWon": 6
+      },
+      "Andy": {
+        "score": -4,
+        "games": 8,
+        "score": 0,
+        "games": 9,
+        "wins": 4,
+        "timesChopped": 0,
+        "timesChopper": 0,
+@@ -187,16 +187,16 @@
+        "stinky2Lose": 0,
+        "stinky2Win": 0,
+        "reversePtsLost": 16,
+        "reversePtsWon": 2
+        "reversePtsWon": 8
+      },
+      "Aris": {
+        "score": 0,
+        "games": 0,
+        "wins": 0
+      },
+      "David": {
+        "score": -4,
+        "games": 1,
+        "score": -2,
+        "games": 2,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+@@ -205,24 +205,24 @@
+        "stinky2Lose": 0,
+        "stinky2Win": 0,
+        "reversePtsLost": 0,
+        "reversePtsWon": 0
+        "reversePtsWon": 2
+      },
+      "Ian": {
+        "score": 0,
+        "games": 0,
+        "wins": 0
+      },
+      "James": {
+        "score": 6,
+        "games": 4,
+        "wins": 0,
+        "score": 2,
+        "games": 5,
+        "wins": 1,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0,
+        "reversePtsLost": 4,
+        "reversePtsLost": 12,
+        "reversePtsWon": 8
+      },
+      "Jeanette": {
+@@ -231,16 +231,16 @@
+        "wins": 0
+      },
+      "Kevin": {
+        "score": -9,
+        "games": 12,
+        "score": -11,
+        "games": 13,
+        "wins": 2,
+        "timesChopped": 1,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0,
+        "reversePtsLost": 8,
+        "reversePtsLost": 12,
+        "reversePtsWon": 6
+      },
+      "Lawrence": {
+@@ -786,5 +786,5 @@
+      ]
+    }
+  ],
   "_version": "mot0oq67loss"
 }
