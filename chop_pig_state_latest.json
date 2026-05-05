@@ -67,8 +67,8 @@
         "reversePtsWon": 0
       },
       "James": {
-        "score": 117,
-        "games": 104,
+        "score": 113,
+        "games": 105,
         "wins": 32,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -93,10 +93,10 @@
         "reversePtsWon": 0
       },
       "Kevin": {
-        "score": -3,
-        "games": 73,
+        "score": -4,
+        "games": 74,
         "wins": 15,
-        "timesChopped": 0,
+        "timesChopped": 1,
         "timesChopper": 0,
         "stinky13Lose": 1,
         "stinky13Win": 0,
@@ -119,11 +119,11 @@
         "reversePtsWon": 0
       },
       "Majid": {
-        "score": -7,
-        "games": 57,
+        "score": -6,
+        "games": 58,
         "wins": 13,
         "timesChopped": 0,
-        "timesChopper": 0,
+        "timesChopper": 1,
         "stinky13Lose": 0,
         "stinky13Win": 3,
         "stinky2Lose": 0,
@@ -158,9 +158,9 @@
         "reversePtsWon": 13
       },
       "William": {
-        "score": -23,
-        "games": 72,
-        "wins": 19,
+        "score": -19,
+        "games": 73,
+        "wins": 20,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 1,
@@ -255,8 +255,8 @@
         "reversePtsWon": 0
       },
       "James": {
-        "score": -12,
-        "games": 21,
+        "score": -16,
+        "games": 22,
         "wins": 6,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -281,10 +281,10 @@
         "reversePtsWon": 0
       },
       "Kevin": {
-        "score": 6,
-        "games": 3,
+        "score": 5,
+        "games": 4,
         "wins": 0,
-        "timesChopped": 0,
+        "timesChopped": 1,
         "timesChopper": 0,
         "stinky13Lose": 1,
         "stinky13Win": 0,
@@ -307,11 +307,11 @@
         "reversePtsWon": 0
       },
       "Majid": {
-        "score": -23,
-        "games": 9,
+        "score": -22,
+        "games": 10,
         "wins": 1,
         "timesChopped": 0,
-        "timesChopper": 0,
+        "timesChopper": 1,
         "stinky13Lose": 0,
         "stinky13Win": 3,
         "stinky2Lose": 0,
@@ -346,9 +346,9 @@
         "reversePtsWon": 13
       },
       "William": {
-        "score": -10,
-        "games": 11,
-        "wins": 1,
+        "score": -6,
+        "games": 12,
+        "wins": 2,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 1,
@@ -1096,5 +1096,5 @@
       ]
     }
   ],
-  "_version": "mot1vvqrbf7q"
+  "_version": "mot1vx2e0jgb"
 }
