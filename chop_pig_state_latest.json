@@ -2,9 +2,9 @@
   "allTime": {
     "players": {
       "Ana": {
-        "score": -32,
-        "games": 97,
-        "wins": 19,
+        "score": -28,
+        "games": 98,
+        "wins": 20,
         "timesChopped": 2,
         "timesChopper": 1,
         "stinky13Lose": 0,
@@ -33,15 +33,17 @@
         "wins": 2
       },
       "David": {
-        "score": -54,
-        "games": 89,
+        "score": -58,
+        "games": 90,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 1,
         "stinky13Lose": 0,
         "stinky13Win": 0,
         "stinky2Lose": 0,
-        "stinky2Win": 1
+        "stinky2Win": 1,
+        "reversePtsLost": 0,
+        "reversePtsWon": 0
       },
       "Ian": {
         "score": -19,
@@ -55,8 +57,8 @@
         "stinky2Win": 0
       },
       "James": {
-        "score": 131,
-        "games": 108,
+        "score": 133,
+        "games": 109,
         "wins": 32,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -73,8 +75,8 @@
         "wins": 1
       },
       "Kevin": {
-        "score": -20,
-        "games": 93,
+        "score": -22,
+        "games": 94,
         "wins": 19,
         "timesChopped": 1,
         "timesChopper": 0,
@@ -160,9 +162,9 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": 11,
-        "games": 9,
-        "wins": 4,
+        "score": 15,
+        "games": 10,
+        "wins": 5,
         "timesChopped": 0,
         "timesChopper": 1,
         "stinky13Lose": 0,
@@ -191,9 +193,17 @@
         "wins": 0
       },
       "David": {
-        "score": 0,
-        "games": 0,
-        "wins": 0
+        "score": -4,
+        "games": 1,
+        "wins": 0,
+        "timesChopped": 0,
+        "timesChopper": 0,
+        "stinky13Lose": 0,
+        "stinky13Win": 0,
+        "stinky2Lose": 0,
+        "stinky2Win": 0,
+        "reversePtsLost": 0,
+        "reversePtsWon": 0
       },
       "Ian": {
         "score": 0,
@@ -201,8 +211,8 @@
         "wins": 0
       },
       "James": {
-        "score": 6,
-        "games": 2,
+        "score": 8,
+        "games": 3,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -219,8 +229,8 @@
         "wins": 0
       },
       "Kevin": {
-        "score": -11,
-        "games": 10,
+        "score": -13,
+        "games": 11,
         "wins": 2,
         "timesChopped": 1,
         "timesChopper": 0,
@@ -766,5 +776,5 @@
       ]
     }
   ],
-  "_version": "mot06i6wd63h"
+  "_version": "mot06qptc1il"
 }
