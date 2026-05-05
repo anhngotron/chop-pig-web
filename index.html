@@ -741,7 +741,8 @@
           bucket.players[name] = { score: 0, games: 0, wins: 0,
             timesChopped: 0, timesChopper: 0,
             stinky13Lose: 0, stinky13Win: 0,
-            stinky2Lose: 0, stinky2Win: 0 };
+            stinky2Lose: 0, stinky2Win: 0,
+            reversePtsLost: 0, reversePtsWon: 0 };
           bucket.playerList.push(name);
           bucket.playerList.sort();
         }
@@ -1424,7 +1425,8 @@
       function ensureNotorietyFields(p) {
         const fields = ["timesChopped","timesChopper",
                         "stinky13Lose","stinky13Win",
-                        "stinky2Lose","stinky2Win"];
+                        "stinky2Lose","stinky2Win",
+                        "reversePtsLost","reversePtsWon"];
         for (const f of fields) if (p[f] === undefined) p[f] = 0;
       }
 
@@ -1503,6 +1505,42 @@
           }
         }
       }
+
+      // Track points won/lost due to reverse mode
+      if (reverseMode) {
+        for (let i = 0; i < 4; i++) {
+          const playerName = selectedPlayers[i];
+          // In reverse mode the score is the flipped value.
+          // The "reverse impact" per player is how much they differ from what
+          // the normal score would have been. We store positive impact as
+          // reversePtsWon (they benefited from reverse) and negative as
+          // reversePtsLost (they were hurt by it).
+          // We recalculate the normal score for comparison.
+          let normalScore = scores[i]; // already the reversed final score
+
+          // Base placement score in normal mode
+          const pl = placements[i];
+          const stinky13Count = placements.filter(p => p === "Stinky 13").length;
+          let basePlacementNormal;
+          if (pl === "Stinky 13") basePlacementNormal = -5;
+          else if (pl === "1st") basePlacementNormal = stinky13Count > 0 ? 5 * stinky13Count : 4;
+          else if (pl === "2nd") basePlacementNormal = stinky13Count === 2 ? 0 : 2;
+          else basePlacementNormal = { "3rd": 0, "4th": -2 }[pl] ?? 0;
+
+          const reverseImpact = scores[i] - basePlacementNormal;
+          // reverseImpact > 0 means reverse mode helped this player vs normal
+          // reverseImpact < 0 means reverse mode hurt this player vs normal
+          for (const bucket of [allTime, weekly]) {
+            ensureNotorietyFields(bucket.players[playerName]);
+            if (reverseImpact > 0) {
+              bucket.players[playerName].reversePtsWon  += reverseImpact;
+            } else if (reverseImpact < 0) {
+              bucket.players[playerName].reversePtsLost += Math.abs(reverseImpact);
+            }
+          }
+        }
+      }
+
       // Build game log snapshot BEFORE clearing rows (all data still live)
       const gameLogPlayers = [];
       for (let i = 0; i < 4; i++) {
@@ -1927,12 +1965,14 @@
         .filter(([, d]) => d.games > 0)
         .map(([name, d]) => ({
           name,
-          timesChopped:  d.timesChopped  || 0,
-          timesChopper:  d.timesChopper  || 0,
-          stinky13Lose:  d.stinky13Lose  || 0,
-          stinky13Win:   d.stinky13Win   || 0,
-          stinky2Lose:   d.stinky2Lose   || 0,
-          stinky2Win:    d.stinky2Win    || 0,
+          timesChopped:    d.timesChopped    || 0,
+          timesChopper:    d.timesChopper    || 0,
+          stinky13Lose:    d.stinky13Lose    || 0,
+          stinky13Win:     d.stinky13Win     || 0,
+          stinky2Lose:     d.stinky2Lose     || 0,
+          stinky2Win:      d.stinky2Win      || 0,
+          reversePtsLost:  d.reversePtsLost  || 0,
+          reversePtsWon:   d.reversePtsWon   || 0,
         }));
 
       if (arr.length === 0) return;
@@ -1947,10 +1987,12 @@
       const maxS13Win      = maxOf("stinky13Win");
       const maxS2Lose      = maxOf("stinky2Lose");
       const maxS2Win       = maxOf("stinky2Win");
+      const maxRevLost     = maxOf("reversePtsLost");
+      const maxRevWon      = maxOf("reversePtsWon");
 
       const table = document.createElement("table");
       table.style.width = "100%";
-      table.style.minWidth = "720px";
+      table.style.minWidth = "920px";
       table.style.borderCollapse = "collapse";
       table.style.background = "white";
       table.style.borderRadius = "12px";
@@ -1966,6 +2008,7 @@
           <th style="padding:8px 6px;" colspan="2">🪓 Chop Pigs</th>
           <th style="padding:8px 6px;" colspan="2">💩 Stinky 13</th>
           <th style="padding:8px 6px;" colspan="2">🐷 Stinky 2</th>
+          <th style="padding:8px 6px;" colspan="2">⚡ Reverse Mode</th>
         </tr>
         <tr style="background:#f2f2f7; font-size:12px;">
           <th style="padding:6px 8px;" title="Times this player was chopped by others">Got Chopped</th>
@@ -1974,6 +2017,8 @@
           <th style="padding:6px 8px;" title="Times this player benefited from someone else's Stinky 13 (gained bonus)">Win 🎉</th>
           <th style="padding:6px 8px;" title="Times this player triggered Stinky 2 (lost points)">Lose 💀</th>
           <th style="padding:6px 8px;" title="Times this player received Stinky 2 bonus points">Win 🎉</th>
+          <th style="padding:6px 8px;" title="Total points lost because of reverse mode">Pts Lost 💀</th>
+          <th style="padding:6px 8px;" title="Total points gained because of reverse mode">Pts Won 🎉</th>
         </tr>
       `;
       table.appendChild(thead);
@@ -1995,12 +2040,14 @@
 
         tr.innerHTML = `
           <td style="padding:9px 10px; font-weight:500;">${p.name}</td>
-          ${cellLose(p.timesChopped, maxChopped)}
-          ${cellWin(p.timesChopper,  maxChopper)}
-          ${cellLose(p.stinky13Lose, maxS13Lose)}
-          ${cellWin(p.stinky13Win,   maxS13Win)}
-          ${cellLose(p.stinky2Lose,  maxS2Lose)}
-          ${cellWin(p.stinky2Win,    maxS2Win)}
+          ${cellLose(p.timesChopped,   maxChopped)}
+          ${cellWin(p.timesChopper,    maxChopper)}
+          ${cellLose(p.stinky13Lose,   maxS13Lose)}
+          ${cellWin(p.stinky13Win,     maxS13Win)}
+          ${cellLose(p.stinky2Lose,    maxS2Lose)}
+          ${cellWin(p.stinky2Win,      maxS2Win)}
+          ${cellLose(p.reversePtsLost, maxRevLost)}
+          ${cellWin(p.reversePtsWon,   maxRevWon)}
         `;
         tbody.appendChild(tr);
       });
@@ -2100,9 +2147,10 @@
       // All notoriety columns included so nothing is lost on round-trip
       const HEADERS = [
         "Player", "Score", "Games", "Wins",
-        "TimesChopped", "TimesChopper",
-        "Stinky13Lose", "Stinky13Win",
-        "Stinky2Lose",  "Stinky2Win"
+        "TimesChopped",   "TimesChopper",
+        "Stinky13Lose",   "Stinky13Win",
+        "Stinky2Lose",    "Stinky2Win",
+        "ReversePtsLost", "ReversePtsWon"
       ];
 
       function sheetFrom(bucket, sheetName) {
@@ -2111,15 +2159,17 @@
           const d = bucket.players[p];
           rows.push([
             p,
-            d.score          || 0,
-            d.games          || 0,
-            d.wins           || 0,
-            d.timesChopped   || 0,
-            d.timesChopper   || 0,
-            d.stinky13Lose   || 0,
-            d.stinky13Win    || 0,
-            d.stinky2Lose    || 0,
-            d.stinky2Win     || 0
+            d.score            || 0,
+            d.games            || 0,
+            d.wins             || 0,
+            d.timesChopped     || 0,
+            d.timesChopper     || 0,
+            d.stinky13Lose     || 0,
+            d.stinky13Win      || 0,
+            d.stinky2Lose      || 0,
+            d.stinky2Win       || 0,
+            d.reversePtsLost   || 0,
+            d.reversePtsWon    || 0
           ]);
         }
         const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -2131,9 +2181,10 @@
 
       const historyRows = [[
         "Start", "End", "Player", "Score", "Games", "Wins",
-        "TimesChopped", "TimesChopper",
-        "Stinky13Lose", "Stinky13Win",
-        "Stinky2Lose",  "Stinky2Win"
+        "TimesChopped",   "TimesChopper",
+        "Stinky13Lose",   "Stinky13Win",
+        "Stinky2Lose",    "Stinky2Win",
+        "ReversePtsLost", "ReversePtsWon"
       ]];
       weeklyHistory.forEach((week) => {
         const start = new Date(week.weekStart).toLocaleDateString();
@@ -2142,15 +2193,17 @@
           const p = week.players[name];
           historyRows.push([
             start, end, name,
-            p.score          || 0,
-            p.games          || 0,
-            p.wins           || 0,
-            p.timesChopped   || 0,
-            p.timesChopper   || 0,
-            p.stinky13Lose   || 0,
-            p.stinky13Win    || 0,
-            p.stinky2Lose    || 0,
-            p.stinky2Win     || 0
+            p.score            || 0,
+            p.games            || 0,
+            p.wins             || 0,
+            p.timesChopped     || 0,
+            p.timesChopper     || 0,
+            p.stinky13Lose     || 0,
+            p.stinky13Win      || 0,
+            p.stinky2Lose      || 0,
+            p.stinky2Win       || 0,
+            p.reversePtsLost   || 0,
+            p.reversePtsWon    || 0
           ]);
         });
       });
@@ -2191,15 +2244,17 @@
             if (!name) return null;
             return {
               name,
-              score:        Number(get("Score"))        || 0,
-              games:        Number(get("Games"))        || 0,
-              wins:         Number(get("Wins"))         || 0,
-              timesChopped: Number(get("TimesChopped")) || 0,
-              timesChopper: Number(get("TimesChopper")) || 0,
-              stinky13Lose: Number(get("Stinky13Lose")) || 0,
-              stinky13Win:  Number(get("Stinky13Win"))  || 0,
-              stinky2Lose:  Number(get("Stinky2Lose"))  || 0,
-              stinky2Win:   Number(get("Stinky2Win"))   || 0
+              score:          Number(get("Score"))          || 0,
+              games:          Number(get("Games"))          || 0,
+              wins:           Number(get("Wins"))           || 0,
+              timesChopped:   Number(get("TimesChopped"))   || 0,
+              timesChopper:   Number(get("TimesChopper"))   || 0,
+              stinky13Lose:   Number(get("Stinky13Lose"))   || 0,
+              stinky13Win:    Number(get("Stinky13Win"))    || 0,
+              stinky2Lose:    Number(get("Stinky2Lose"))    || 0,
+              stinky2Win:     Number(get("Stinky2Win"))     || 0,
+              reversePtsLost: Number(get("ReversePtsLost")) || 0,
+              reversePtsWon:  Number(get("ReversePtsWon"))  || 0
             };
           }
 
