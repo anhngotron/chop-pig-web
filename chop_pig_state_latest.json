@@ -67,9 +67,9 @@
         "reversePtsWon": 0
       },
       "James": {
-        "score": 115,
-        "games": 102,
-        "wins": 31,
+        "score": 119,
+        "games": 103,
+        "wins": 32,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -93,8 +93,8 @@
         "reversePtsWon": 0
       },
       "Kevin": {
-        "score": -1,
-        "games": 71,
+        "score": 1,
+        "games": 72,
         "wins": 15,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -119,8 +119,8 @@
         "reversePtsWon": 0
       },
       "Majid": {
-        "score": -5,
-        "games": 55,
+        "score": -9,
+        "games": 56,
         "wins": 13,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -158,8 +158,8 @@
         "reversePtsWon": 13
       },
       "William": {
-        "score": -25,
-        "games": 70,
+        "score": -27,
+        "games": 71,
         "wins": 18,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -255,9 +255,9 @@
         "reversePtsWon": 0
       },
       "James": {
-        "score": -14,
-        "games": 19,
-        "wins": 5,
+        "score": -10,
+        "games": 20,
+        "wins": 6,
         "timesChopped": 0,
         "timesChopper": 0,
         "stinky13Lose": 0,
@@ -281,8 +281,8 @@
         "reversePtsWon": 0
       },
       "Kevin": {
-        "score": 8,
-        "games": 1,
+        "score": 10,
+        "games": 2,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -307,8 +307,8 @@
         "reversePtsWon": 0
       },
       "Majid": {
-        "score": -21,
-        "games": 7,
+        "score": -25,
+        "games": 8,
         "wins": 1,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -346,8 +346,8 @@
         "reversePtsWon": 13
       },
       "William": {
-        "score": -12,
-        "games": 9,
+        "score": -14,
+        "games": 10,
         "wins": 0,
         "timesChopped": 0,
         "timesChopper": 0,
@@ -1096,5 +1096,5 @@
       ]
     }
   ],
-  "_version": "mot1uo04kc52"
+  "_version": "mot1uqh0f379"
 }
