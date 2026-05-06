@@ -213,7 +213,7 @@
         "stinky2Lose": 0,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 2
+        "reversePtsWon": 6
       },
       "Aris": {
         "score": 0,
@@ -238,8 +238,8 @@
         "stinky13Win": 0,
         "stinky2Lose": 1,
         "stinky2Win": 0,
-        "reversePtsLost": 8,
-        "reversePtsWon": 12
+        "reversePtsLost": 4,
+        "reversePtsWon": 9
       },
       "Ian": {
         "score": -10,
@@ -264,8 +264,8 @@
         "stinky13Win": 0,
         "stinky2Lose": 0,
         "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 6
+        "reversePtsLost": 4,
+        "reversePtsWon": 4
       },
       "Jeanette": {
         "score": 0,
@@ -290,8 +290,8 @@
         "stinky13Win": 3,
         "stinky2Lose": 1,
         "stinky2Win": 3,
-        "reversePtsLost": 39,
-        "reversePtsWon": 13
+        "reversePtsLost": 26,
+        "reversePtsWon": 8
       },
       "Lawrence": {
         "score": 3,
@@ -316,8 +316,8 @@
         "stinky13Win": 3,
         "stinky2Lose": 1,
         "stinky2Win": 2,
-        "reversePtsLost": 36,
-        "reversePtsWon": 16
+        "reversePtsLost": 21,
+        "reversePtsWon": 11
       },
       "Robert": {
         "score": 9,
@@ -329,7 +329,7 @@
         "stinky13Win": 0,
         "stinky2Lose": 0,
         "stinky2Win": 0,
-        "reversePtsLost": 4,
+        "reversePtsLost": 2,
         "reversePtsWon": 0
       },
       "Ted": {
@@ -343,7 +343,7 @@
         "stinky2Lose": 2,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 24
+        "reversePtsWon": 14
       },
       "William": {
         "score": -6,
@@ -356,7 +356,7 @@
         "stinky2Lose": 0,
         "stinky2Win": 0,
         "reversePtsLost": 0,
-        "reversePtsWon": 10
+        "reversePtsWon": 5
       }
     },
     "playerList": [
@@ -375,7 +375,7 @@
       "William"
     ]
   },
-  "weeklyReset": "2026-05-05T19:48:40.421Z",
+  "weeklyReset": "2026-05-06T15:59:35.877Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
@@ -1096,5 +1096,5 @@
       ]
     }
   ],
-  "_version": "mot5ia46ed5j"
+  "_version": "mou8talyguua"
 }
