@@ -276,6 +276,9 @@
     body.reverse-mode .tab-bar {
       border-color: #333;
     }
+    body.mode-8p #modeBanner::before {
+      content: "👥 8 Player Mode — ";
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -292,6 +295,7 @@
     <button class="btn" onclick="refreshFromCloud()">Refresh</button>
     <button class="btn" id="loginBtn" onclick="handleLoginClick()">Login</button>
     <button class="btn" id="reverseModeBtn" onclick="toggleReverseMode()">Reverse Mode</button>
+    <button class="btn" id="gameModeBtn" onclick="toggleGameMode()">8 Player Mode</button>
     <button class="btn" onclick="openWeeklyHistory()">History</button>
     <button class="btn" onclick="openGameLogs()">Game Logs</button>
 
@@ -337,33 +341,65 @@
     let appPassword = sessionStorage.getItem("appPassword") || "";
     let canSave = !!appPassword;   // restored immediately — no refresh needed
     let currentVersion = null;  // optimistic concurrency token from server
+    let _saveInFlight  = false; // true while a save fetch is running
+    let _savePending   = false; // true if another save was requested while one was in flight
+    let _saveDebounceTimer = null; // debounce timer for rapid saves
+    let _appReady      = false; // blocks saveState() until initial load is complete
 
     let allTime = { players: {}, playerList: [] };
     let weekly = { players: {}, playerList: [] };
     let weeklyReset = null;
     let weeklyHistory = [];
 
-    const baseScores = {
-      "1st": 4,
-      "2nd": 2,
-      "3rd": -2,
-      "4th": -4,
-      "Stinky 13": -5
-    };
-    const basePlacements = ["1st", "2nd", "3rd", "4th", "Stinky 13"];
+    // ── Game mode: "4p" (default) or "8p" ──
+    let gameMode = "4p";
 
-    let stinky2Enabled = [false, false, false, false];
-    let Stinky2_red = [0, 0, 0, 0];
-    let Stinky2_black = [0, 0, 0, 0];
-    let Stinky2_pairs3 = [0, 0, 0, 0];
-    let Stinky2_kind4 = [0, 0, 0, 0];
-    let Stinky2_pairs4 = [0, 0, 0, 0];
+    // 4-player scoring
+    const baseScores4 = { "1st": 4, "2nd": 2, "3rd": -2, "4th": -4, "Stinky 13": -5 };
+    const basePlacements4 = ["1st", "2nd", "3rd", "4th", "Stinky 13"];
 
-    let chopData = [[], [], [], []];
-    let reverseMode = false;
+    // 8-player scoring: 1st=+4 … 4th=+1, 5th=-1 … 8th=-4
+    const baseScores8 = { "1st": 8, "2nd": 6, "3rd": 4, "4th": 2, "5th": -2, "6th": -4, "7th": -6, "8th": -8, "Stinky 13": -10 };
+    const basePlacements8 = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "Stinky 13"];
 
-    const rowCount = 4;
+    // Active mode helpers (recalculated whenever gameMode changes)
+    function getBaseScores()      { return gameMode === "8p" ? baseScores8      : baseScores4; }
+    function getBasePlacements()  { return gameMode === "8p" ? basePlacements8  : basePlacements4; }
+    function getRowCount()        { return gameMode === "8p" ? 8 : 4; }
+    // "Last place" placement for Stinky 2 eligibility
+    function getLastPlace()       { return gameMode === "8p" ? "8th" : "4th"; }
+    // The placement that is one above last (receives stinky2 from last)
+    function getAboveLastPlace()  { return gameMode === "8p" ? "7th" : "3rd"; }
+
+    function makeArrayOfSize(n, val) { return Array.from({ length: n }, () => val); }
+
+    let rowCount = 4;
+    let stinky2Enabled = makeArrayOfSize(4, false);
+    let Stinky2_red    = makeArrayOfSize(4, 0);
+    let Stinky2_black  = makeArrayOfSize(4, 0);
+    let Stinky2_pairs3 = makeArrayOfSize(4, 0);
+    let Stinky2_kind4  = makeArrayOfSize(4, 0);
+    let Stinky2_pairs4 = makeArrayOfSize(4, 0);
+    let chopData       = makeArrayOfSize(4, null).map(() => []);
+    let reverseMode    = false;
+
     const rowState = [];
+
+    function resizeArraysToRowCount(n) {
+      const grow = (arr, def) => {
+        while (arr.length < n) arr.push(def);
+        arr.length = n;
+      };
+      grow(stinky2Enabled, false);
+      grow(Stinky2_red,    0);
+      grow(Stinky2_black,  0);
+      grow(Stinky2_pairs3, 0);
+      grow(Stinky2_kind4,  0);
+      grow(Stinky2_pairs4, 0);
+      // chopData: keep existing, add empty arrays for new slots
+      while (chopData.length < n) chopData.push([]);
+      chopData.length = n;
+    }
 
     function updateModeBanner() {
       const banner = document.getElementById("modeBanner");
@@ -439,6 +475,19 @@
     }
 
 
+      function toggleGameMode() {
+        gameMode = gameMode === "4p" ? "8p" : "4p";
+        rowCount = getRowCount();
+        resizeArraysToRowCount(rowCount);
+        document.getElementById("gameModeBtn").textContent =
+          gameMode === "8p" ? "4 Player Mode" : "8 Player Mode";
+        // Rebuild the round rows UI and reset everything
+        init();
+        updatePlayerDropdowns();
+        updatePlacementOptions();
+        autoFillAllScores();
+      }
+
       function toggleReverseMode() {
         reverseMode = !reverseMode;
         document.body.classList.toggle("reverse-mode", reverseMode);
@@ -513,55 +562,99 @@
       el.style.color = color;
     }
 
+    // Debounced entry point — all callers use this.
+    // Rapid calls (e.g. dropdown changes) collapse into one save.
+    // Blocked entirely until _appReady is true (prevents saving empty state
+    // during page initialisation before loadStateFromGitHub() has returned).
     function saveState() {
+      if (!_appReady) return;
       if (!canSave) {
         setSyncStatus("View-only mode — not synced", "#ff3b30");
         return;
       }
+      clearTimeout(_saveDebounceTimer);
+      _saveDebounceTimer = setTimeout(() => _doSave(), 400);
+    }
+
+    // Internal: run one save; if another was requested while in-flight, run it after.
+    function _stateIsValid() {
+      // Guard against saving empty/corrupt state to GitHub
+      if (!allTime?.players || !allTime?.playerList?.length) return false;
+      if (!weekly?.players  || !weekly?.playerList?.length)  return false;
+      if (!weeklyReset)                                       return false;
+      if (!Array.isArray(weeklyHistory))                      return false;
+      // Sanity check: all-time games should always be >= weekly games
+      const atPlayers = Object.values(allTime.players);
+      if (atPlayers.some(p => typeof p.score !== "number"))  return false;
+      return true;
+    }
+
+    async function _doSave() {
+      if (_saveInFlight) {
+        // A save is already running — mark that we need another one after
+        _savePending = true;
+        return;
+      }
+
+      // Never write corrupt or empty state to GitHub
+      if (!_stateIsValid()) {
+        console.warn("Save blocked — state failed validation check");
+        setSyncStatus("Save blocked — invalid state ⚠", "red");
+        return;
+      }
+
+      _saveInFlight = true;
+      _savePending  = false;
 
       const payload = {
         allTime,
         weekly,
         weeklyReset,
         weeklyHistory,
-        _version: currentVersion   // send version token for conflict check
+        _version: currentVersion
       };
 
       setSyncStatus("Syncing…", "#888");
 
-      fetch("/api/save-state", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-App-Password": appPassword
-        },
-        body: JSON.stringify(payload)
-      })
-        .then(async res => {
-          const json = await res.json().catch(() => ({}));
-          if (res.status === 409) {
-            // Server has a newer version — reload then retry
-            console.warn("Conflict detected, refreshing from cloud…");
-            setSyncStatus("Conflict — refreshing…", "orange");
-            await loadStateFromGitHub();
-            updatePlayerDropdowns();
-            updateWeeklyDropdown();
-            refreshTable();
-            setSyncStatus("Refreshed (conflict resolved) ✓", "green");
-            return;
-          }
-          if (!res.ok) {
-            const msg = json.error || res.statusText || res.status;
-            throw new Error(msg);
-          }
-          // Store the new version token the server returned
+      try {
+        const res  = await fetch("/api/save-state", {
+          method:  "POST",
+          headers: {
+            "Content-Type":  "application/json",
+            "X-App-Password": appPassword
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const json = await res.json().catch(() => ({}));
+
+        if (res.status === 409) {
+          console.warn("Conflict — refreshing from cloud…");
+          setSyncStatus("Conflict — refreshing…", "orange");
+          await loadStateFromGitHub();
+          updatePlayerDropdowns();
+          updateWeeklyDropdown();
+          refreshTable();
+          setSyncStatus("Refreshed ✓", "green");
+          // After conflict resolution, immediately resave with fresh state
+          _savePending = true;
+        } else if (!res.ok) {
+          throw new Error(json.error || res.statusText || res.status);
+        } else {
           if (json._version) currentVersion = json._version;
           setSyncStatus("Saved ✓", "green");
-        })
-        .catch(err => {
-          console.warn("GitHub autosave failed:", err);
-          setSyncStatus("Sync failed ⚠ — " + err.message, "red");
-        });
+        }
+      } catch (err) {
+        console.warn("Save failed:", err);
+        setSyncStatus("Sync failed ⚠ — " + err.message, "red");
+      } finally {
+        _saveInFlight = false;
+        // If another save was requested while we were in-flight, run it now
+        if (_savePending) {
+          _savePending = false;
+          setTimeout(() => _doSave(), 300); // small gap so GitHub settles
+        }
+      }
     }
 
     function manualSync() {
@@ -649,7 +742,7 @@
         const selPlace = document.createElement("select");
         selPlace.innerHTML =
           `<option value="">--</option>` +
-          basePlacements.map(p => `<option value="${p}">${p}</option>`).join("");
+          getBasePlacements().map(p => `<option value="${p}">${p}</option>`).join("");
         selPlace.onchange = () => { onPlacementChanged(); saveState(); };
         rowPlace.appendChild(lblPlace);
         rowPlace.appendChild(selPlace);
@@ -801,39 +894,39 @@
     function updatePlacementOptions() {
       const placementsNow = rowState.map(r => r.placeSelect.value);
       const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
+      const regularPlacements = getBasePlacements().filter(p => p !== "Stinky 13");
+      const maxRegular = regularPlacements.length; // 4 or 8
 
-      let allowedGlobal = basePlacements.slice();
+      let allowedGlobal = [...getBasePlacements()];
 
-      if (stinky13Count === 1) {
-        allowedGlobal = allowedGlobal.filter(p => p !== "4th");
-      } else if (stinky13Count === 2) {
-        allowedGlobal = allowedGlobal.filter(p => !["3rd", "4th"].includes(p));
-      } else if (stinky13Count >= 3) {
-        allowedGlobal = allowedGlobal.filter(
-          p => !["2nd", "3rd", "4th"].includes(p)
-        );
+      // Stinky 13 rules — same logic for both modes:
+      // Each Stinky 13 removes the lowest available regular placement
+      // (in 4p: 4th→3rd→2nd; in 8p: 8th→7th→6th→…→2nd)
+      for (let s = 0; s < stinky13Count; s++) {
+        // Remove the last regular placement still in allowedGlobal
+        const remaining = allowedGlobal.filter(p => p !== "Stinky 13");
+        if (remaining.length > 0) {
+          const toRemove = remaining[remaining.length - 1];
+          allowedGlobal = allowedGlobal.filter(p => p !== toRemove);
+        }
+      }
+      // If all regular spots are taken, no more Stinky 13
+      const regularCount = placementsNow.filter(p => p && p !== "Stinky 13").length;
+      if (regularCount >= maxRegular) {
+        allowedGlobal = allowedGlobal.filter(p => p !== "Stinky 13");
       }
 
       for (let i = 0; i < rowCount; i++) {
-        const current = placementsNow[i];
         const usedByOthers = [];
         for (let j = 0; j < rowCount; j++) {
-          if (
-            j !== i &&
-            ["1st", "2nd", "3rd", "4th"].includes(placementsNow[j])
-          ) {
+          if (j !== i && regularPlacements.includes(placementsNow[j])) {
             usedByOthers.push(placementsNow[j]);
           }
         }
 
-        const allowedForRow = [];
-        for (const p of allowedGlobal) {
-          if (p === "Stinky 13") {
-            allowedForRow.push(p);
-          } else if (!usedByOthers.includes(p)) {
-            allowedForRow.push(p);
-          }
-        }
+        const allowedForRow = allowedGlobal.filter(
+          p => p === "Stinky 13" || !usedByOthers.includes(p)
+        );
 
         const sel = rowState[i].placeSelect;
         const oldVal = sel.value;
@@ -846,13 +939,9 @@
           sel.value = "";
           rowState[i].scoreInput.value = "";
           stinky2Enabled[i] = false;
-          Stinky2_red[i] = 0;
-          Stinky2_black[i] = 0;
-          Stinky2_pairs3[i] = 0;
-          Stinky2_kind4[i] = 0;
-          Stinky2_pairs4[i] = 0;
+          Stinky2_red[i] = 0; Stinky2_black[i] = 0;
+          Stinky2_pairs3[i] = 0; Stinky2_kind4[i] = 0; Stinky2_pairs4[i] = 0;
           rowState[i].stinky2Checkbox.checked = false;
-
           chopData[i] = [];
           rowState[i].chopCheckbox.checked = false;
           rowState[i].choppedBySpan.textContent = "";
@@ -890,6 +979,10 @@
       const placementsNow = rowState.map(r => r.placeSelect.value);
       const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
       const place = placementsNow[idx];
+      // 8p: stinky2 allowed from 8th place or Stinky 13
+      if (gameMode === "8p") {
+        return place === "8th" || place === "Stinky 13";
+      }
 
       if (!place) return false;
 
@@ -1277,25 +1370,30 @@
     function autoFillAllScores() {
       const placementsNow = rowState.map(r => r.placeSelect.value);
       const stinky13Count = placementsNow.filter(p => p === "Stinky 13").length;
+      const scores8 = baseScores8;
+      const scores4 = baseScores4;
 
-      const baseScoresRow = [0, 0, 0, 0];
+      const baseScoresRow = new Array(rowCount).fill(0);
 
       for (let i = 0; i < rowCount; i++) {
         const placement = placementsNow[i];
-        if (!placement) {
-          baseScoresRow[i] = 0;
-          continue;
-        }
+        if (!placement) { baseScoresRow[i] = 0; continue; }
 
         let score;
-        if (placement === "Stinky 13") score = -5;
-        else if (placement === "1st")
-          score = stinky13Count > 0 ? 5 * stinky13Count : 4;
-        else if (placement === "2nd")
-          score = stinky13Count === 2 ? 0 : 2;
-        else score = baseScores[placement];
+        if (gameMode === "8p") {
+          if (placement === "Stinky 13") score = -5;
+          else if (placement === "1st") score = stinky13Count > 0 ? 5 * stinky13Count : 4;
+          else score = scores8[placement] ?? 0;
+        } else {
+          // 4p scoring with Stinky 13 bonus
+          if (placement === "Stinky 13") score = -5;
+          else if (placement === "1st")
+            score = stinky13Count > 0 ? 5 * stinky13Count : 4;
+          else if (placement === "2nd")
+            score = stinky13Count === 2 ? 0 : 2;
+          else score = scores4[placement] ?? 0;
+        }
 
-        // Reverse mode flips base placement scores
         baseScoresRow[i] = reverseMode ? -score : score;
       }
 
@@ -1317,12 +1415,19 @@
         const giverPlace = placementsNow[i];
         let receiverIdx = null;
 
-        if (giverPlace === "4th")
-          receiverIdx = findPlayerByPlace(placementsNow, "3rd");
-        else if (giverPlace === "Stinky 13")
-          receiverIdx = findPlayerByPlace(placementsNow, "1st");
-        else if (giverPlace === "3rd")
-          receiverIdx = findPlayerByPlace(placementsNow, "2nd");
+        if (gameMode === "8p") {
+          // 8p: last place (8th) passes to 7th; others pass one up
+          const orderMap = { "8th":"7th","7th":"6th","6th":"5th","5th":"4th","4th":"3rd","3rd":"2nd","2nd":"1st" };
+          const above = orderMap[giverPlace];
+          if (above) receiverIdx = findPlayerByPlace(placementsNow, above);
+        } else {
+          if (giverPlace === "4th")
+            receiverIdx = findPlayerByPlace(placementsNow, "3rd");
+          else if (giverPlace === "Stinky 13")
+            receiverIdx = findPlayerByPlace(placementsNow, "1st");
+          else if (giverPlace === "3rd")
+            receiverIdx = findPlayerByPlace(placementsNow, "2nd");
+        }
 
         if (reverseMode) {
           // Reverse: stinky2 player gains (subtract a negative = add)
@@ -1442,7 +1547,7 @@
         ensureNotorietyFields(p);
       }
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < rowCount; i++) {
         const p = selectedPlayers[i];
         const score = scores[i];
         const isWin = placements[i] === "1st";
@@ -1455,7 +1560,7 @@
       const firstIdx = placements.indexOf("1st");
       const firstName = firstIdx >= 0 ? selectedPlayers[firstIdx] : null;
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < rowCount; i++) {
         const playerName = selectedPlayers[i];
 
         if (placements[i] === "Stinky 13") {
@@ -1471,14 +1576,20 @@
 
         if (stinky2Enabled[i]) {
           let receiverName = null;
-          if (placements[i] === "4th") {
-            const ri = placements.indexOf("3rd");
-            if (ri >= 0) receiverName = selectedPlayers[ri];
-          } else if (placements[i] === "3rd") {
-            const ri = placements.indexOf("2nd");
-            if (ri >= 0) receiverName = selectedPlayers[ri];
-          } else if (placements[i] === "Stinky 13") {
-            receiverName = firstName;
+          if (gameMode === "8p") {
+            const orderMap = { "8th":"7th","7th":"6th","6th":"5th","5th":"4th","4th":"3rd","3rd":"2nd","2nd":"1st","Stinky 13":"1st" };
+            const above = orderMap[placements[i]];
+            if (above) { const ri = placements.indexOf(above); if (ri >= 0) receiverName = selectedPlayers[ri]; }
+          } else {
+            if (placements[i] === "4th") {
+              const ri = placements.indexOf("3rd");
+              if (ri >= 0) receiverName = selectedPlayers[ri];
+            } else if (placements[i] === "3rd") {
+              const ri = placements.indexOf("2nd");
+              if (ri >= 0) receiverName = selectedPlayers[ri];
+            } else if (placements[i] === "Stinky 13") {
+              receiverName = firstName;
+            }
           }
 
           for (const bucket of [allTime, weekly]) {
@@ -1506,44 +1617,25 @@
         }
       }
 
-      // Track points won/lost due to reverse mode
+      // Track reverse mode points — simply record the actual score
+      // earned/lost in this round if reverse mode was active.
+      // positive score → reversePtsWon, negative → reversePtsLost
       if (reverseMode) {
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < rowCount; i++) {
           const playerName = selectedPlayers[i];
-          // In reverse mode the score is the flipped value.
-          // The "reverse impact" per player is how much they differ from what
-          // the normal score would have been. We store positive impact as
-          // reversePtsWon (they benefited from reverse) and negative as
-          // reversePtsLost (they were hurt by it).
-          // We recalculate the normal score for comparison.
-          let normalScore = scores[i]; // already the reversed final score
-
-          // Base placement score in normal mode
-          const pl = placements[i];
-          const stinky13Count = placements.filter(p => p === "Stinky 13").length;
-          let basePlacementNormal;
-          if (pl === "Stinky 13") basePlacementNormal = -5;
-          else if (pl === "1st") basePlacementNormal = stinky13Count > 0 ? 5 * stinky13Count : 4;
-          else if (pl === "2nd") basePlacementNormal = stinky13Count === 2 ? 0 : 2;
-          else basePlacementNormal = { "3rd": 0, "4th": -2 }[pl] ?? 0;
-
-          const reverseImpact = scores[i] - basePlacementNormal;
-          // reverseImpact > 0 means reverse mode helped this player vs normal
-          // reverseImpact < 0 means reverse mode hurt this player vs normal
+          if (!playerName) continue;
+          const s = scores[i];
           for (const bucket of [allTime, weekly]) {
             ensureNotorietyFields(bucket.players[playerName]);
-            if (reverseImpact > 0) {
-              bucket.players[playerName].reversePtsWon  += reverseImpact;
-            } else if (reverseImpact < 0) {
-              bucket.players[playerName].reversePtsLost += Math.abs(reverseImpact);
-            }
+            if (s > 0) bucket.players[playerName].reversePtsWon  += s;
+            else if (s < 0) bucket.players[playerName].reversePtsLost += Math.abs(s);
           }
         }
       }
 
-      // Build game log snapshot BEFORE clearing rows (all data still live)
+            // Build game log snapshot BEFORE clearing rows (all data still live)
       const gameLogPlayers = [];
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < rowCount; i++) {
         const entry = {
           name:      selectedPlayers[i],
           placement: placements[i],
@@ -1584,9 +1676,10 @@
 
       refreshTable();
 
-      // Await log FIRST, then save — prevents simultaneous GitHub writes
-      // causing 409 Conflict errors (race condition with stinky 2 / chop data)
+      // Log first, then wait briefly for GitHub to settle the logs/ write,
+      // then save state — prevents SHA conflicts between the two writes.
       await logGame(gameLogPlayers);
+      await new Promise(r => setTimeout(r, 800));
       saveState();
     }
 
@@ -2390,6 +2483,10 @@
       refreshTable();
       updateModeBanner();
       setSyncStatus(canSave ? "Logged in — saving enabled" : "View-only mode", canSave ? "green" : "#ff3b30");
+      // Only allow saves AFTER the full load + render sequence is done.
+      // This prevents any onchange/init handlers from overwriting GitHub
+      // with empty state before loadStateFromGitHub() has populated the vars.
+      _appReady = true;
     };
   </script>
 </body>
