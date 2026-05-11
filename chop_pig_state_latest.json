@@ -190,173 +190,69 @@
   "weekly": {
     "players": {
       "Ana": {
-        "score": -2,
-        "games": 15,
-        "wins": 2,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Andy": {
-        "score": 6,
-        "games": 16,
-        "wins": 2,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 6
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Aris": {
         "score": 0,
         "games": 0,
-        "wins": 0,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "wins": 0
       },
       "David": {
-        "score": 43,
-        "games": 19,
-        "wins": 9,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 1,
-        "stinky13Win": 0,
-        "stinky2Lose": 1,
-        "stinky2Win": 0,
-        "reversePtsLost": 4,
-        "reversePtsWon": 9
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Ian": {
-        "score": -10,
-        "games": 8,
-        "wins": 1,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "James": {
-        "score": -14,
-        "games": 24,
-        "wins": 6,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 4,
-        "reversePtsWon": 4
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Jeanette": {
         "score": 0,
         "games": 0,
-        "wins": 0,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "wins": 0
       },
       "Kevin": {
-        "score": -19,
-        "games": 5,
-        "wins": 1,
-        "timesChopped": 1,
-        "timesChopper": 0,
-        "stinky13Lose": 1,
-        "stinky13Win": 3,
-        "stinky2Lose": 1,
-        "stinky2Win": 3,
-        "reversePtsLost": 26,
-        "reversePtsWon": 8
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Lawrence": {
-        "score": 3,
-        "games": 4,
-        "wins": 1,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 0
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Majid": {
-        "score": -11,
-        "games": 11,
-        "wins": 1,
-        "timesChopped": 0,
-        "timesChopper": 1,
-        "stinky13Lose": 1,
-        "stinky13Win": 3,
-        "stinky2Lose": 1,
-        "stinky2Win": 2,
-        "reversePtsLost": 21,
-        "reversePtsWon": 11
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Robert": {
-        "score": 9,
-        "games": 10,
-        "wins": 1,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 0,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 2,
-        "reversePtsWon": 0
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "Ted": {
-        "score": 8,
-        "games": 12,
-        "wins": 4,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 2,
-        "stinky13Win": 0,
-        "stinky2Lose": 2,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 14
+        "score": 0,
+        "games": 0,
+        "wins": 0
       },
       "William": {
-        "score": -6,
-        "games": 12,
-        "wins": 2,
-        "timesChopped": 0,
-        "timesChopper": 0,
-        "stinky13Lose": 1,
-        "stinky13Win": 0,
-        "stinky2Lose": 0,
-        "stinky2Win": 0,
-        "reversePtsLost": 0,
-        "reversePtsWon": 5
+        "score": 0,
+        "games": 0,
+        "wins": 0
       }
     },
     "playerList": [
@@ -375,7 +271,7 @@
       "William"
     ]
   },
-  "weeklyReset": "2026-05-06T15:59:35.877Z",
+  "weeklyReset": "2026-05-11T00:11:36.050Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
@@ -1077,6 +973,196 @@
           "stinky2Win": 0,
           "reversePtsLost": 0,
           "reversePtsWon": 0
+        }
+      },
+      "playerList": [
+        "Ana",
+        "Andy",
+        "Aris",
+        "David",
+        "Ian",
+        "James",
+        "Jeanette",
+        "Kevin",
+        "Lawrence",
+        "Majid",
+        "Robert",
+        "Ted",
+        "William"
+      ]
+    },
+    {
+      "weekStart": "2026-05-06T15:59:35.877Z",
+      "weekEnd": "2026-05-11T00:11:36.050Z",
+      "players": {
+        "Ana": {
+          "score": -2,
+          "games": 15,
+          "wins": 2,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 0,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 0,
+          "reversePtsWon": 0
+        },
+        "Andy": {
+          "score": 6,
+          "games": 16,
+          "wins": 2,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 0,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 0,
+          "reversePtsWon": 6
+        },
+        "Aris": {
+          "score": 0,
+          "games": 0,
+          "wins": 0,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 0,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 0,
+          "reversePtsWon": 0
+        },
+        "David": {
+          "score": 43,
+          "games": 19,
+          "wins": 9,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 1,
+          "stinky13Win": 0,
+          "stinky2Lose": 1,
+          "stinky2Win": 0,
+          "reversePtsLost": 4,
+          "reversePtsWon": 9
+        },
+        "Ian": {
+          "score": -10,
+          "games": 8,
+          "wins": 1,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 0,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 0,
+          "reversePtsWon": 0
+        },
+        "James": {
+          "score": -14,
+          "games": 24,
+          "wins": 6,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 0,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 4,
+          "reversePtsWon": 4
+        },
+        "Jeanette": {
+          "score": 0,
+          "games": 0,
+          "wins": 0,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 0,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 0,
+          "reversePtsWon": 0
+        },
+        "Kevin": {
+          "score": -19,
+          "games": 5,
+          "wins": 1,
+          "timesChopped": 1,
+          "timesChopper": 0,
+          "stinky13Lose": 1,
+          "stinky13Win": 3,
+          "stinky2Lose": 1,
+          "stinky2Win": 3,
+          "reversePtsLost": 26,
+          "reversePtsWon": 8
+        },
+        "Lawrence": {
+          "score": 3,
+          "games": 4,
+          "wins": 1,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 0,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 0,
+          "reversePtsWon": 0
+        },
+        "Majid": {
+          "score": -11,
+          "games": 11,
+          "wins": 1,
+          "timesChopped": 0,
+          "timesChopper": 1,
+          "stinky13Lose": 1,
+          "stinky13Win": 3,
+          "stinky2Lose": 1,
+          "stinky2Win": 2,
+          "reversePtsLost": 21,
+          "reversePtsWon": 11
+        },
+        "Robert": {
+          "score": 9,
+          "games": 10,
+          "wins": 1,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 0,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 2,
+          "reversePtsWon": 0
+        },
+        "Ted": {
+          "score": 8,
+          "games": 12,
+          "wins": 4,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 2,
+          "stinky13Win": 0,
+          "stinky2Lose": 2,
+          "stinky2Win": 0,
+          "reversePtsLost": 0,
+          "reversePtsWon": 14
+        },
+        "William": {
+          "score": -6,
+          "games": 12,
+          "wins": 2,
+          "timesChopped": 0,
+          "timesChopper": 0,
+          "stinky13Lose": 1,
+          "stinky13Win": 0,
+          "stinky2Lose": 0,
+          "stinky2Win": 0,
+          "reversePtsLost": 0,
+          "reversePtsWon": 5
         }
       },
       "playerList": [
