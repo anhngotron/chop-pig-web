@@ -714,6 +714,7 @@
     function init() {
       const container = document.getElementById("roundRows");
       container.innerHTML = "";
+      rowState.length = 0; // clear stale refs before rebuilding
 
       for (let i = 0; i < rowCount; i++) {
         const card = document.createElement("div");
