@@ -271,7 +271,7 @@
       "William"
     ]
   },
-  "weeklyReset": "2026-05-11T00:11:36.050Z",
+  "weeklyReset": "2026-05-18T00:31:25.223Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
@@ -1163,6 +1163,92 @@
           "stinky2Win": 0,
           "reversePtsLost": 0,
           "reversePtsWon": 5
+        }
+      },
+      "playerList": [
+        "Ana",
+        "Andy",
+        "Aris",
+        "David",
+        "Ian",
+        "James",
+        "Jeanette",
+        "Kevin",
+        "Lawrence",
+        "Majid",
+        "Robert",
+        "Ted",
+        "William"
+      ]
+    },
+    {
+      "weekStart": "2026-05-11T00:11:36.050Z",
+      "weekEnd": "2026-05-18T00:31:25.223Z",
+      "players": {
+        "Ana": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Andy": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Aris": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "David": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Ian": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "James": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Jeanette": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Kevin": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Lawrence": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Majid": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Robert": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Ted": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "William": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
         }
       },
       "playerList": [
