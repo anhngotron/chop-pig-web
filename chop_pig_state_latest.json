@@ -271,7 +271,7 @@
       "William"
     ]
   },
-  "weeklyReset": "2026-06-22T00:54:13.060Z",
+  "weeklyReset": "2026-06-29T00:52:33.051Z",
   "weeklyHistory": [
     {
       "weekStart": "3/29/2026",
@@ -1614,6 +1614,92 @@
     {
       "weekStart": "2026-06-15T00:37:59.106Z",
       "weekEnd": "2026-06-22T00:54:13.060Z",
+      "players": {
+        "Ana": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Andy": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Aris": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "David": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Ian": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "James": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Jeanette": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Kevin": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Lawrence": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Majid": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Robert": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "Ted": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        },
+        "William": {
+          "score": 0,
+          "games": 0,
+          "wins": 0
+        }
+      },
+      "playerList": [
+        "Ana",
+        "Andy",
+        "Aris",
+        "David",
+        "Ian",
+        "James",
+        "Jeanette",
+        "Kevin",
+        "Lawrence",
+        "Majid",
+        "Robert",
+        "Ted",
+        "William"
+      ]
+    },
+    {
+      "weekStart": "2026-06-22T00:54:13.060Z",
+      "weekEnd": "2026-06-29T00:52:33.051Z",
       "players": {
         "Ana": {
           "score": 0,
